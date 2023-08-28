@@ -1,14 +1,12 @@
-# ocp4-upi-compute-powervs
+# ocp4-upi-compute-powervs-ibmcloud
 
-The [`ocp4-upi-compute-powervs` project](https://github.com/ibm/ocp4-upi-compute-powervs) provides Terraform based automation code to help with the deployment of OpenShift Container Platform (OCP) 4.x compute workers on [IBM® Power Systems™ Virtual Server on IBM Cloud](https://www.ibm.com/cloud/power-virtual-server).
+The [`ocp4-upi-compute-powervs-ibmcloud` project](https://github.com/ibm/ocp4-upi-compute-powervs-ibmcloud) provides Terraform based automation code to add workers to [IBM® Power Systems™ Virtual Server on IBM Cloud](https://www.ibm.com/cloud/power-virtual-server) with the deployment of OpenShift Container Platform (OCP) 4.x compute workers on [IBM Cloud® Virtual Private Cloud (VPC)](https://www.ibm.com/cloud/vpc).
 
 ## Prerequisites
 
 1. Requires Terraform v1.5.0 or Higher
-2. A PowerVS Service 
-3. An RHCOS Image loaded to the PowerVS Service
-4. Optional: An RHEL/Centos Image loaded to the PowerVS Service
-5. An Existing OpenShift Container Platform Cluster installed on IBMCloud VPC.
+2. An Existing OpenShift Container Platform Cluster installed on PowerVS
+3. [Optional]: An Existing VPC (otherwise one will be created.)
 
 ## Commands
 
@@ -44,8 +42,7 @@ Note, the `destroy` command removes the Node resource, removes the NFS deploymen
 
 There are some important points to mention:
 
-1. The Power Bastion node uses a https proxy to forward requests to the Cluster's internal api load balancer. This setting is configured in /etc/environment on the Power Bastion.
-2. NFS is used as the storage provider across nodes.
+1. NFS is used as the storage provider across nodes.
 
 ## Running Automation from another IBMCloud VPC
 
@@ -55,12 +52,12 @@ To run the code, you'll need to set the MTU for your machine:
 ip link set eth0 mtu 1400
 ```
 
-### Getting the IPs of Power Workers
+### Getting the IPs of Intel Workers
 
 To get the IPs of the Power Workers. 
 
 ```
-❯ oc get nodes -l 'kubernetes.io/arch=ppc64le' -owide
+❯ oc get nodes -l 'kubernetes.io/arch=amd64' -owide
 NAME                STATUS   ROLES    AGE   VERSION           INTERNAL-IP      EXTERNAL-IP   OS-IMAGE                                                       KERNEL-VERSION                  CONTAINER-RUNTIME
 mac-d263-worker-0   Ready    worker   40h   v1.27.4+4e87926   192.168.200.10   <none>        Red Hat Enterprise Linux CoreOS 414.92.202308151250-0 (Plow)   5.14.0-284.25.1.el9_2.ppc64le   cri-o://1.27.1-6.rhaos4.14.gitc2c9f36.el9
 ```

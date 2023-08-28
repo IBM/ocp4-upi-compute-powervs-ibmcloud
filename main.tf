@@ -35,7 +35,7 @@ module "checks" {
   providers = {
     ibm = ibm.vpc
   }
-  source = "./modules/0_checks"
+  source = "./modules/0_vpc"
 
   ibmcloud_api_key      = var.ibmcloud_api_key
   vpc_name              = var.vpc_name
