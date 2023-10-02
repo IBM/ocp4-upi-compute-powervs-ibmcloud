@@ -34,9 +34,9 @@ resource "null_resource" "remove_workers" {
   depends_on = [null_resource.post_setup]
 
   triggers = {
-    count_1             = var.worker_1["count"]
-    count_2             = var.worker_2["count"]
-    count_3             = var.worker_3["count"]
+    count_1           = var.worker_1["count"]
+    count_2           = var.worker_2["count"]
+    count_3           = var.worker_3["count"]
     name_prefix       = "${var.name_prefix}"
     private_key       = file(var.private_key_file)
     host              = var.bastion_public_ip[0]
