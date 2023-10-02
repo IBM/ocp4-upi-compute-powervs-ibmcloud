@@ -12,8 +12,8 @@ provider "ibm" {
 
 provider "ibm" {
   ibmcloud_api_key = var.ibmcloud_api_key
-  region           = module.checks.powervs_region
-  zone             = module.checks.powervs_zone
+  region           = module.vpc.powervs_region
+  zone             = module.vpc.powervs_zone
   alias            = "powervs"
 }
 
@@ -61,7 +61,7 @@ module "vpc_prepare" {
   public_key_file      = var.public_key_file
   openshift_api_url    = var.openshift_api_url
   powervs_machine_cidr = var.powervs_machine_cidr
-  vpc_supp_public_ip   = var.vpc_supp_public_ip
+  powervs_bastion_ip   = var.powervs_bastion_ip
 }
 
 module "transit_gateway" {
@@ -73,8 +73,8 @@ module "transit_gateway" {
 
   cluster_id         = local.cluster_id
   vpc_name           = var.vpc_name
-  vpc_crn            = module.vpc_support.vpc_crn
-  transit_gateway_id = module.vpc_support.transit_gateway_id
+  vpc_crn            = module.vpc_prepare.vpc_crn
+  transit_gateway_id = module.vpc_prepare.transit_gateway_id
 }
 
 module "support" {
@@ -90,7 +90,7 @@ module "support" {
   rhel_username            = var.rhel_username
   bastion_public_ip        = var.powervs_bastion_ip
   openshift_client_tarball = var.openshift_client_tarball
-  vpc_support_server_ip    = module.vpc_support.vpc_support_server_ip
+  vpc_bootstrap_private_ip    = module.vpc_prepare.vpc_bootstrap_private_ip
   openshift_api_url        = var.openshift_api_url
   openshift_user           = var.openshift_user
   openshift_pass           = var.openshift_pass
@@ -112,7 +112,7 @@ module "worker" {
   powervs_dhcp_network_id     = module.pvs_prepare.powervs_dhcp_network_id
   powervs_dhcp_network_name   = module.pvs_prepare.powervs_dhcp_network_name
   processor_type              = var.processor_type
-  rhcos_image_id              = module.pvs_prepare.rhcos_image_id
+  rhcos_image_id              = module.vpc_prepare.rhcos_image_id
   system_type                 = var.system_type
   worker                      = var.worker
   ignition_ip                 = module.vpc_prepare.vpc_bootstrap_private_ip

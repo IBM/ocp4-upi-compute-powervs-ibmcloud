@@ -11,9 +11,7 @@ locals {
 
   # you must use the api-int url so the bastion routes over the correct interface.
   helpernode_vars = {
-    client_tarball               = var.openshift_client_tarball
     openshift_machine_config_url = replace(replace(var.openshift_api_url, ":6443", ""), "://api.", "://api-int.")
-    vpc_support_server_ip        = var.vpc_support_server_ip
   }
 
   cidrs = {
@@ -113,7 +111,6 @@ resource "null_resource" "config_login" {
 
   provisioner "remote-exec" {
     inline = [<<EOF
-export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
 oc login \
   "${var.openshift_api_url}" -u "${var.openshift_user}" -p "${var.openshift_pass}" --insecure-skip-tls-verify=true
 EOF
@@ -137,7 +134,6 @@ resource "null_resource" "config_csi" {
   # scheduler.alpha.kubernetes.io/node-selector: kubernetes.io/arch=amd64
   provisioner "remote-exec" {
     inline = [<<EOF
-export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
 oc annotate --kubeconfig /root/.kube/config ns openshift-cluster-csi-drivers \
   scheduler.alpha.kubernetes.io/node-selector=kubernetes.io/arch=amd64
 EOF
@@ -157,7 +153,6 @@ resource "null_resource" "adjust_mtu" {
   }
   provisioner "remote-exec" {
     inline = [<<EOF
-export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
 oc patch Network.operator.openshift.io cluster --type=merge --patch \
   '{"spec": { "migration": { "mtu": { "network": { "from": 1400, "to": 9000 } , "machine": { "to" : 9100} } } } }'
 EOF
@@ -179,7 +174,6 @@ resource "null_resource" "keep_dns_on_vpc" {
   # Dev Note: put the dns nodes on the VPC machines
   provisioner "remote-exec" {
     inline = [<<EOF
-export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
 oc patch dns.operator/default -p '{ "spec" : {"nodePlacement": {"nodeSelector": {"kubernetes.io/arch" : "amd64"}}}}' --type merge
 EOF
     ]
@@ -200,46 +194,11 @@ resource "null_resource" "keep_imagepruner_on_vpc" {
   # Dev Note: put the image pruner nodes on the VPC machines
   provisioner "remote-exec" {
     inline = [<<EOF
-export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
 oc patch imagepruner/cluster -p '{ "spec" : {"nodeSelector": {"kubernetes.io/arch" : "amd64"}}}' --type merge
 EOF
     ]
   }
 }
-
-#locals {
-# Dev Note: considered `split("/", "${var.powervs_machine_cidr}")[1]` however, it needs to be smaller than the mask.
-# ref: https://www.ibm.com/docs/en/zcxrhos/1.1.0?topic=parameters-network-configuration
-#hostPrefix = 30
-#}
-
-# resource "null_resource" "alter_network_cluster_config" {
-#   depends_on = [null_resource.keep_imagepruner_on_vpc]
-#   connection {
-#     type        = "ssh"
-#     user        = var.rhel_username
-#     host        = var.bastion_public_ip
-#     private_key = file(var.private_key_file)
-#     agent       = var.ssh_agent
-#     timeout     = "${var.connection_timeout}m"
-#   }
-
-#   # Dev Note: adds the network so the OVN-KUBE settings are correct for a second network, and the LB doesn't end up in a loop.
-#   # original logic was `jq '.spec.clusterNetwork += [{"cidr": "${var.powervs_machine_cidr}", "hostPrefix": ${local.hostPrefix}}]'`
-#   provisioner "remote-exec" {
-#     inline = [<<EOF
-# export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
-# dnf install -y jq
-# echo "CIDRs are:"
-# oc get Network.config.openshift.io cluster -ojson | jq -r '.spec.clusterNetwork[].cidr'
-# [[ "$(oc get Network.config.openshift.io cluster -ojson | jq -r '.spec.clusterNetwork[].cidr')" != "192.168.0.0/16" ]] \
-#   && oc get Network.config.openshift.io cluster -o json \
-#   | jq '.spec.clusterNetwork += [{"cidr": "192.168.0.0/16", "hostPrefix": 24}]' \
-#   | oc apply -f -
-# EOF
-#     ]
-#   }
-# }
 
 # ovnkube between vpc/powervs requires routingViaHost for the LBs to work properly
 # ref: https://community.ibm.com/community/user/powerdeveloper/blogs/mick-tarsel/2023/01/26/routingviahost-with-ovnkuberenetes
@@ -256,7 +215,6 @@ resource "null_resource" "set_routing_via_host" {
 
   provisioner "remote-exec" {
     inline = [<<EOF
-export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
 oc patch network.operator/cluster --type merge -p \
   '{"spec":{"defaultNetwork":{"ovnKubernetesConfig":{"gatewayConfig":{"routingViaHost":true}}}}}'
 EOF
@@ -278,8 +236,6 @@ resource "null_resource" "wait_on_mcp" {
   # Dev Note: added hardening to the MTU wait, we wait for the condition and then fail
   provisioner "remote-exec" {
     inline = [<<EOF
-export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
-
 echo "-diagnostics-"
 oc get network cluster -o yaml | grep -i mtu
 oc get mcp

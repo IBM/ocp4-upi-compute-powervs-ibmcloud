@@ -53,9 +53,9 @@ variable "openshift_api_url" {
   default     = "https://api.example.ocp-multiarch.xyz:6443"
 }
 
-variable "vpc_supp_public_ip" {
+variable "powervs_bastion_ip" {
   type        = bool
-  description = "Set to true if you want to skip region checks."
+  description = "PowerVS Bastion IP"
   default     = false
 }
 

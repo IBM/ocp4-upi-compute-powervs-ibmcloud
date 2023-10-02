@@ -11,16 +11,9 @@
         - kubernetes
         - openshift
 
-  - name: Populate /etc/environment
-    lineinfile:
-      path: "/etc/environment"
-      state: present
-      regexp: "^HTTPS_PROXY="
-      line: "HTTPS_PROXY=http://{{ nfs_server }}:3128"
-    become: yes
-
   - name: Get CSRs
-    shell: "export HTTPS_PROXY=http://{{ nfs_server }}:3128 && oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name'"
+    shell: |
+      oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name'
     register: csr_list
 
   - name: Print Pending CSRs
@@ -29,80 +22,45 @@
 
   # Run approve CSR command till CSR list is empty.
   - name: Approve Worker CSRs
-    shell: "export HTTPS_PROXY=http://{{ nfs_server }}:3128 && for i in `oc get csr | grep -i pending | awk '{ print $1 }'`; do oc adm certificate approve $i; done && oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name'"
+    shell: |
+      for i in $(oc get csr | grep -i pending | awk '{ print $1 }')
+      do
+        oc adm certificate approve $i
+      done 
+      oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name'
     register: csr_list
     until: csr_list.stdout == ""
     retries: 5
     delay: 40
     when: powervs_worker_count|int > 0
 
-  - name: Wait for 20 seconds before checking Ready state for Powervs worker node/s
+  - name: Wait for 20 seconds before checking Ready state for Intel worker node/s
     pause:
       seconds: 20
 
   # Run approve command again and wait till we have all powervs worker/s with Ready status. 'xargs -r ' is used to ignore empty stdin.
-  - name: Check Ready state for Powervs Worker Node
-    shell: "export HTTPS_PROXY=http://{{ nfs_server }}:3128 && oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs -r oc adm certificate approve && oc get nodes -l kubernetes.io/arch=ppc64le | grep -w worker | grep -w Ready | wc -l"
+  - name: Check Ready state for Intel Worker Node
+    shell: "oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs -r oc adm certificate approve && oc get nodes -l kubernetes.io/arch=amd64 | grep -w worker | grep -w Ready | wc -l"
     register: ready_count_result
     until: ready_count_result.stdout.find(powervs_worker_count) != -1
     retries: 50
     delay: 30
     when: powervs_worker_count|int > 0
 
-  - name: Ensure able to fetch project list
-    shell: "export HTTPS_PROXY=http://{{ nfs_server }}:3128 && oc get projects"
-    register: projects_list
-    until: projects_list.stdout.find("default") != -1
-    retries: 20
-    delay: 30
-
-  - name: Create openshift-powervm-rmc project
-    when: projects_list.stdout.find(project_name) == -1
-    kubernetes.core.k8s:
-      state: present
-      proxy: "http://{{ nfs_server }}:3128"
-      definition: "{{ lookup('template', '../templates/rmc-ns.yml.j2')}}"
-
-  - name: Create openshift-powervm-rmc serviceaccount
-    kubernetes.core.k8s:
-      state: present
-      proxy: "http://{{ nfs_server }}:3128"
-      definition:
-        api_version: v1
-        kind: ServiceAccount
-        metadata:
-          name: "{{ rmc_name }}"
-          namespace: "{{ project_name }}"
-
-  - name: Add privileged scc to openshift-powervm-rmc serviceaccount
-    shell: "export HTTPS_PROXY=http://{{ nfs_server }}:3128 && oc adm policy add-scc-to-user -z {{ rmc_name }} privileged -n {{ project_name }}"
-
-  - name: Deploy openshift-powervm-rmc DaemonSet
-    kubernetes.core.k8s:
-      state: present
-      proxy: "http://{{ nfs_server }}:3128"
-      definition: "{{ lookup('template', '../templates/rsct-daemonset.yml.j2') }}"
-
-  - name: Get Nodes with ppc64le architecture
-    shell: "export HTTPS_PROXY=http://{{ nfs_server }}:3128 && oc get nodes -l kubernetes.io/arch=ppc64le | awk '(NR>1) { print $1 }'"
+  - name: Get Nodes with amd64 architecture
+    shell: "oc get nodes -l kubernetes.io/arch=amd64 | awk '(NR>1) { print $1 }'"
     register: node_names
 
   - name: Print Node names with ppc64le architecture
     debug:
       msg: "Nodes with ppc64le : {{ node_names.stdout_lines }}"
 
-  - name: Add labels defined in node_labels to ppc64le Nodes
+  - name: Add labels defined in node_labels to amd64 Nodes
     kubernetes.core.k8s:
       state: present
-      proxy: "http://{{ nfs_server }}:3128"
       kind: Node
       name: "{{ item }}"
       definition:
         metadata:
           labels: "{{ node_labels }}"
     with_items: "{{ node_names.stdout_lines }}"
-
-  - name: Setup NFS storage if NFS_SERVER is provided
-    import_tasks: nfs_provisioner.yaml
-    when: nfs_server != "none"
-

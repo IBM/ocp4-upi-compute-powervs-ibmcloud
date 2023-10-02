@@ -2,8 +2,6 @@
 - hosts: all
   vars_files:
     - ../vars/main.yml
-  handlers:
-  - import_tasks: ../handlers/main.yml
 
   ####################################################################################
   # Verify and Validate prior to starting execution
@@ -17,26 +15,6 @@
   ####################################################################################
   tasks:
 
-  - name: Install needed packages
-    package:
-      name:
-      - bind-utils
-      - firewalld
-      - httpd
-      - vim
-      - bash-completion
-      - podman
-      - nfs-utils
-      - git
-      state: present
-
-  - name: Copy httpd conf file
-    copy:
-      src: ../files/httpd.conf
-      dest: /etc/httpd/conf/httpd.conf
-    notify:
-      - restart httpd
-
   - name: Create Apache directories for installing
     file:
       path: "{{ item }}"
@@ -45,88 +23,30 @@
     with_items:
       - /var/www/html/ignition
 
-  - name: Start firewalld service
-    systemd:
-      name: firewalld
-      state: started
-      enabled: yes
+  - name: Disable fcontext
+    shell: "semanage fcontext -a -t httpd_sys_rw_content_t /var/www/html/ignition/worker.ign || true"
 
-  - name: Open up firewall ports
-    firewalld:
-      permanent: yes
-      immediate: yes
-      state: enabled
-      port: "{{ item }}"
-    run_once: true
-    with_items:
-      - "{{ ports }}"
-
-  - name: Systemd daemon reload
-    systemd:
-      daemon_reload: yes
-
-  - name: Starting services
-    service:
-      name: "httpd"
-      enabled: yes
-      state: started
-
-  - name: Delete OCP4 files, if requested, to download again
-    file:
-      state: absent
-      path: "{{ item }}"
-    with_items:
-      - "/usr/local/src/openshift-client-linux.tar.gz"
-      - "/usr/local/src/openshift-install-linux.tar.gz"
-
-  - name: Preparing OCP client
-    when: ocp_client is defined
+  - name: Download the ignition file to http server
     block:
-    - name: Downloading OCP4 client
+    - name: Downloading the ignition file
       get_url:
-        url: "{{ ocp_client }}"
-        dest: /usr/local/src/openshift-client-linux.tar.gz
+        url: "{{ openshift_machine_config_url }}"
+        dest: /var/www/html/ignition/worker-intel.ign
+        validate_certs: false
+        headers:
+          "Accept": "application/vnd.coreos.ignition+json;version=3.2.0"
+      ignore_errors: true
 
-    - name: Unarchiving OCP4 client
-      unarchive:
-        src: /usr/local/src/openshift-client-linux.tar.gz
-        dest: /usr/local/bin
-        remote_src: yes
+    - name: Verify the ignition file exists
+      ansible.builtin.shell: stat /var/www/html/ignition/worker-intel.ign
 
-  - name: Removing files that are not needed
-    file:
-      path: /usr/local/bin/README.md
-      state: absent
+    - name: Make ignition file readable through the www dir
+      ansible.builtin.file:
+        path: /var/www
+        owner: apache
+        group: apache
+        recurse: true 
+        mode: u+rwx,g-rx,o-rx
 
-  - name: Restarting NetworkManager
-    service:
-      name: "{{ item }}"
-      state: restarted
-    with_items:
-      - NetworkManager
-
-  - name: Enable restart always for HTTPD
-    block: 
-      - name: Create dropin directory for services
-        file:
-          path: /etc/systemd/system/httpd.service.d
-          state: directory
-          mode: 0755
-
-      - name: Copy restart conf file to the services dropin directory
-        copy:
-          src: ../files/restart.conf
-          dest: /etc/systemd/system/httpd.service.d/restart.conf
-
-      - name: restart services
-        service:
-          name: "httpd"
-          state: restarted
-          daemon_reload: yes
-
-  - name: Wait for quick to become open on the vpc support machine
-    ansible.builtin.wait_for:
-      host: "{{ vpc_support_server_ip }}"
-      port: 3128
-      delay: 30
-      timeout: 600
+  - name: Best effort SELinux repair - Apache
+    shell: "restorecon -vR /var/www/html/ignition || true"

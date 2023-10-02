@@ -13,9 +13,6 @@ locals {
     nfs_path             = var.nfs_path
     powervs_worker_count = var.worker["count"]
   }
-
-  nfs_namespace  = "nfs-provisioner"
-  nfs_deployment = "nfs-client-provisioner"
 }
 
 resource "null_resource" "post_setup" {
@@ -41,7 +38,6 @@ resource "null_resource" "remove_workers" {
   triggers = {
     count                 = var.worker["count"]
     name_prefix           = "${var.name_prefix}"
-    vpc_support_server_ip = "${var.nfs_server}"
     private_key           = file(var.private_key_file)
     host                  = var.bastion_public_ip[0]
     agent                 = var.ssh_agent
@@ -61,13 +57,13 @@ resource "null_resource" "remove_workers" {
     on_failure = continue
     inline = [<<EOF
 cd ${self.triggers.ansible_post_path}
-bash files/destroy-workers.sh "${self.triggers.count}" "${self.triggers.vpc_support_server_ip}" "${self.triggers.name_prefix}"
+bash files/destroy-workers.sh "${self.triggers.count}" "${self.triggers.name_prefix}"
 EOF
     ]
   }
 }
 
-#command to run ansible playbook on Bastion
+#command to run ansible playbook on bastion
 resource "null_resource" "post_ansible" {
   depends_on = [null_resource.remove_workers]
   connection {
@@ -86,10 +82,11 @@ resource "null_resource" "post_ansible" {
 
   #command to run ansible playbook on Bastion
   provisioner "remote-exec" {
-    inline = [
-      "echo Running ansible-playbook for Post Activities",
-      "cd ${local.ansible_post_path}",
-      "ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-post.log ansible-playbook tasks/main.yml --extra-vars @ansible_post_vars.json"
+    inline = [<<EOF
+echo Running ansible-playbook for post Intel worker ignition
+cd ${local.ansible_post_path}
+ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-post.log ansible-playbook tasks/main.yml --extra-vars @ansible_post_vars.json
+EOF
     ]
   }
 }
@@ -108,46 +105,11 @@ resource "null_resource" "debug_and_remove_taints" {
 
   provisioner "remote-exec" {
     inline = [<<EOF
-export HTTPS_PROXY="http://${var.nfs_server}:3128"
 oc get nodes -owide
 oc get nodes -l 'kubernetes.io/arch=ppc64le' -o json | jq -r '.items[].spec'
 cd ${local.ansible_post_path}
-bash files/remove-worker-taints.sh "${var.nfs_server}" "${var.name_prefix}" "${var.worker["count"]}"
+bash files/remove-worker-taints.sh "${var.name_prefix}" "${var.worker["count"]}"
 EOF
     ]
   }
 }
-
-# Dev Note: only on destroy - remove the the deployment for nfs storage, and leave after post_ansible
-resource "null_resource" "remove_nfs_deployment" {
-  depends_on = [null_resource.post_ansible]
-
-  triggers = {
-    vpc_support_server_ip = "${var.nfs_server}"
-    private_key           = file(var.private_key_file)
-    host                  = var.bastion_public_ip[0]
-    agent                 = var.ssh_agent
-    nfs_namespace         = local.nfs_namespace
-    nfs_deployment        = local.nfs_deployment
-    ansible_post_path     = local.ansible_post_path
-  }
-
-  connection {
-    type        = "ssh"
-    user        = "root"
-    private_key = self.triggers.private_key
-    host        = self.triggers.host
-    agent       = self.triggers.agent
-  }
-
-  provisioner "remote-exec" {
-    when       = destroy
-    on_failure = continue
-    inline = [<<EOF
-cd ${self.triggers.ansible_post_path}
-bash files/destroy-nfs-deployment.sh "${self.triggers.nfs_deployment}" "${self.triggers.vpc_support_server_ip}" "${self.triggers.nfs_namespace}"
-EOF
-    ]
-  }
-}
-
