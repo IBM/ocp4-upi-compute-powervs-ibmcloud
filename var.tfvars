@@ -18,22 +18,22 @@ powervs_zone                = "<zone>"
 
 # OpenShift Cluster
 openshift_api_url        = "<openshift_cluster_API_URL>"
-openshift_user           = "<openshift_cluster_user>"
-openshift_pass           = "<openshift_cluster_pass>"
-openshift_client_tarball = "<openshift_client_tarball_url>"
 
-# Power Instance Configuration
-processor_type = "shared"
-system_type    = "e980"
+# Required for ignition and automation to run.
+powervs_bastion_ip = ""
+powervs_bastion_private_ip = ""
 
-# Machine Details
-bastion_health_status = "WARNING"
-bastion               = { memory = "16", processors = "1", "count" = 1 }
-worker                = { memory = "16", processors = "1", "count" = 1 }
+# The PowerVS machine cidr for your network
+# powervs_machine_cidr = "192.168.200.0/24"
 
-# Images for Power Systems
-rhel_image_name  = "centos-03112022"
-rhcos_image_name = "rhcos-414-92-202306140644-t1"
+# Zone 1's Worker Details
+worker_1                = { count = 1, profile = "cx2d-8x16", zone = "ca-tor-1" }
+
+# Zone 2's Worker Details
+# worker_2                = { count = 1, profile = "cx2d-8x16", zone = "ca-tor-2" }
+
+# Zone 3's Worker Details
+# worker_3                = { count = 1, profile = "cx2d-8x16", zone = "ca-tor-3" }
 
 # Public and Private Key for Bastion Nodes
 public_key_file  = "data/compute_id_rsa.pub"
