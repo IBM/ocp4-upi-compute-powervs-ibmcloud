@@ -17,17 +17,17 @@ powervs_region              = "<region>"
 powervs_zone                = "<zone>"
 
 # OpenShift Cluster
-openshift_api_url        = "<openshift_cluster_API_URL>"
+openshift_api_url = "<openshift_cluster_API_URL>"
 
 # Required for ignition and automation to run.
-powervs_bastion_ip = ""
+powervs_bastion_ip         = ""
 powervs_bastion_private_ip = ""
 
 # The PowerVS machine cidr for your network
 # powervs_machine_cidr = "192.168.200.0/24"
 
 # Zone 1's Worker Details
-worker_1                = { count = 1, profile = "cx2d-8x16", zone = "ca-tor-1" }
+worker_1 = { count = 1, profile = "cx2d-8x16", zone = "ca-tor-1" }
 
 # Zone 2's Worker Details
 # worker_2                = { count = 1, profile = "cx2d-8x16", zone = "ca-tor-2" }
