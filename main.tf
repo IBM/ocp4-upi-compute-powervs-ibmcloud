@@ -69,11 +69,12 @@ module "transit_gateway" {
     ibm = ibm.vpc
   }
   depends_on = [module.vpc_prepare]
-  source     = "./modules/2_transit_gateway"
+  source     = "./modules/3_transit_gateway"
 
   cluster_id         = local.cluster_id
   vpc_name           = var.vpc_name
   vpc_crn            = module.vpc_prepare.vpc_crn
+  vpc_region         = var.vpc_region
 }
 
 module "support" {
@@ -81,20 +82,16 @@ module "support" {
     ibm = ibm.powervs
   }
   depends_on = [module.transit_gateway]
-  source     = "./modules/3_pvs_support"
+  source     = "./modules/4_pvs_support"
 
   private_key_file         = var.private_key_file
   ssh_agent                = var.ssh_agent
   connection_timeout       = var.connection_timeout
   rhel_username            = var.rhel_username
   bastion_public_ip        = var.powervs_bastion_ip
-  openshift_client_tarball = var.openshift_client_tarball
   vpc_bootstrap_private_ip    = module.vpc_prepare.vpc_bootstrap_private_ip
   openshift_api_url        = var.openshift_api_url
-  openshift_user           = var.openshift_user
-  openshift_pass           = var.openshift_pass
-  kubeconfig_file          = var.kubeconfig_file
-  cidrs                    = module.transit_gateway.mac_vpc_subnets
+  cidrs                    = module.vpc_prepare.mac_vpc_subnets
   powervs_machine_cidr     = var.powervs_machine_cidr
 }
 

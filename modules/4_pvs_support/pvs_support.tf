@@ -11,7 +11,7 @@ locals {
 
   # you must use the api-int url so the bastion routes over the correct interface.
   helpernode_vars = {
-    openshift_machine_config_url = replace(replace(var.openshift_api_url, ":6443", ""), "://api.", "://api-int.")
+    openshift_machine_config_url = replace(var.openshift_api_url, ":6443", "")
   }
 
   cidrs = {
@@ -20,32 +20,7 @@ locals {
   }
 }
 
-resource "null_resource" "kubeconfig" {
-  count = fileexists(var.kubeconfig_file) ? 1 : 0
-  connection {
-    type        = "ssh"
-    user        = var.rhel_username
-    host        = var.bastion_public_ip
-    private_key = file(var.private_key_file)
-    agent       = var.ssh_agent
-    timeout     = "${var.connection_timeout}m"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "mkdir -p /root/.kube"
-    ]
-  }
-
-  # Copies the kubeconfig to specific folder and replace api 
-  provisioner "file" {
-    content     = replace(file(var.kubeconfig_file), "://api.", "://api-int.")
-    destination = "/root/.kube/config"
-  }
-}
-
-resource "null_resource" "config" {
-  depends_on = [null_resource.kubeconfig]
+resource "null_resource" "setup" {
   connection {
     type        = "ssh"
     user        = var.rhel_username
@@ -87,7 +62,8 @@ resource "null_resource" "config" {
 
   provisioner "remote-exec" {
     inline = [<<EOF
-ifup env3
+nmcli device up env3
+
 echo 'Running ocp4-upi-compute-powervs playbook...'
 cd ocp4-upi-compute-powervs/support
 ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-support.log ansible-playbook -e @vars/vars.yaml tasks/main.yml --become
@@ -96,30 +72,8 @@ EOF
   }
 }
 
-# Dev Note: login
-resource "null_resource" "config_login" {
-  count      = fileexists(var.kubeconfig_file) ? 0 : 1
-  depends_on = [null_resource.config]
-  connection {
-    type        = "ssh"
-    user        = var.rhel_username
-    host        = var.bastion_public_ip
-    private_key = file(var.private_key_file)
-    agent       = var.ssh_agent
-    timeout     = "${var.connection_timeout}m"
-  }
-
-  provisioner "remote-exec" {
-    inline = [<<EOF
-oc login \
-  "${var.openshift_api_url}" -u "${var.openshift_user}" -p "${var.openshift_pass}" --insecure-skip-tls-verify=true
-EOF
-    ]
-  }
-}
-
-resource "null_resource" "config_csi" {
-  depends_on = [null_resource.config_login, null_resource.config]
+resource "null_resource" "limit_csi_arch" {
+  depends_on = [null_resource.setup]
   connection {
     type        = "ssh"
     user        = var.rhel_username
@@ -135,14 +89,14 @@ resource "null_resource" "config_csi" {
   provisioner "remote-exec" {
     inline = [<<EOF
 oc annotate --kubeconfig /root/.kube/config ns openshift-cluster-csi-drivers \
-  scheduler.alpha.kubernetes.io/node-selector=kubernetes.io/arch=amd64
+  scheduler.alpha.kubernetes.io/node-selector=kubernetes.io/arch=ppc64le
 EOF
     ]
   }
 }
 
 resource "null_resource" "adjust_mtu" {
-  depends_on = [null_resource.config_csi]
+  depends_on = [null_resource.limit_csi_arch]
   connection {
     type        = "ssh"
     user        = var.rhel_username
@@ -160,50 +114,10 @@ EOF
   }
 }
 
-resource "null_resource" "keep_dns_on_vpc" {
-  depends_on = [null_resource.adjust_mtu]
-  connection {
-    type        = "ssh"
-    user        = var.rhel_username
-    host        = var.bastion_public_ip
-    private_key = file(var.private_key_file)
-    agent       = var.ssh_agent
-    timeout     = "${var.connection_timeout}m"
-  }
-
-  # Dev Note: put the dns nodes on the VPC machines
-  provisioner "remote-exec" {
-    inline = [<<EOF
-oc patch dns.operator/default -p '{ "spec" : {"nodePlacement": {"nodeSelector": {"kubernetes.io/arch" : "amd64"}}}}' --type merge
-EOF
-    ]
-  }
-}
-
-resource "null_resource" "keep_imagepruner_on_vpc" {
-  depends_on = [null_resource.keep_dns_on_vpc]
-  connection {
-    type        = "ssh"
-    user        = var.rhel_username
-    host        = var.bastion_public_ip
-    private_key = file(var.private_key_file)
-    agent       = var.ssh_agent
-    timeout     = "${var.connection_timeout}m"
-  }
-
-  # Dev Note: put the image pruner nodes on the VPC machines
-  provisioner "remote-exec" {
-    inline = [<<EOF
-oc patch imagepruner/cluster -p '{ "spec" : {"nodeSelector": {"kubernetes.io/arch" : "amd64"}}}' --type merge
-EOF
-    ]
-  }
-}
-
 # ovnkube between vpc/powervs requires routingViaHost for the LBs to work properly
 # ref: https://community.ibm.com/community/user/powerdeveloper/blogs/mick-tarsel/2023/01/26/routingviahost-with-ovnkuberenetes
 resource "null_resource" "set_routing_via_host" {
-  depends_on = [null_resource.keep_imagepruner_on_vpc]
+  depends_on = [null_resource.adjust_mtu]
   connection {
     type        = "ssh"
     user        = var.rhel_username
@@ -243,43 +157,24 @@ oc get mcp
 echo 'verifying worker mc'
 start_counter=0
 timeout_counter=10
-mtu_output=`oc get mc 00-worker -o yaml | grep MTU=9000`
-# While loop waits for MTU=9000 till timeout has not reached 
-while [[ ( $mtu_output == "" ) && ( $start_counter -lt $timeout_counter ) ]];
+mtu_output=`oc get mc 00-worker -o yaml | grep TARGET_MTU=9100`
+echo "(DEBUG) MTU FOUND?: ${mtu_output}"
+# While loop waits for TARGET_MTU=9100 till timeout has not reached 
+while [[ "$(oc get network cluster -o yaml | grep 'to: 9100' | awk '{print $NF}')" != "9100" ]]
 do
   echo "waiting on worker"
   sleep 30
-  mtu_output=`oc get mc 00-worker -o yaml | grep MTU=9000`
-  start_counter=`expr $start_counter + 1`
 done
-#oc wait mcp/worker --for condition=updated --timeout=5m || true
+
+# Waiting on output
+oc wait mcp/worker \
+  --for condition=updated \
+  --timeout=5m || true
 
 echo '-checking mtu-'
-[[ "$( oc get network cluster -o yaml | grep clusterNetworkMTU | awk '{print $NF}')" == "9000" ]] || false
+oc get network cluster -o yaml | grep 'to: 9100' | awk '{print $NF}'
+[[ "$(oc get network cluster -o yaml | grep 'to: 9100' | awk '{print $NF}')" == "9100" ]] || false
 echo "success on wait on mtu change"
-EOF
-    ]
-  }
-}
-
-# Dev Note: do this as the last step so we get a good worker ignition file downloaded.
-resource "null_resource" "latest_ignition" {
-  depends_on = [null_resource.wait_on_mcp]
-  connection {
-    type        = "ssh"
-    user        = var.rhel_username
-    host        = var.bastion_public_ip
-    private_key = file(var.private_key_file)
-    agent       = var.ssh_agent
-    timeout     = "${var.connection_timeout}m"
-  }
-
-  provisioner "remote-exec" {
-    inline = [<<EOF
-ifup env3
-echo 'Running ocp4-upi-compute-powervs playbook for ignition...'
-cd ocp4-upi-compute-powervs/support
-ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-support.log ansible-playbook -e @vars/vars.yaml tasks/ignition.yml --become
 EOF
     ]
   }

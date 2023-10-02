@@ -14,3 +14,7 @@ output "vpc_crn" {
 output "target_worker_sg_id" {
   value = ibm_is_security_group.worker_vm_sg[0].id
 }
+
+output "mac_vpc_subnets" {
+  value = data.ibm_is_subnets.vpc_subnets.subnets[*].ipv4_cidr_block
+}

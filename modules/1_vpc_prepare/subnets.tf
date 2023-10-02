@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
-variable "cluster_id" {}
-variable "vpc_name" {}
-variable "vpc_crn" {}
-variable "transit_gateway_id" {}
+data "ibm_is_subnets" "vpc" {
+  routing_table_name = data.ibm_is_vpc.vpc.default_routing_table_name
+}
