@@ -3,6 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
+data "ibm_is_ssh_keys" "keys" {
+  # Region is implicit
+}
+
 # Manages the ssh keys
 locals {
   public_key_file = var.public_key_file == "" ? "${path.cwd}/data/id_rsa.pub" : "${path.cwd}/${var.public_key_file}"

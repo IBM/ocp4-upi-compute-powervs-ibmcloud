@@ -59,9 +59,7 @@ module "vpc_prepare" {
   vpc_zone             = var.vpc_zone
   public_key           = var.public_key
   public_key_file      = var.public_key_file
-  openshift_api_url    = var.openshift_api_url
   powervs_machine_cidr = var.powervs_machine_cidr
-  powervs_bastion_ip   = var.powervs_bastion_ip
 }
 
 module "transit_gateway" {
@@ -71,10 +69,11 @@ module "transit_gateway" {
   depends_on = [module.vpc_prepare]
   source     = "./modules/3_transit_gateway"
 
-  cluster_id         = local.cluster_id
-  vpc_name           = var.vpc_name
-  vpc_crn            = module.vpc_prepare.vpc_crn
-  vpc_region         = var.vpc_region
+  cluster_id     = local.cluster_id
+  vpc_name       = var.vpc_name
+  vpc_crn        = module.vpc_prepare.vpc_crn
+  vpc_region     = var.vpc_region
+  resource_group = module.vpc.vpc_resource_group
 }
 
 module "support" {
@@ -84,15 +83,14 @@ module "support" {
   depends_on = [module.transit_gateway]
   source     = "./modules/4_pvs_support"
 
-  private_key_file         = var.private_key_file
-  ssh_agent                = var.ssh_agent
-  connection_timeout       = var.connection_timeout
-  rhel_username            = var.rhel_username
-  bastion_public_ip        = var.powervs_bastion_ip
-  vpc_bootstrap_private_ip    = module.vpc_prepare.vpc_bootstrap_private_ip
-  openshift_api_url        = var.openshift_api_url
-  cidrs                    = module.vpc_prepare.mac_vpc_subnets
-  powervs_machine_cidr     = var.powervs_machine_cidr
+  private_key_file     = var.private_key_file
+  ssh_agent            = var.ssh_agent
+  connection_timeout   = var.connection_timeout
+  rhel_username        = var.rhel_username
+  bastion_public_ip    = var.powervs_bastion_ip
+  openshift_api_url    = var.openshift_api_url
+  cidrs                = module.vpc_prepare.mac_vpc_subnets
+  powervs_machine_cidr = var.powervs_machine_cidr
 }
 
 module "image" {
@@ -100,17 +98,17 @@ module "image" {
     ibm = ibm.powervs
   }
   depends_on = [module.vpc_prepare]
-  source     = "./modules/6_image"
+  source     = "./modules/5_image"
 
-  name_prefix         = var.name_prefix
-  vpc_region                = var.vpc_region
-  rhel_username       = var.rhel_username
-  bastion_public_ip            = var.bastion_public_ip
-  private_key_file        = var.private_key_file
-  ssh_agent    = var.ssh_agent
-  connection_timeout        = var.connection_timeout
-  ibmcloud_api_key                    = var.ibmcloud_api_key
-  resource_group     = var.resource_group
+  name_prefix        = var.name_prefix
+  vpc_region         = var.vpc_region
+  rhel_username      = var.rhel_username
+  bastion_public_ip  = var.powervs_bastion_ip
+  private_key_file   = var.private_key_file
+  ssh_agent          = var.ssh_agent
+  connection_timeout = var.connection_timeout
+  ibmcloud_api_key   = var.ibmcloud_api_key
+  resource_group     = module.vpc.vpc_resource_group
 }
 
 module "worker" {
@@ -118,33 +116,29 @@ module "worker" {
     ibm = ibm.powervs
   }
   depends_on = [module.support]
-  source     = "./modules/5_worker"
+  source     = "./modules/6_worker"
 
-  key_name                    = module.pvs_prepare.pvs_pubkey_name
-  name_prefix                 = local.name_prefix
-  powervs_service_instance_id = var.powervs_service_instance_id
-  powervs_dhcp_network_id     = module.pvs_prepare.powervs_dhcp_network_id
-  powervs_dhcp_network_name   = module.pvs_prepare.powervs_dhcp_network_name
-  processor_type              = var.processor_type
-  rhcos_image_id              = module.vpc_prepare.rhcos_image_id
-  system_type                 = var.system_type
-  worker                      = var.worker
-  ignition_ip                 = module.vpc_prepare.vpc_bootstrap_private_ip
-  target_worker_sg_id         = module.vpc_prepare.target_worker_sg_id
+  worker_1            = var.worker_1
+  worker_2            = var.worker_2
+  worker_3            = var.worker_3
+  rhcos_image_id      = module.vpc_prepare.rhcos_image_id
+  name_prefix         = var.name_prefix
+  vpc_key_id          = module.vpc_prepare.vpc_check_key
+  ignition_ip         = var.bastion_private_ip
+  target_worker_sg_id = module.vpc_prepare.target_worker_sg_id
 }
 
 module "post" {
   depends_on = [module.worker]
-  source     = "./modules/6_post"
+  source     = "./modules/7_post"
 
   ssh_agent         = var.ssh_agent
   bastion_public_ip = var.powervs_bastion_ip
   private_key_file  = var.private_key_file
-  powervs_region    = module.vpc.powervs_region
-  powervs_zone      = module.vpc.powervs_zone
-  system_type       = var.system_type
-  nfs_server        = var.powervs_bastion_ip
-  nfs_path          = var.nfs_path
+  vpc_region        = var.vpc_region
+  vpc_zone          = var.vpc_zone
   name_prefix       = local.name_prefix
-  worker            = var.worker
+  worker_1          = var.worker_1
+  worker_2          = var.worker_2
+  worker_3          = var.worker_3
 }

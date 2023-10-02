@@ -11,14 +11,14 @@ resource "ibm_is_security_group" "worker_vm_sg" {
 
 # allow all outgoing network traffic
 resource "ibm_is_security_group_rule" "worker_vm_sg_outgoing_all" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "outbound"
   remote    = "0.0.0.0/0"
 }
 
 # allow all incoming network traffic on port 22
 resource "ibm_is_security_group_rule" "worker_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = "0.0.0.0/0"
   tcp {
@@ -29,7 +29,7 @@ resource "ibm_is_security_group_rule" "worker_vm_sg_ssh_all" {
 
 # allow all incoming network traffic on port 53
 resource "ibm_is_security_group_rule" "worker_vm_sg_supp_all" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -41,7 +41,7 @@ resource "ibm_is_security_group_rule" "worker_vm_sg_supp_all" {
 # Dev Note: the following are used by PowerVS and VPC VSIs.
 # allow all incoming network traffic on port 2049
 resource "ibm_is_security_group_rule" "nfs_1_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -52,7 +52,7 @@ resource "ibm_is_security_group_rule" "nfs_1_vm_sg_ssh_all" {
 
 # allow all incoming network traffic on port 111
 resource "ibm_is_security_group_rule" "nfs_2_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -63,7 +63,7 @@ resource "ibm_is_security_group_rule" "nfs_2_vm_sg_ssh_all" {
 
 # allow all incoming network traffic on port 2049
 resource "ibm_is_security_group_rule" "nfs_3_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
 
@@ -75,7 +75,7 @@ resource "ibm_is_security_group_rule" "nfs_3_vm_sg_ssh_all" {
 
 # allow all incoming network traffic on port 111
 resource "ibm_is_security_group_rule" "nfs_4_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -87,7 +87,7 @@ resource "ibm_is_security_group_rule" "nfs_4_vm_sg_ssh_all" {
 
 # allow all incoming network traffic for ping
 resource "ibm_is_security_group_rule" "worker_vm_sg_ping_all" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   icmp {
@@ -97,7 +97,7 @@ resource "ibm_is_security_group_rule" "worker_vm_sg_ping_all" {
 }
 
 resource "ibm_is_security_group_rule" "control_plane_sg_mc" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -107,7 +107,7 @@ resource "ibm_is_security_group_rule" "control_plane_sg_mc" {
 }
 
 resource "ibm_is_security_group_rule" "control_plane_sg_api" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -123,7 +123,7 @@ resource "ibm_is_security_group_rule" "control_plane_sg_api" {
 #TCP 	22 	192.168.200.0/24
 #TCP - 9100 192.168.200.0/24
 resource "ibm_is_security_group_rule" "cluster_wide_sg_6081" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -133,7 +133,7 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_6081" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_any" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   icmp {
@@ -141,7 +141,7 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_any" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_4789" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -151,7 +151,7 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_4789" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_ssh" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -161,7 +161,7 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_ssh" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_9100" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -171,7 +171,7 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_9100" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_9537" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -184,7 +184,7 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_9537" {
 #TCP 	2379-2380 	192.168.200.0/24
 #TCP 	10257-10259 	192.168.200.0/24
 resource "ibm_is_security_group_rule" "cp_internal_sg_r1" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -194,7 +194,7 @@ resource "ibm_is_security_group_rule" "cp_internal_sg_r1" {
 }
 
 resource "ibm_is_security_group_rule" "cp_internal_sg_r2" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -210,7 +210,7 @@ resource "ibm_is_security_group_rule" "cp_internal_sg_r2" {
 # TCP (Out) 	80 	192.168.200.0/24
 # TCP (Out) 	443 	192.168.200.0/24
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_mc" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -220,7 +220,7 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_mc" {
 }
 
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_mc_out" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "outbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -230,7 +230,7 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_mc_out" {
 }
 
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_api_out" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "outbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -240,7 +240,7 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_api_out" {
 }
 
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_http_out" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "outbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -250,7 +250,7 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_http_out" {
 }
 
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_https_out" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "outbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -268,7 +268,7 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_https_out" {
 # TCP (IN) 	10250 	192.168.200.0/24
 # Dev Note: originally used 32767 and it's too low. Changed to 65000
 resource "ibm_is_security_group_rule" "openshift_net_sg_r1_in_tcp" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -278,7 +278,7 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_r1_in_tcp" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_r1_in_udp" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -288,7 +288,7 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_r1_in_udp" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_500" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -298,7 +298,7 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_500" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_r2_in_tcp" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -308,7 +308,7 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_r2_in_tcp" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_r2_in_udp" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -318,7 +318,7 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_r2_in_udp" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_10250_out" {
-  group     = ibm_is_security_group.worker_vm_sg[0].id
+  group     = ibm_is_security_group.worker_vm_sg.id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {

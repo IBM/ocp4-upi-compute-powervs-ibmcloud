@@ -147,17 +147,45 @@ variable "bastion_health_status" {
 # Configure the PowerVS workers to be added to the compute plane
 ################################################################
 
-variable "worker" {
+variable "worker_1" {
   type = object({ count = number, profile = string })
   default = {
-    count      = 1
-    profile     = "cx2d-8x16"
+    count   = 1
+    profile = "cx2d-8x16"
+    zone    = ""
   }
   validation {
-    condition     = lookup(var.worker, "count", 1) >= 1
+    condition     = lookup(var.worker_1, "count", 1) >= 1
     error_message = "The worker.count value must be greater than 1."
   }
 }
+
+variable "worker_2" {
+  type = object({ count = number, profile = string })
+  default = {
+    count   = 0
+    profile = "cx2d-8x16"
+    zone    = ""
+  }
+  validation {
+    condition     = lookup(var.worker_2, "count", 1) >= 0
+    error_message = "The worker.count value must be greater than 0."
+  }
+}
+
+variable "worker_3" {
+  type = object({ count = number, profile = string })
+  default = {
+    count   = 0
+    profile = "cx2d-8x16"
+    zone    = ""
+  }
+  validation {
+    condition     = lookup(var.worker_3, "count", 1) >= 0
+    error_message = "The worker.count value must be greater than 0."
+  }
+}
+
 
 ################################################################
 # RHCOS PowerVS Details
@@ -293,6 +321,12 @@ variable "ssh_agent" {
 variable "connection_timeout" {
   description = "Timeout in minutes for SSH connections"
   default     = 30
+}
+
+variable "rhel_username" {
+  type        = bool
+  description = "The username used to connect to the bastion"
+  default     = false
 }
 
 variable "helpernode_repo" {

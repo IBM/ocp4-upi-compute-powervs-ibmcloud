@@ -7,3 +7,4 @@ variable "cluster_id" {}
 variable "vpc_name" {}
 variable "vpc_crn" {}
 variable "vpc_region" {}
+variable "resource_group" {}

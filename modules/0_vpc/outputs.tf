@@ -10,3 +10,7 @@ output "powervs_region" {
 output "powervs_zone" {
   value = local.powervs_zone
 }
+
+output "vpc_resource_group" {
+  value = data.ibm_is_vpc.ibm_is_vpc.resource_group
+}

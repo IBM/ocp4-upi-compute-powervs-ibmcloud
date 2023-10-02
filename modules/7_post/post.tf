@@ -6,12 +6,10 @@
 locals {
   ansible_post_path = "/root/ocp4-upi-compute-powervs/post"
   ansible_vars = {
-    region               = var.powervs_region
-    zone                 = var.powervs_zone
-    system_type          = var.system_type
-    nfs_server           = var.nfs_server
-    nfs_path             = var.nfs_path
-    powervs_worker_count = var.worker["count"]
+    region       = var.vpc_region
+    zone         = var.vpc_zone
+    system_type  = var.worker_1["profile"]
+    worker_count = sum([var.worker_1["count"], var.worker_2["count"], var.worker_3["count"]])
   }
 }
 
@@ -36,12 +34,12 @@ resource "null_resource" "remove_workers" {
   depends_on = [null_resource.post_setup]
 
   triggers = {
-    count                 = var.worker["count"]
-    name_prefix           = "${var.name_prefix}"
-    private_key           = file(var.private_key_file)
-    host                  = var.bastion_public_ip[0]
-    agent                 = var.ssh_agent
-    ansible_post_path     = local.ansible_post_path
+    count             = var.worker["count"]
+    name_prefix       = "${var.name_prefix}"
+    private_key       = file(var.private_key_file)
+    host              = var.bastion_public_ip[0]
+    agent             = var.ssh_agent
+    ansible_post_path = local.ansible_post_path
   }
 
   connection {
