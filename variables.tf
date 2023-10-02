@@ -143,55 +143,15 @@ variable "bastion_health_status" {
   }
 }
 
-# Centos default is CentOS-Stream-8
-variable "rhel_image_name" {
-  type        = string
-  description = "Name of the RHEL or Centos image that you want to use for the bastion node"
-  default     = "CentOS-Stream-8"
-}
-
-variable "rhel_username" {
-  type    = string
-  default = "root"
-}
-
-variable "rhel_subscription_username" {
-  type    = string
-  default = ""
-}
-
-variable "rhel_subscription_password" {
-  type    = string
-  default = ""
-}
-
-variable "rhel_subscription_org" {
-  type    = string
-  default = ""
-}
-
-variable "rhel_subscription_activationkey" {
-  type    = string
-  default = ""
-}
-
-# SMT level is 8 which is the maximum.
-variable "rhel_smt" {
-  type        = number
-  description = "SMT value to set on the bastion node. Eg: on,off,2,4,8"
-  default     = 8
-}
-
 ################################################################
 # Configure the PowerVS workers to be added to the compute plane
 ################################################################
 
 variable "worker" {
-  type = object({ count = number, memory = string, processors = string })
+  type = object({ count = number, profile = string })
   default = {
     count      = 1
-    memory     = "16"
-    processors = "1"
+    profile     = "cx2d-8x16"
   }
   validation {
     condition     = lookup(var.worker, "count", 1) >= 1

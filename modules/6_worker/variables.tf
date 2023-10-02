@@ -12,13 +12,13 @@ variable "powervs_dhcp_network_name" {}
 variable "processor_type" {}
 variable "rhcos_image_id" {}
 variable "system_type" {}
+variable "vpc_key_id" {}
 
 variable "worker" {
-  type = object({ count = number, memory = string, processors = string })
+  type = object({ count = number, profile = string })
   default = {
     count      = 1
-    memory     = "16"
-    processors = "1"
+    profile     = "cx2d-8x16"
   }
   validation {
     condition     = lookup(var.worker, "count", 1) >= 1

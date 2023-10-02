@@ -1,0 +1,16 @@
+{
+    "ignition": {
+        "version": "3.4.0",
+        "config": {
+            "merge": [
+                {
+                    "source": "http://${ignition_ip}:8080/ignition/worker-intel.ign"
+                }
+            ]
+        }
+    },
+    "storage": {
+        "files": [
+        ]
+    }
+}

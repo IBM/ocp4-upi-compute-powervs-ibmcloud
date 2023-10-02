@@ -95,12 +95,30 @@ module "support" {
   powervs_machine_cidr     = var.powervs_machine_cidr
 }
 
+module "image" {
+  providers = {
+    ibm = ibm.powervs
+  }
+  depends_on = [module.vpc_prepare]
+  source     = "./modules/6_image"
+
+  name_prefix         = var.name_prefix
+  vpc_region                = var.vpc_region
+  rhel_username       = var.rhel_username
+  bastion_public_ip            = var.bastion_public_ip
+  private_key_file        = var.private_key_file
+  ssh_agent    = var.ssh_agent
+  connection_timeout        = var.connection_timeout
+  ibmcloud_api_key                    = var.ibmcloud_api_key
+  resource_group     = var.resource_group
+}
+
 module "worker" {
   providers = {
     ibm = ibm.powervs
   }
   depends_on = [module.support]
-  source     = "./modules/4_worker"
+  source     = "./modules/5_worker"
 
   key_name                    = module.pvs_prepare.pvs_pubkey_name
   name_prefix                 = local.name_prefix
@@ -117,7 +135,7 @@ module "worker" {
 
 module "post" {
   depends_on = [module.worker]
-  source     = "./modules/5_post"
+  source     = "./modules/6_post"
 
   ssh_agent         = var.ssh_agent
   bastion_public_ip = var.powervs_bastion_ip
