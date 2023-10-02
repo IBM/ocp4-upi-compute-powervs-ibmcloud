@@ -11,13 +11,13 @@ data "ibm_is_vpc" "vpc" {
 }
 
 resource "ibm_is_instance" "workers_1" {
-  count   = var.worker_zone_1["count"]
+  count   = var.worker_1["count"]
   name    = "${var.name_prefix}-worker-${count.index}"
   vpc     = data.ibm_is_vpc.vpc.id
-  zone    = var.worker_zone_1["zone"]
+  zone    = var.worker_1["zone"]
   keys    = [var.vpc_key_id]
   image   = var.rhcos_image_id
-  profile = var.worker_zone_1["profile"] #
+  profile = var.worker_1["profile"] #
   # Profiles: https://cloud.ibm.com/docs/vpc?topic=vpc-profiles&interface=ui
   # "cx2d-8x16" - 8x16 includes 300G storage.
   resource_group = data.ibm_is_vpc.vpc.resource_group
@@ -37,13 +37,13 @@ resource "ibm_is_instance" "workers_1" {
 }
 
 resource "ibm_is_instance" "workers_2" {
-  count   = var.worker_zone_2["count"]
+  count   = var.worker_2["count"]
   name    = "${var.name_prefix}-worker-${count.index}"
   vpc     = data.ibm_is_vpc.vpc.id
-  zone    = var.worker_zone_2["zone"]
+  zone    = var.worker_2["zone"]
   keys    = [var.vpc_key_id]
   image   = var.rhcos_image_id
-  profile = var.worker_zone_2["profile"] #
+  profile = var.worker_2["profile"] #
   # Profiles: https://cloud.ibm.com/docs/vpc?topic=vpc-profiles&interface=ui
   # "cx2d-8x16" - 8x16 includes 300G storage.
   resource_group = data.ibm_is_vpc.vpc.resource_group
@@ -63,13 +63,13 @@ resource "ibm_is_instance" "workers_2" {
 }
 
 resource "ibm_is_instance" "workers_3" {
-  count   = var.worker_zone_3["count"]
+  count   = var.worker_3["count"]
   name    = "${var.name_prefix}-worker-${count.index}"
   vpc     = data.ibm_is_vpc.vpc.id
-  zone    = var.worker_zone_3["zone"]
+  zone    = var.worker_3["zone"]
   keys    = [var.vpc_key_id]
   image   = var.rhcos_image_id
-  profile = var.worker_zone_3["profile"] #
+  profile = var.worker_3["profile"] #
   # Profiles: https://cloud.ibm.com/docs/vpc?topic=vpc-profiles&interface=ui
   # "cx2d-8x16" - 8x16 includes 300G storage.
   resource_group = data.ibm_is_vpc.vpc.resource_group

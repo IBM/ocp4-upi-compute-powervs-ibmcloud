@@ -121,10 +121,11 @@ module "worker" {
   worker_1            = var.worker_1
   worker_2            = var.worker_2
   worker_3            = var.worker_3
-  rhcos_image_id      = module.vpc_prepare.rhcos_image_id
+  rhcos_image_id      = module.image.rhcos_image_id
   name_prefix         = var.name_prefix
+  vpc_name            = var.vpc_name
   vpc_key_id          = module.vpc_prepare.vpc_check_key
-  ignition_ip         = var.bastion_private_ip
+  ignition_ip         = var.powervs_bastion_private_ip
   target_worker_sg_id = module.vpc_prepare.target_worker_sg_id
 }
 

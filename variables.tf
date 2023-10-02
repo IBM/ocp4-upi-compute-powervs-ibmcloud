@@ -47,6 +47,12 @@ variable "powervs_bastion_ip" {
   default     = ""
 }
 
+variable "powervs_bastion_private_ip" {
+  type        = string
+  description = "The Bastion private IP of the OpenShift Cluster on PowerVS"
+  default     = ""
+}
+
 ################################################################
 # Configure the IBM VPC provider
 ################################################################
@@ -144,7 +150,7 @@ variable "bastion_health_status" {
 }
 
 ################################################################
-# Configure the PowerVS workers to be added to the compute plane
+# Configure the Intel workers to be added to the compute plane
 ################################################################
 
 variable "worker_1" {

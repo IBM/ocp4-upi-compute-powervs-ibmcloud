@@ -34,7 +34,9 @@ resource "null_resource" "remove_workers" {
   depends_on = [null_resource.post_setup]
 
   triggers = {
-    count             = var.worker["count"]
+    count_1             = var.worker_1["count"]
+    count_2             = var.worker_2["count"]
+    count_3             = var.worker_3["count"]
     name_prefix       = "${var.name_prefix}"
     private_key       = file(var.private_key_file)
     host              = var.bastion_public_ip[0]
@@ -55,7 +57,7 @@ resource "null_resource" "remove_workers" {
     on_failure = continue
     inline = [<<EOF
 cd ${self.triggers.ansible_post_path}
-bash files/destroy-workers.sh "${self.triggers.count}" "${self.triggers.name_prefix}"
+bash files/destroy-workers.sh "${self.triggers.count_1}" "${self.triggers.count_2}" "${self.triggers.count_3}" "${self.triggers.name_prefix}"
 EOF
     ]
   }
@@ -106,7 +108,7 @@ resource "null_resource" "debug_and_remove_taints" {
 oc get nodes -owide
 oc get nodes -l 'kubernetes.io/arch=ppc64le' -o json | jq -r '.items[].spec'
 cd ${local.ansible_post_path}
-bash files/remove-worker-taints.sh "${var.name_prefix}" "${var.worker["count"]}"
+bash files/remove-worker-taints.sh "${var.name_prefix}" "${var.worker_1["count"]}" "${var.worker_2["count"]}" "${var.worker_3["count"]}"
 EOF
     ]
   }

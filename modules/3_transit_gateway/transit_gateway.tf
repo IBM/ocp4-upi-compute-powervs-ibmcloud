@@ -15,10 +15,10 @@ resource "ibm_tg_gateway" "mac_tg_gw" {
 # Ref: https://registry.terraform.io/providers/IBM-Cloud/ibm/latest/docs/resources/tg_connection
 resource "ibm_tg_connection" "vpc_tg_connection" {
   depends_on   = [ibm_tg_gateway.mac_tg_gw]
-  gateway      = ibm_tg_gateway.mac_tg_gw[0].id
+  gateway      = ibm_tg_gateway.mac_tg_gw.id
   network_type = "vpc"
   name         = "${var.vpc_name}-vpc-conn"
-  network_id   = data.ibm_is_vpc.vpc.resource_crn
+  network_id   = var.vpc_crn
 }
 
 data "ibm_dl_gateway" "pvs_dl" {

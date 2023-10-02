@@ -49,5 +49,4 @@ resource "ibm_is_image" "worker_image_id" {
   href             = "cos://${var.vpc_region}/${var.name_prefix}-bucket/${var.name_prefix}-rhcos.qcow2"
   operating_system = "rhel-coreos-stable-amd64"
   resource_group   = var.resource_group
-  access_tags      = ["mac-intel-worker"]
 }
