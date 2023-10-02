@@ -4,9 +4,9 @@
 ################################################################
 
 # Manages the ssh keys
-
-data "ibm_is_ssh_keys" "keys" {
-  # Region is implicit
+locals {
+  public_key_file = var.public_key_file == "" ? "${path.cwd}/data/id_rsa.pub" : "${path.cwd}/${var.public_key_file}"
+  public_key      = var.public_key == "" ? file(coalesce(local.public_key_file, "/dev/null")) : var.public_key
 }
 
 locals {

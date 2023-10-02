@@ -10,3 +10,8 @@ output "mac_tg_gateway" {
 output "mac_vpc_subnets" {
   value = data.ibm_is_subnets.vpc_subnets.subnets[*].ipv4_cidr_block
 }
+
+
+output "transit_gateway_id" {
+  value = local.tg == [] ? ibm_tg_gateway.mac_tg_gw[0] : local.tg[0]
+}

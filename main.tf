@@ -74,7 +74,6 @@ module "transit_gateway" {
   cluster_id         = local.cluster_id
   vpc_name           = var.vpc_name
   vpc_crn            = module.vpc_prepare.vpc_crn
-  transit_gateway_id = module.vpc_prepare.transit_gateway_id
 }
 
 module "support" {
@@ -116,6 +115,7 @@ module "worker" {
   system_type                 = var.system_type
   worker                      = var.worker
   ignition_ip                 = module.vpc_prepare.vpc_bootstrap_private_ip
+  target_worker_sg_id         = module.vpc_prepare.target_worker_sg_id
 }
 
 module "post" {
