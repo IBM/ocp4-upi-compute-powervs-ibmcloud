@@ -47,12 +47,12 @@ module "vpc" {
 }
 
 ### Prepares the VPC Support Machine
-module "vpc_support" {
+module "vpc_prepare" {
   providers = {
     ibm = ibm.vpc
   }
-  depends_on = [module.checks]
-  source     = "./modules/1_vpc_support"
+  depends_on = [module.vpc]
+  source     = "./modules/1_vpc_prepare"
 
   vpc_name             = var.vpc_name
   vpc_region           = var.vpc_region
@@ -68,7 +68,7 @@ module "transit_gateway" {
   providers = {
     ibm = ibm.vpc
   }
-  depends_on = [module.pvs_prepare]
+  depends_on = [module.vpc_prepare]
   source     = "./modules/2_transit_gateway"
 
   cluster_id         = local.cluster_id
@@ -88,7 +88,7 @@ module "support" {
   ssh_agent                = var.ssh_agent
   connection_timeout       = var.connection_timeout
   rhel_username            = var.rhel_username
-  bastion_public_ip        = module.pvs_prepare.bastion_public_ip[0]
+  bastion_public_ip        = var.powervs_bastion_ip
   openshift_client_tarball = var.openshift_client_tarball
   vpc_support_server_ip    = module.vpc_support.vpc_support_server_ip
   openshift_api_url        = var.openshift_api_url
@@ -115,8 +115,7 @@ module "worker" {
   rhcos_image_id              = module.pvs_prepare.rhcos_image_id
   system_type                 = var.system_type
   worker                      = var.worker
-  ignition_ip                 = module.pvs_prepare.bastion_private_ip[0]
-  # Eventually, this should be a bit more dynamic and include MachineConfigPool
+  ignition_ip                 = module.vpc_prepare.vpc_bootstrap_private_ip
 }
 
 module "post" {
@@ -124,12 +123,12 @@ module "post" {
   source     = "./modules/5_post"
 
   ssh_agent         = var.ssh_agent
-  bastion_public_ip = module.pvs_prepare.bastion_public_ip
+  bastion_public_ip = var.powervs_bastion_ip
   private_key_file  = var.private_key_file
-  powervs_region    = module.checks.powervs_region
-  powervs_zone      = module.checks.powervs_zone
+  powervs_region    = module.vpc.powervs_region
+  powervs_zone      = module.vpc.powervs_zone
   system_type       = var.system_type
-  nfs_server        = module.vpc_support.vpc_support_server_ip
+  nfs_server        = var.powervs_bastion_ip
   nfs_path          = var.nfs_path
   name_prefix       = local.name_prefix
   worker            = var.worker

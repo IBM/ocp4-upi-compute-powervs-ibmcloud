@@ -40,7 +40,7 @@ resource "ibm_is_instance" "supp_vm_vsi" {
     security_groups = [local.sg_id, local.cp_internal_sg[0].id]
   }
 
-  user_data = templatefile("${path.cwd}/modules/1_vpc_support/templates/cloud-init.yaml.tpl", {})
+  user_data = templatefile("${path.cwd}/modules/1_vpc_prepare/templates/cloud-init.yaml.tpl", {})
 }
 
 resource "ibm_is_floating_ip" "supp_vm_fip" {

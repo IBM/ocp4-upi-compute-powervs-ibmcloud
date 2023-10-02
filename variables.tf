@@ -41,6 +41,12 @@ variable "powervs_zone" {
   default     = ""
 }
 
+variable "powervs_bastion_ip" {
+  type        = string
+  description = "The Bastion IP of the OpenShift Cluster on PowerVS"
+  default     = ""
+}
+
 ################################################################
 # Configure the IBM VPC provider
 ################################################################
