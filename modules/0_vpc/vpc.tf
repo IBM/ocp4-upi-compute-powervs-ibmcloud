@@ -7,6 +7,11 @@
 # Ref: PowerVS Regions https://cloud.ibm.com/docs/power-iaas?topic=power-iaas-creating-power-virtual-server
 # Ref: https://cluster-api-ibmcloud.sigs.k8s.io/reference/regions-zones-mapping.html
 
+# Dev Note: This is the file where the VPC should be created in the future.
+# The code should follow the checks, and conditionally create the vpc.
+# outputs need to be updated and passed back to the user.
+
+# Dev Note: The following are 'Checks'
 # If the PowerVS Region or Zone is empty, the code auto-populates the zone/region information
 locals {
   vpc_pvs = {

@@ -5,8 +5,8 @@ The [`ocp4-upi-compute-powervs-ibmcloud` project](https://github.com/ibm/ocp4-up
 ## Prerequisites
 
 1. Requires Terraform v1.5.0 or Higher
-2. An Existing OpenShift Container Platform Cluster installed on PowerVS
-3. [Optional]: An Existing VPC (otherwise one will be created.)
+2. An Existing OpenShift Container Platform Cluster installed on IBM Power Virtual Server (PowerVS)
+3. An Existing IBM Cloud Virtual Private Computing
 
 ## Commands
 
