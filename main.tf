@@ -31,7 +31,7 @@ locals {
 }
 
 ### Prepares the VPC Support Machine
-module "checks" {
+module "vpc" {
   providers = {
     ibm = ibm.vpc
   }
@@ -64,54 +64,12 @@ module "vpc_support" {
   vpc_supp_public_ip   = var.vpc_supp_public_ip
 }
 
-### Prepares the PowerVS workspace for Day-2 Workers
-module "pvs_prepare" {
-  providers = {
-    ibm = ibm.powervs
-  }
-  depends_on = [module.vpc_support]
-  source     = "./modules/2_pvs_prepare"
-
-  ansible_repo_name                  = var.ansible_repo_name
-  bastion                            = var.bastion
-  bastion_health_status              = var.bastion_health_status
-  cluster_domain                     = var.cluster_domain
-  cluster_id                         = local.cluster_id
-  connection_timeout                 = var.connection_timeout
-  enable_snat                        = var.enable_snat
-  powervs_machine_cidr               = var.powervs_machine_cidr
-  name_prefix                        = local.name_prefix
-  powervs_region                     = module.checks.powervs_region
-  powervs_service_instance_id        = var.powervs_service_instance_id
-  private_key_file                   = var.private_key_file
-  public_key_file                    = var.public_key_file
-  private_network_mtu                = var.private_network_mtu
-  processor_type                     = var.processor_type
-  powervs_dns_forwarders             = var.powervs_dns_forwarders == "" ? [] : [for dns in split(";", var.powervs_dns_forwarders) : trimspace(dns)]
-  public_key                         = var.public_key
-  rhcos_image_name                   = var.rhcos_image_name
-  rhcos_import_image                 = var.rhcos_import_image
-  rhcos_import_image_filename        = var.rhcos_import_image_filename
-  rhcos_import_image_region_override = var.rhcos_import_image_region_override
-  rhcos_import_image_storage_type    = var.rhcos_import_image_storage_type
-  rhel_image_name                    = var.rhel_image_name
-  rhel_subscription_org              = var.rhel_subscription_org
-  rhel_subscription_password         = var.rhel_subscription_password
-  rhel_subscription_username         = var.rhel_subscription_username
-  rhel_username                      = var.rhel_username
-  rhel_subscription_activationkey    = var.rhel_subscription_activationkey
-  rhel_smt                           = var.rhel_smt
-  ssh_agent                          = var.ssh_agent
-  system_type                        = var.system_type
-  vpc_support_server_ip              = module.vpc_support.vpc_support_server_ip
-}
-
 module "transit_gateway" {
   providers = {
     ibm = ibm.vpc
   }
   depends_on = [module.pvs_prepare]
-  source     = "./modules/3_transit_gateway"
+  source     = "./modules/2_transit_gateway"
 
   cluster_id         = local.cluster_id
   vpc_name           = var.vpc_name
@@ -124,7 +82,7 @@ module "support" {
     ibm = ibm.powervs
   }
   depends_on = [module.transit_gateway]
-  source     = "./modules/4_pvs_support"
+  source     = "./modules/3_pvs_support"
 
   private_key_file         = var.private_key_file
   ssh_agent                = var.ssh_agent
@@ -146,7 +104,7 @@ module "worker" {
     ibm = ibm.powervs
   }
   depends_on = [module.support]
-  source     = "./modules/5_worker"
+  source     = "./modules/4_worker"
 
   key_name                    = module.pvs_prepare.pvs_pubkey_name
   name_prefix                 = local.name_prefix
@@ -163,7 +121,7 @@ module "worker" {
 
 module "post" {
   depends_on = [module.worker]
-  source     = "./modules/6_post"
+  source     = "./modules/5_post"
 
   ssh_agent         = var.ssh_agent
   bastion_public_ip = module.pvs_prepare.bastion_public_ip
