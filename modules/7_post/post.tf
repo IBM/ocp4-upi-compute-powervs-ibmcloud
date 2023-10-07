@@ -4,7 +4,7 @@
 ################################################################
 
 locals {
-  ansible_post_path = "/root/ocp4-upi-compute-powervs/post"
+  ansible_post_path = "/root/ocp4-upi-compute-powervs-ibmcloud/post"
   ansible_vars = {
     region       = var.vpc_region
     zone         = var.vpc_zone
@@ -18,7 +18,7 @@ resource "null_resource" "post_setup" {
     type        = "ssh"
     user        = "root"
     private_key = file(var.private_key_file)
-    host        = var.bastion_public_ip[0]
+    host        = var.bastion_public_ip
     agent       = var.ssh_agent
   }
 
@@ -39,7 +39,7 @@ resource "null_resource" "remove_workers" {
     count_3           = var.worker_3["count"]
     name_prefix       = "${var.name_prefix}"
     private_key       = file(var.private_key_file)
-    host              = var.bastion_public_ip[0]
+    host              = var.bastion_public_ip
     agent             = var.ssh_agent
     ansible_post_path = local.ansible_post_path
   }
@@ -70,7 +70,7 @@ resource "null_resource" "post_ansible" {
     type        = "ssh"
     user        = "root"
     private_key = file(var.private_key_file)
-    host        = var.bastion_public_ip[0]
+    host        = var.bastion_public_ip
     agent       = var.ssh_agent
   }
 
@@ -99,7 +99,7 @@ resource "null_resource" "debug_and_remove_taints" {
     type        = "ssh"
     user        = "root"
     private_key = file(var.private_key_file)
-    host        = var.bastion_public_ip[0]
+    host        = var.bastion_public_ip
     agent       = var.ssh_agent
   }
 

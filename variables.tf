@@ -94,7 +94,7 @@ variable "powervs_bastion_private_ip" {
 ################################################################
 
 variable "worker_1" {
-  type = object({ count = number, profile = string })
+  type = object({ count = number, profile = string, zone = string })
   default = {
     count   = 1
     profile = "cx2d-8x16"
@@ -107,7 +107,7 @@ variable "worker_1" {
 }
 
 variable "worker_2" {
-  type = object({ count = number, profile = string })
+  type = object({ count = number, profile = string, zone = string })
   default = {
     count   = 0
     profile = "cx2d-8x16"
@@ -120,7 +120,7 @@ variable "worker_2" {
 }
 
 variable "worker_3" {
-  type = object({ count = number, profile = string })
+  type = object({ count = number, profile = string, zone = string })
   default = {
     count   = 0
     profile = "cx2d-8x16"

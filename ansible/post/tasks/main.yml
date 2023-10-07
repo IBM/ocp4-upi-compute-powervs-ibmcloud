@@ -1,5 +1,5 @@
 ---
-- name: Post Installation Tasks (Approving CSRs, Setting up Node Labels, Installation of RSCT Daemonset, Setup NFS storage)
+- name: Post Installation Tasks (Approving CSRs, Setting up Node Labels)
   hosts: all
   vars_files:
     - ../vars/main.yml
@@ -32,7 +32,7 @@
     until: csr_list.stdout == ""
     retries: 5
     delay: 40
-    when: powervs_worker_count|int > 0
+    when: worker_count|int > 0
 
   - name: Wait for 20 seconds before checking Ready state for Intel worker node/s
     pause:
@@ -42,18 +42,18 @@
   - name: Check Ready state for Intel Worker Node
     shell: "oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs -r oc adm certificate approve && oc get nodes -l kubernetes.io/arch=amd64 | grep -w worker | grep -w Ready | wc -l"
     register: ready_count_result
-    until: ready_count_result.stdout.find(powervs_worker_count) != -1
+    until: ready_count_result.stdout.find(worker_count) != -1
     retries: 50
     delay: 30
-    when: powervs_worker_count|int > 0
+    when: worker_count|int > 0
 
   - name: Get Nodes with amd64 architecture
     shell: "oc get nodes -l kubernetes.io/arch=amd64 | awk '(NR>1) { print $1 }'"
     register: node_names
 
-  - name: Print Node names with ppc64le architecture
+  - name: Print Node names with amd64 architecture
     debug:
-      msg: "Nodes with ppc64le : {{ node_names.stdout_lines }}"
+      msg: "Nodes with amd64 : {{ node_names.stdout_lines }}"
 
   - name: Add labels defined in node_labels to amd64 Nodes
     kubernetes.core.k8s:
