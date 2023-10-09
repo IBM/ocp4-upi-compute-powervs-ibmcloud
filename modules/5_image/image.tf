@@ -36,7 +36,7 @@ resource "null_resource" "upload_rhcos_image" {
 echo 'Uploading rhcos image to ibmcloud'
 cd ocp4-upi-compute-powervs-ibmcloud/intel/image
 chmod +x upload_rhcos_image.sh
-./upload_rhcos_image.sh "${var.ibmcloud_api_key}" "${var.vpc_region}" "${var.resource_group}" "${var.name_prefix}"
+./upload_rhcos_image.sh "${var.ibmcloud_api_key}" "${ibm_resource_instance.ibm_resource_instance.guid}" "${var.vpc_region}" "${var.resource_group}" "${var.name_prefix}"
 echo 'Done with rhcos image uploading to ibmcloud'
 EOF
     ]
