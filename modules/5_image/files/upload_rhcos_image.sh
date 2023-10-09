@@ -36,6 +36,13 @@ then
     && cd -
 fi
 
+# Create a bucket
+ibmcloud cos bucket-create --bucket "${NAME_PREFIX}-bucket" \
+    --ibm-service-instance-id 41566169-175d-49f7-9e7f-a004e43fe49f \
+    --class smart \
+    --region ca-tor \
+    --json
+
 # Upload the file
 TARGET_KEY=$(echo ${TARGET_FILE} | sed 's|[._]|-|g')
 ibmcloud cos --bucket "${NAME_PREFIX}-bucket" \

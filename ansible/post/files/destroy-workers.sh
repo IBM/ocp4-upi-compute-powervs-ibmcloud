@@ -15,7 +15,7 @@ COUNT_2="${2}"
 COUNT_3="${3}"
 
 # Var: self.triggers.name_prefix
-NAME_PREFIX="${2}"
+NAME_PREFIX="${4}"
 
 IDX=0
 while [ "$IDX" -lt "$COUNT_1" ]
