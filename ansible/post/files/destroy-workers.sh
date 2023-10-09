@@ -18,7 +18,7 @@ COUNT_3="${3}"
 NAME_PREFIX="${2}"
 
 IDX=0
-while [ "$IDX" -lt "$COUNT" ]
+while [ "$IDX" -lt "$COUNT_1" ]
 do
     echo "Removing the Worker Zone 1: ${NAME_PREFIX}-worker-1-${IDX}"
     oc delete node ${NAME_PREFIX}-worker-${IDX} || true

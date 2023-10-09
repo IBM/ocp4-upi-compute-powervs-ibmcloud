@@ -17,7 +17,7 @@ data "ibm_is_vpc" "vpc" {
 
 resource "ibm_is_instance" "workers_1" {
   count   = var.worker_1["count"]
-  name    = "ca-worker-test-1" #"${var.name_prefix}-worker-${count.index}" #"ca-worker-test-1"
+  name    = "${var.name_prefix}-worker-${count.index}" #"ca-worker-test-1"
   vpc     = data.ibm_is_vpc.vpc.id
   zone    = var.worker_1["zone"] #"ca-tor-2"
   keys    = [var.vpc_key_id]
@@ -71,13 +71,12 @@ resource "ibm_is_instance" "workers_2" {
     security_groups = [var.target_worker_sg_id]
   }
 
-  user_data = base64encode(
-    templatefile(
+  user_data = templatefile(
       "${path.cwd}/modules/6_worker/templates/worker.ign",
       {
         ignition_ip : var.ignition_ip,
         name : base64encode("${var.name_prefix}-worker-2-${count.index}"),
-  }))
+  })
 }
 
 resource "ibm_is_instance" "workers_3" {

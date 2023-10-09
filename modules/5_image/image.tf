@@ -28,13 +28,13 @@ resource "null_resource" "upload_rhcos_image" {
 
   provisioner "file" {
     source      = "${path.module}/files/upload_rhcos_image.sh"
-    destination = "ocp4-upi-compute/intel/image/upload_rhcos_image.sh"
+    destination = "ocp4-upi-compute-powervs-ibmcloud/intel/image/upload_rhcos_image.sh"
   }
 
   provisioner "remote-exec" {
     inline = [<<EOF
 echo 'Uploading rhcos image to ibmcloud'
-cd ocp4-upi-compute/intel/image/upload_rhcos_image.sh
+cd ocp4-upi-compute-powervs-ibmcloud/intel/image/upload_rhcos_image.sh
 chmod +x upload_rhcos_image.sh
 ./upload_rhcos_image.sh "${var.ibmcloud_api_key}" "${var.vpc_region}" "${var.name_prefix}"
 echo 'Done with rhcos image uploading to ibmcloud'
