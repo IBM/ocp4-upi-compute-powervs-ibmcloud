@@ -36,7 +36,7 @@ resource "ibm_is_instance" "workers_1" {
     "${path.cwd}/modules/6_worker/templates/worker.ign",
     {
       ignition_ip : var.ignition_ip,
-      name : base64encode("ca-worker-test-1"),
+      name : base64encode("${var.name_prefix}-worker-${count.index}"),
   })
 }
 
