@@ -38,12 +38,11 @@ then
 fi
 
 # Create a bucket
-ibmcloud cos bucket-create --bucket "${NAME_PREFIX}-qcow2-bucket" \
+ibmcloud cos bucket-create --bucket "${NAME_PREFIX}-bucket" \
     --ibm-service-instance-id "${SERVICE_INSTANCE_ID}" --class smart --region "${REGION}" --json
 
 # Upload the file
 TARGET_KEY=$(echo ${TARGET_FILE} | sed 's|[._]|-|g')
 #ibmcloud cos --bucket "${NAME_PREFIX}-bucket" \
 #  --region "${REGION}" --key "${TARGET_KEY}" --file "${TARGET_DIR}/${TARGET_FILE}"
-
-ibmcloud cos object-put --bucket "${NAME_PREFIX}-qcow2-bucket" --key "$TARGET_KEY" --body "${TARGET_DIR}/${TARGET_FILE}"
+ibmcloud cos object-put --bucket "${NAME_PREFIX}-bucket" --key "${TARGET_FILE}" --body "${TARGET_DIR}/${TARGET_FILE}"

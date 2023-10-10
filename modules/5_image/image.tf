@@ -8,7 +8,7 @@ data "ibm_resource_group" "resource_group" {
 }
 
 resource "ibm_resource_instance" "ibm_resource_instance" {
-  name              = "${var.name_prefix}-bucket"
+  name              = "${var.name_prefix}-cos"
   resource_group_id = data.ibm_resource_group.resource_group.id
   service           = "cloud-object-storage"
   plan              = "standard"
@@ -46,7 +46,9 @@ EOF
 resource "ibm_is_image" "worker_image_id" {
   depends_on       = [null_resource.upload_rhcos_image]
   name             = "${var.name_prefix}-img"
-  href             = "cos://${var.vpc_region}/${var.name_prefix}-bucket/${var.name_prefix}-rhcos.qcow2"
+#  href             = "cos://${var.vpc_region}/${var.name_prefix}-qcow2-bucket/${var.name_prefix}-rhcos.qcow2"
+  href             = "cos://${var.vpc_region}/${var.name_prefix}-bucket/rhcos-414.92.202307070025-0-ibmcloud.x86_64.qcow2"
   operating_system = "rhel-coreos-stable-amd64"
   resource_group   = var.resource_group
 }
+
