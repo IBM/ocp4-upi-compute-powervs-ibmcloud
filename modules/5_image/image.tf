@@ -4,7 +4,7 @@
 ################################################################
 
 data "ibm_resource_group" "resource_group" {
-  name = var.resource_group
+  name = var.resource_group_name
 }
 
 resource "ibm_resource_instance" "ibm_resource_instance" {
@@ -36,7 +36,7 @@ resource "null_resource" "upload_rhcos_image" {
 echo 'Uploading rhcos image to ibmcloud'
 cd ocp4-upi-compute-powervs-ibmcloud/intel/image
 chmod +x upload_rhcos_image.sh
-./upload_rhcos_image.sh "${var.ibmcloud_api_key}" "${ibm_resource_instance.ibm_resource_instance.guid}" "${var.vpc_region}" "${var.resource_group}" "${var.name_prefix}"
+./upload_rhcos_image.sh "${var.ibmcloud_api_key}" "${ibm_resource_instance.ibm_resource_instance.guid}" "${var.vpc_region}" "${var.resource_group_name}" "${var.name_prefix}"
 echo 'Done with rhcos image uploading to ibmcloud'
 EOF
     ]
@@ -44,9 +44,9 @@ EOF
 }
 
 resource "ibm_is_image" "worker_image_id" {
-  depends_on       = [null_resource.upload_rhcos_image]
-  name             = "${var.name_prefix}-img"
-#  href             = "cos://${var.vpc_region}/${var.name_prefix}-qcow2-bucket/${var.name_prefix}-rhcos.qcow2"
+  depends_on = [null_resource.upload_rhcos_image]
+  name       = "${var.name_prefix}-img"
+  #  href             = "cos://${var.vpc_region}/${var.name_prefix}-qcow2-bucket/${var.name_prefix}-rhcos.qcow2"
   href             = "cos://${var.vpc_region}/${var.name_prefix}-bucket/rhcos-414.92.202307070025-0-ibmcloud.x86_64.qcow2"
   operating_system = "rhel-coreos-stable-amd64"
   resource_group   = data.ibm_resource_group.resource_group.id #var.resource_group

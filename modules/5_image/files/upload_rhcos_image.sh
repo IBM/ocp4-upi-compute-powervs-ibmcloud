@@ -20,6 +20,7 @@ then
 fi
 
 ibmcloud login --apikey "${API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}"
+#ibmcloud login --apikey "${API_KEY}" -r "${REGION}"
 ibmcloud plugin install -f cloud-internet-services vpc-infrastructure cloud-object-storage power-iaas is
 
 # Download the RHCOS qcow2

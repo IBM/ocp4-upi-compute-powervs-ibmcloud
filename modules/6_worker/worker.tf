@@ -22,8 +22,8 @@ resource "ibm_is_instance" "workers_1" {
   vpc     = data.ibm_is_vpc.vpc.id
   zone    = var.worker_1["zone"] #"ca-tor-2"
   keys    = [var.vpc_key_id]
-  image   = var.rhcos_image_id #data.ibm_is_image.rhcos_image[0].id #var.rhcos_image_id
-  profile = var.worker_1["profile"]             #
+  image   = var.rhcos_image_id      #data.ibm_is_image.rhcos_image[0].id #var.rhcos_image_id
+  profile = var.worker_1["profile"] #
   # Profiles: https://cloud.ibm.com/docs/vpc?topic=vpc-profiles&interface=ui
   # "cx2d-8x16" - 8x16 includes 300G storage.
   resource_group = data.ibm_is_vpc.vpc.resource_group
