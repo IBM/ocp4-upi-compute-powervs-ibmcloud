@@ -90,7 +90,7 @@ EOF
     ]
   }
 }
-
+/*
 # Dev Note: Normal Cloud Providers remove this taint, we have to manually remove it.
 # ref: https://github.com/openshift/kubernetes/blob/master/staging/src/k8s.io/cloud-provider/api/well_known_taints.go#L20
 resource "null_resource" "debug_and_remove_taints" {
@@ -113,3 +113,4 @@ EOF
     ]
   }
 }
+*/

@@ -29,8 +29,10 @@ DOWNLOAD_URL=$(openshift-install coreos print-stream-json | jq -r '.architecture
 TARGET_GZ_FILE=$(echo "${DOWNLOAD_URL}" | sed 's|/| |g' | awk '{print $NF}')
 TARGET_FILE=$(echo "${TARGET_GZ_FILE}" | sed 's|.gz||g')
 
-if [ "${TARGET_FILE}" == "" ]
+if [ "${TARGET_FILE}" != "" ]
 then
+  echo "Deleting old qcow2 file if exists"
+  rm -f ${TARGET_DIR}/${TARGET_FILE}
   echo "Downloading from URL - ${DOWNLOAD_URL}"
   cd "${TARGET_DIR}" \
     && curl -o "${TARGET_GZ_FILE}" -L "${DOWNLOAD_URL}" \
@@ -42,7 +44,7 @@ ibmcloud cos bucket-create --bucket "${NAME_PREFIX}-bucket" \
     --ibm-service-instance-id "${SERVICE_INSTANCE_ID}" --class smart --region "${REGION}" --json
 
 # Upload the file
-TARGET_KEY=$(echo ${TARGET_FILE} | sed 's|[._]|-|g')
+#TARGET_KEY=$(echo ${TARGET_FILE} | sed 's|[._]|-|g')
 #ibmcloud cos --bucket "${NAME_PREFIX}-bucket" \
 #  --region "${REGION}" --key "${TARGET_KEY}" --file "${TARGET_DIR}/${TARGET_FILE}"
 ibmcloud cos object-put --bucket "${NAME_PREFIX}-bucket" --key "${TARGET_FILE}" --body "${TARGET_DIR}/${TARGET_FILE}"
