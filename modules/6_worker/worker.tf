@@ -6,11 +6,12 @@
 # Creates an Intel VSI for the VPC and PowerVS workers 
 # Ref: https://github.com/openshift/installer/blob/master/data/data/powervs/cluster/dns/dns.tf
 
+/*
 data "ibm_is_image" "rhcos_image" {
   count = 1
   name  = var.rhcos_image_name
 }
-
+*/
 data "ibm_is_vpc" "vpc" {
   name = var.vpc_name
 }

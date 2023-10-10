@@ -122,7 +122,7 @@ module "worker" {
   #  worker_2            = var.worker_2
   #  worker_3            = var.worker_3
   name_prefix      = local.name_prefix
-  rhcos_image_name = "rhcos-ca-worker-x86" #var.rhcos_image_name
+#  rhcos_image_name = "rhcos-ca-worker-x86" #var.rhcos_image_name
   rhcos_image_id      = module.image.rhcos_image_id #"rhcos-x86"
   vpc_name            = var.vpc_name
   vpc_key_id          = "r038-51cdecb0-c33b-4f80-814d-405c50c9a22b" #module.vpc_prepare.vpc_check_key
