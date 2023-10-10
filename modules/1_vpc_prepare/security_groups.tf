@@ -16,6 +16,18 @@ resource "ibm_is_security_group_rule" "worker_vm_sg_outgoing_all" {
   remote    = "0.0.0.0/0"
 }
 
+# allow all incoming network traffic on port 8080
+# This facilitates the ignition
+resource "ibm_is_security_group_rule" "worker_ignition" {
+  group     = ibm_is_security_group.worker_vm_sg.id
+  direction = "inbound"
+  remote    = ibm_is_security_group.worker_vm_sg.id
+  tcp {
+    port_min = 8080
+    port_max = 8080
+  }
+}
+
 # allow all incoming network traffic on port 22
 resource "ibm_is_security_group_rule" "worker_vm_sg_ssh_all" {
   group     = ibm_is_security_group.worker_vm_sg.id
