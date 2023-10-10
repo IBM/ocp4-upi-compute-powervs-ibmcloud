@@ -338,3 +338,13 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_10250_out" {
     port_max = 10250
   }
 }
+
+resource "ibm_is_security_group_rule" "openshift_net_sg_4500" {
+  group     = ibm_is_security_group.worker_vm_sg.id
+  direction = "inbound"
+  remote    = var.powervs_machine_cidr
+  udp {
+    port_min = 4500
+    port_max = 4500
+  }
+}
