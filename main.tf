@@ -100,15 +100,15 @@ module "image" {
   #  depends_on = [module.vpc_prepare]
   source = "./modules/5_image"
 
-  name_prefix        = local.name_prefix
-  vpc_region         = var.vpc_region
-  rhel_username      = var.rhel_username
-  bastion_public_ip  = var.powervs_bastion_ip
-  private_key_file   = var.private_key_file
-  ssh_agent          = var.ssh_agent
-  connection_timeout = var.connection_timeout
-  ibmcloud_api_key   = var.ibmcloud_api_key
-  resource_group_name     = module.vpc.vpc_resource_group_name #"ocp-dev-resource-group"
+  name_prefix         = local.name_prefix
+  vpc_region          = var.vpc_region
+  rhel_username       = var.rhel_username
+  bastion_public_ip   = var.powervs_bastion_ip
+  private_key_file    = var.private_key_file
+  ssh_agent           = var.ssh_agent
+  connection_timeout  = var.connection_timeout
+  ibmcloud_api_key    = var.ibmcloud_api_key
+  resource_group_name = module.vpc.vpc_resource_group_name
 }
 
 module "worker" {
@@ -121,9 +121,8 @@ module "worker" {
   worker_1 = var.worker_1
   #  worker_2            = var.worker_2
   #  worker_3            = var.worker_3
-  name_prefix = local.name_prefix
-  #  rhcos_image_name = "rhcos-ca-worker-x86" #var.rhcos_image_name
-  rhcos_image_id      = module.image.rhcos_image_id #"rhcos-x86"
+  name_prefix         = local.name_prefix
+  rhcos_image_id      = module.image.rhcos_image_id
   vpc_name            = var.vpc_name
   vpc_key_id          = "r038-51cdecb0-c33b-4f80-814d-405c50c9a22b" #module.vpc_prepare.vpc_check_key
   ignition_ip         = "10.249.65.6"                               #var.powervs_bastion_private_ip
