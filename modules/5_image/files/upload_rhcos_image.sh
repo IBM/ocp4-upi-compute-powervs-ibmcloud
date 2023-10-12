@@ -20,7 +20,6 @@ then
 fi
 
 ibmcloud login --apikey "${API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}"
-#ibmcloud login --apikey "${API_KEY}" -r "${REGION}"
 ibmcloud plugin install -f cloud-internet-services vpc-infrastructure cloud-object-storage power-iaas is
 
 # Download the RHCOS qcow2
@@ -48,5 +47,5 @@ fi
 #TARGET_KEY=$(echo ${TARGET_FILE} | sed 's|[._]|-|g')
 #ibmcloud cos --bucket "${NAME_PREFIX}-bucket" \
 #  --region "${REGION}" --key "${TARGET_KEY}" --file "${TARGET_DIR}/${TARGET_FILE}"
-ibmcloud cos object-put --bucket "${NAME_PREFIX}-bucket" --key "${TARGET_FILE}" --body "${TARGET_DIR}/${TARGET_FILE}"
+ibmcloud cos object-put --bucket "${NAME_PREFIX}-bucket" --key "${NAME_PREFIX}-rhcos.qcow2" --body "${TARGET_DIR}/${TARGET_FILE}"
 

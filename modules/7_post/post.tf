@@ -63,7 +63,7 @@ EOF
   }
 }
 
-#command to run ansible playbook on bastion
+#Command to run ansible playbook on bastion
 resource "null_resource" "post_ansible" {
   depends_on = [null_resource.remove_workers]
   connection {
@@ -85,32 +85,8 @@ resource "null_resource" "post_ansible" {
     inline = [<<EOF
 echo Running ansible-playbook for post Intel worker ignition
 cd ${local.ansible_post_path}
-ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-post.log ansible-playbook tasks/main.yml --extra-vars @ansible_post_vars.json
+ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud-post.log ansible-playbook tasks/main.yml --extra-vars @ansible_post_vars.json
 EOF
     ]
   }
 }
-/*
-# Dev Note: Normal Cloud Providers remove this taint, we have to manually remove it.
-# ref: https://github.com/openshift/kubernetes/blob/master/staging/src/k8s.io/cloud-provider/api/well_known_taints.go#L20
-resource "null_resource" "debug_and_remove_taints" {
-  depends_on = [null_resource.post_ansible]
-  connection {
-    type        = "ssh"
-    user        = "root"
-    private_key = file(var.private_key_file)
-    host        = var.bastion_public_ip
-    agent       = var.ssh_agent
-  }
-
-  provisioner "remote-exec" {
-    inline = [<<EOF
-oc get nodes -owide
-oc get nodes -l 'kubernetes.io/arch=ppc64le' -o json | jq -r '.items[].spec'
-cd ${local.ansible_post_path}
-bash files/remove-worker-taints.sh "${var.name_prefix}" "${var.worker_1["count"]}" "${var.worker_2["count"]}" "${var.worker_3["count"]}"
-EOF
-    ]
-  }
-}
-*/

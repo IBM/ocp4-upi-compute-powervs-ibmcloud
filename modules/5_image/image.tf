@@ -59,20 +59,11 @@ EOF
     ]
   }
 }
-/*
-data "ibm_cos_bucket" "image_cos_bucket" {
-  depends_on = [null_resource.upload_rhcos_image]
-  bucket_name          = "${var.name_prefix}-bucket"
-  resource_instance_id = ibm_resource_instance.cos_instance.id
-  bucket_region      = var.vpc_region
-  bucket_type        = "single_site_location"
-}
-*/
+
 resource "ibm_is_image" "worker_image_id" {
-  depends_on = [null_resource.upload_rhcos_image]
-  name       = "${var.name_prefix}-img"
-  #  href             = "cos://${var.vpc_region}/${var.name_prefix}-qcow2-bucket/${var.name_prefix}-rhcos.qcow2"
-  href             = "cos://${var.vpc_region}/${var.name_prefix}-bucket/rhcos-414.92.202307070025-0-ibmcloud.x86_64.qcow2"
+  depends_on       = [null_resource.upload_rhcos_image]
+  name             = "${var.name_prefix}-img"
+  href             = "cos://${var.vpc_region}/${var.name_prefix}-bucket/${var.name_prefix}-rhcos.qcow2"
   operating_system = "rhel-coreos-stable-amd64"
   resource_group   = data.ibm_resource_group.resource_group.id
 }
