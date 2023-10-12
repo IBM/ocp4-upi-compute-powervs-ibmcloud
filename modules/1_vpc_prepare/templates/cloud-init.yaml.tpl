@@ -9,6 +9,6 @@ write_files:
   content: |
     /export *(rw)
 runcmd:
-  - systemctl enable nfs-server
-  - systemctl start nfs-server
+  - systemctl enable nfs-server httpd
+  - systemctl start nfs-server httpd
   - mkdir -p /export && chmod -R 777 /export
