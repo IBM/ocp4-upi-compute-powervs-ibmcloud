@@ -45,7 +45,7 @@ module "vpc" {
   powervs_zone          = var.powervs_zone
   override_region_check = var.override_region_check
 }
-/*
+
 ### Prepares the VPC Support Machine
 module "vpc_prepare" {
   providers = {
@@ -61,7 +61,7 @@ module "vpc_prepare" {
   public_key_file      = var.public_key_file
   powervs_machine_cidr = var.powervs_machine_cidr
 }
-
+/*
 module "transit_gateway" {
   providers = {
     ibm = ibm.vpc
@@ -124,9 +124,9 @@ module "worker" {
   name_prefix         = local.name_prefix
   rhcos_image_id      = module.image.rhcos_image_id
   vpc_name            = var.vpc_name
-  vpc_key_id          = "r038-51cdecb0-c33b-4f80-814d-405c50c9a22b" #module.vpc_prepare.vpc_check_key
-  ignition_ip         = "10.249.65.6"                               #var.powervs_bastion_private_ip
-  target_worker_sg_id = "r038-1f618761-dc9c-4ce0-b91a-465532bf7d78" #module.vpc_prepare.target_worker_sg_id
+  vpc_key_id          = module.vpc_prepare.vpc_check_key #"r038-51cdecb0-c33b-4f80-814d-405c50c9a22b"
+  ignition_ip         = var.powervs_bastion_private_ip #"10.249.65.6"
+  target_worker_sg_id = module.vpc_prepare.target_worker_sg_id #"r038-1f618761-dc9c-4ce0-b91a-465532bf7d78"
 }
 
 module "post" {

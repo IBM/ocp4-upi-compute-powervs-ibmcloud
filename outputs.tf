@@ -17,3 +17,4 @@ oc get nodes -l kubernetes.io/arch=amd64
 The support machine node in VPC can be destroyed at this point.
 EOF
 }
+
