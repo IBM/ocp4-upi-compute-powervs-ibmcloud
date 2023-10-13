@@ -8,10 +8,10 @@
 # Upload RHCOS to ibmcloud cos and starts an import
 
 API_KEY="${1}"
-SERVICE_INSTANCE_ID="${2}"
-REGION="${3}"
-RESOURCE_GROUP="${4}"
-NAME_PREFIX="${5}"
+#SERVICE_INSTANCE_ID="${2}"
+REGION="${2}"
+RESOURCE_GROUP="${3}"
+NAME_PREFIX="${4}"
 
 if [ -z "$(command -v ibmcloud)" ]
 then
@@ -29,21 +29,23 @@ DOWNLOAD_URL=$(openshift-install coreos print-stream-json | jq -r '.architecture
 TARGET_GZ_FILE=$(echo "${DOWNLOAD_URL}" | sed 's|/| |g' | awk '{print $NF}')
 TARGET_FILE=$(echo "${TARGET_GZ_FILE}" | sed 's|.gz||g')
 
-if [ "${TARGET_FILE}" == "" ]
+if [ "${TARGET_FILE}" != "" ]
 then
+  echo "Deleting old qcow2 file if exists"
+  rm -f ${TARGET_DIR}/${TARGET_FILE}
   echo "Downloading from URL - ${DOWNLOAD_URL}"
   cd "${TARGET_DIR}" \
     && curl -o "${TARGET_GZ_FILE}" -L "${DOWNLOAD_URL}" \
     && gunzip ${TARGET_GZ_FILE} && cd -
 fi
 
-# Create a bucket
-ibmcloud cos bucket-create --bucket "${NAME_PREFIX}-qcow2-bucket" \
-    --ibm-service-instance-id "${SERVICE_INSTANCE_ID}" --class smart --region "${REGION}" --json
+# Create a bucket [Not needed now, taken care by terraform ]
+#ibmcloud cos bucket-create --bucket "${NAME_PREFIX}-bucket" \
+#    --ibm-service-instance-id "${SERVICE_INSTANCE_ID}" --class smart --region "${REGION}" --json
 
-# Upload the file
-TARGET_KEY=$(echo ${TARGET_FILE} | sed 's|[._]|-|g')
+# Upload the file to bucket
+#TARGET_KEY=$(echo ${TARGET_FILE} | sed 's|[._]|-|g')
 #ibmcloud cos --bucket "${NAME_PREFIX}-bucket" \
 #  --region "${REGION}" --key "${TARGET_KEY}" --file "${TARGET_DIR}/${TARGET_FILE}"
+ibmcloud cos object-put --bucket "${NAME_PREFIX}-bucket" --key "${NAME_PREFIX}-rhcos.qcow2" --body "${TARGET_DIR}/${TARGET_FILE}"
 
-ibmcloud cos object-put --bucket "${NAME_PREFIX}-qcow2-bucket" --key "$TARGET_KEY" --body "${TARGET_DIR}/${TARGET_FILE}"

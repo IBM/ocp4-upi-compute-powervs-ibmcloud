@@ -18,7 +18,7 @@ resource "ibm_is_instance" "supp_vm_vsi" {
   name    = "ignition-supp-vsi"
   vpc     = data.ibm_is_vpc.vpc.id
   zone    = var.vpc_zone
-  keys    = [locals.key_id]
+  keys    = [local.key_id]
   image   = data.ibm_is_image.supp_vm_image[0].id
   profile = "cx2d-8x16"
   # Profiles: https://cloud.ibm.com/docs/vpc?topic=vpc-profiles&interface=ui

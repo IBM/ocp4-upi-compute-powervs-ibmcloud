@@ -11,4 +11,4 @@ variable "private_key_file" {}
 variable "ssh_agent" {}
 variable "connection_timeout" {}
 variable "ibmcloud_api_key" {}
-variable "resource_group" {}
+variable "resource_group_name" {}

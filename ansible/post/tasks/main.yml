@@ -34,9 +34,9 @@
     delay: 40
     when: worker_count|int > 0
 
-  - name: Wait for 20 seconds before checking Ready state for Intel worker node/s
+  - name: Wait for 10 seconds before checking Ready state for Intel worker node/s
     pause:
-      seconds: 20
+      seconds: 10
 
   # Run approve command again and wait till we have all powervs worker/s with Ready status. 'xargs -r ' is used to ignore empty stdin.
   - name: Check Ready state for Intel Worker Node

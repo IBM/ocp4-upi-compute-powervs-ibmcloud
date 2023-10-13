@@ -45,7 +45,7 @@ module "vpc" {
   powervs_zone          = var.powervs_zone
   override_region_check = var.override_region_check
 }
-/*
+
 ### Prepares the VPC Support Machine
 module "vpc_prepare" {
   providers = {
@@ -54,14 +54,17 @@ module "vpc_prepare" {
   depends_on = [module.vpc]
   source     = "./modules/1_vpc_prepare"
 
-  vpc_name             = var.vpc_name
-  vpc_region           = var.vpc_region
-  vpc_zone             = var.vpc_zone
-  public_key           = var.public_key
-  public_key_file      = var.public_key_file
+  vpc_name        = var.vpc_name
+  vpc_region      = var.vpc_region
+  vpc_zone        = var.vpc_zone
+  resource_group  = module.vpc.vpc_resource_group
+  public_key      = var.public_key
+  public_key_file = var.public_key_file
+  #  key_id             = module.vpc_prepare.key_id
   powervs_machine_cidr = var.powervs_machine_cidr
+  vpc_supp_public_ip   = var.vpc_supp_public_ip
 }
-
+/*
 module "transit_gateway" {
   providers = {
     ibm = ibm.vpc
@@ -100,15 +103,15 @@ module "image" {
   #  depends_on = [module.vpc_prepare]
   source = "./modules/5_image"
 
-  name_prefix        = local.name_prefix
-  vpc_region         = var.vpc_region
-  rhel_username      = var.rhel_username
-  bastion_public_ip  = var.powervs_bastion_ip
-  private_key_file   = var.private_key_file
-  ssh_agent          = var.ssh_agent
-  connection_timeout = var.connection_timeout
-  ibmcloud_api_key   = var.ibmcloud_api_key
-  resource_group     = "ocp-dev-resource-group" #module.vpc.vpc_resource_group
+  name_prefix         = local.name_prefix
+  vpc_region          = var.vpc_region
+  rhel_username       = var.rhel_username
+  bastion_public_ip   = var.powervs_bastion_ip
+  private_key_file    = var.private_key_file
+  ssh_agent           = var.ssh_agent
+  connection_timeout  = var.connection_timeout
+  ibmcloud_api_key    = var.ibmcloud_api_key
+  resource_group_name = module.vpc.vpc_resource_group_name
 }
 
 module "worker" {
@@ -121,13 +124,12 @@ module "worker" {
   worker_1 = var.worker_1
   #  worker_2            = var.worker_2
   #  worker_3            = var.worker_3
-  name_prefix      = local.name_prefix
-  rhcos_image_name = "rhcos-ca-worker-x86" #var.rhcos_image_name
-  #  rhcos_image_id      = "rhcos-x86" #module.image.rhcos_image_id
+  name_prefix         = local.name_prefix
+  rhcos_image_id      = module.image.rhcos_image_id
   vpc_name            = var.vpc_name
-  vpc_key_id          = "r038-51cdecb0-c33b-4f80-814d-405c50c9a22b" #module.vpc_prepare.vpc_check_key
-  ignition_ip         = "10.249.65.6"                               #var.powervs_bastion_private_ip
-  target_worker_sg_id = "r038-1f618761-dc9c-4ce0-b91a-465532bf7d78" #module.vpc_prepare.target_worker_sg_id
+  vpc_key_id          = module.vpc_prepare.vpc_key_id          #"r038-51cdecb0-c33b-4f80-814d-405c50c9a22b"
+  ignition_ip         = var.powervs_bastion_private_ip         #"10.249.65.6"
+  target_worker_sg_id = module.vpc_prepare.target_worker_sg_id #"r038-1f618761-dc9c-4ce0-b91a-465532bf7d78"
 }
 
 module "post" {
