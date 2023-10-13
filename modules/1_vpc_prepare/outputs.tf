@@ -7,6 +7,10 @@ output "vpc_check_key" {
   value = local.check_key
 }
 
+output "vpc_key_id" {
+  value = local.key_id
+}
+
 output "vpc_crn" {
   value = data.ibm_is_vpc.vpc.crn
 }
