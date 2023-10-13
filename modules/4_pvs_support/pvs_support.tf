@@ -137,7 +137,7 @@ EOF
 }
 
 resource "null_resource" "wait_on_mcp" {
-  depends_on = [null_resource.set_routing_via_host]
+  depends_on = [null_resource.set_routing_via_host, null_resource.adjust_mtu]
   connection {
     type        = "ssh"
     user        = var.rhel_username
@@ -150,6 +150,8 @@ resource "null_resource" "wait_on_mcp" {
   # Dev Note: added hardening to the MTU wait, we wait for the condition and then fail
   provisioner "remote-exec" {
     inline = [<<EOF
+export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
+
 echo "-diagnostics-"
 oc get network cluster -o yaml | grep -i mtu
 oc get mcp
@@ -166,6 +168,16 @@ do
   sleep 30
 done
 
+RENDERED_CONFIG=$(oc get mcp/worker -o json | jq -r '.spec.configuration.name')
+CHECK_CONFIG=$(oc get mc $${RENDERED_CONFIG} -ojson 2>&1 | grep TARGET_MTU=9100)
+while [ -z "$${CHECK_CONFIG}" ]
+do
+  echo "waiting on worker"
+  sleep 30
+  RENDERED_CONFIG=$(oc get mcp/worker -o json | jq -r '.spec.configuration.name')
+  CHECK_CONFIG=$(oc get mc $${RENDERED_CONFIG} -ojson 2>&1 | grep TARGET_MTU=9100)
+done
+
 # Waiting on output
 oc wait mcp/worker \
   --for condition=updated \
@@ -175,6 +187,29 @@ echo '-checking mtu-'
 oc get network cluster -o yaml | grep 'to: 9100' | awk '{print $NF}'
 [[ "$(oc get network cluster -o yaml | grep 'to: 9100' | awk '{print $NF}')" == "9100" ]] || false
 echo "success on wait on mtu change"
+EOF
+    ]
+  }
+}
+
+# Dev Note: do this as the last step so we get a good worker ignition file downloaded.
+resource "null_resource" "latest_ignition" {
+  depends_on = [null_resource.wait_on_mcp]
+  connection {
+    type        = "ssh"
+    user        = var.rhel_username
+    host        = var.bastion_public_ip
+    private_key = file(var.private_key_file)
+    agent       = var.ssh_agent
+    timeout     = "${var.connection_timeout}m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [<<EOF
+nmcli device up env3
+echo 'Running ocp4-upi-compute-powervs playbook for ignition...'
+cd ocp4-upi-compute-powervs/support
+ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-support.log ansible-playbook -e @vars/vars.yaml tasks/ignition.yml --become
 EOF
     ]
   }
