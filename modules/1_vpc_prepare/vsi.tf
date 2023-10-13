@@ -20,9 +20,8 @@ resource "ibm_is_instance" "supp_vm_vsi" {
   zone    = var.vpc_zone
   keys    = [local.key_id]
   image   = data.ibm_is_image.supp_vm_image[0].id
-  profile = "cx2d-8x16"
-  # Profiles: https://cloud.ibm.com/docs/vpc?topic=vpc-profiles&interface=ui
-  # Originally used cx2-2x4, however 8x16 includes 300G storage.
+  profile = "cx2-2x4"
+  # ref for ibmcloud profiles: https://cloud.ibm.com/docs/vpc?topic=vpc-profiles&interface=ui
 
   resource_group = data.ibm_is_vpc.vpc.resource_group
 
@@ -33,11 +32,3 @@ resource "ibm_is_instance" "supp_vm_vsi" {
 
   user_data = templatefile("${path.cwd}/modules/1_vpc_prepare/templates/cloud-init.yaml.tpl", {})
 }
-
-resource "ibm_is_floating_ip" "supp_vm_fip" {
-  count          = var.vpc_supp_public_ip ? 1 : 0
-  resource_group = var.resource_group
-  name           = "${var.vpc_name}-supp-floating-ip"
-  target         = ibm_is_instance.supp_vm_vsi[0].primary_network_interface[0].id
-}
-

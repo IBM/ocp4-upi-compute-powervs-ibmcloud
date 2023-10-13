@@ -12,15 +12,15 @@ data "ibm_resource_group" "resource_group" {
 }
 
 resource "ibm_resource_instance" "cos_instance" {
-  name              = "${var.name_prefix}-cos"
+  name              = "${var.name_prefix}-mac-intel-cos"
   resource_group_id = data.ibm_resource_group.resource_group.id
   service           = "cloud-object-storage"
   plan              = "standard"
-  location          = "global" #var.vpc_region
+  location          = "global"
 }
 
 resource "ibm_cos_bucket" "cos_bucket" {
-  bucket_name          = "${var.name_prefix}-bucket"
+  bucket_name          = "${var.name_prefix}-mac-intel"
   resource_instance_id = ibm_resource_instance.cos_instance.id
   region_location      = var.vpc_region
   storage_class        = "standard"
@@ -63,8 +63,7 @@ EOF
 resource "ibm_is_image" "worker_image_id" {
   depends_on       = [null_resource.upload_rhcos_image]
   name             = "${var.name_prefix}-img"
-  href             = "cos://${var.vpc_region}/${var.name_prefix}-bucket/${var.name_prefix}-rhcos.qcow2"
+  href             = "cos://${var.vpc_region}/${var.name_prefix}-mac-intel/${var.name_prefix}-rhcos.qcow2"
   operating_system = "rhel-coreos-stable-amd64"
   resource_group   = data.ibm_resource_group.resource_group.id
 }
-

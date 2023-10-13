@@ -18,9 +18,10 @@ provider "ibm" {
 }
 
 # Create a random_id label
+# Since we use the hex, the word length would double
 resource "random_id" "label" {
   count       = 1
-  byte_length = "2" # Since we use the hex, the word lenght would double
+  byte_length = "2"
 }
 
 locals {
@@ -62,9 +63,8 @@ module "vpc_prepare" {
   public_key_file = var.public_key_file
   #  key_id             = module.vpc_prepare.key_id
   powervs_machine_cidr = var.powervs_machine_cidr
-  vpc_supp_public_ip   = var.vpc_supp_public_ip
 }
-/*
+
 module "transit_gateway" {
   providers = {
     ibm = ibm.vpc
@@ -95,13 +95,13 @@ module "support" {
   cidrs                = module.vpc_prepare.mac_vpc_subnets
   powervs_machine_cidr = var.powervs_machine_cidr
 }
-*/
+
 module "image" {
   providers = {
     ibm = ibm.vpc
   }
-  #  depends_on = [module.vpc_prepare]
-  source = "./modules/5_image"
+  depends_on = [module.vpc_prepare]
+  source     = "./modules/5_image"
 
   name_prefix         = local.name_prefix
   vpc_region          = var.vpc_region
@@ -121,15 +121,15 @@ module "worker" {
   depends_on = [module.image]
   source     = "./modules/6_worker"
 
-  worker_1 = var.worker_1
-  #  worker_2            = var.worker_2
-  #  worker_3            = var.worker_3
+  worker_1            = var.worker_1
+  worker_2            = var.worker_2
+  worker_3            = var.worker_3
   name_prefix         = local.name_prefix
   rhcos_image_id      = module.image.rhcos_image_id
   vpc_name            = var.vpc_name
-  vpc_key_id          = module.vpc_prepare.vpc_key_id          #"r038-51cdecb0-c33b-4f80-814d-405c50c9a22b"
-  ignition_ip         = var.powervs_bastion_private_ip         #"10.249.65.6"
-  target_worker_sg_id = module.vpc_prepare.target_worker_sg_id #"r038-1f618761-dc9c-4ce0-b91a-465532bf7d78"
+  vpc_key_id          = module.vpc_prepare.vpc_key_id
+  ignition_ip         = var.powervs_bastion_private_ip
+  target_worker_sg_id = module.vpc_prepare.target_worker_sg_id
 }
 
 module "post" {
@@ -146,4 +146,3 @@ module "post" {
   worker_2          = var.worker_2
   worker_3          = var.worker_3
 }
-

@@ -83,7 +83,7 @@ resource "null_resource" "post_ansible" {
   #command to run ansible playbook on Bastion
   provisioner "remote-exec" {
     inline = [<<EOF
-echo Running ansible-playbook for post Intel worker ignition
+echo "Running ansible-playbook for post Intel worker ignition"
 cd ${local.ansible_post_path}
 ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud-post.log ansible-playbook tasks/main.yml --extra-vars @ansible_post_vars.json
 EOF

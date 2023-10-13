@@ -97,7 +97,7 @@ variable "worker_1" {
   type = object({ count = number, profile = string, zone = string })
   default = {
     count   = 1
-    profile = "cx2d-8x16"
+    profile = "cx2-8x16"
     zone    = ""
   }
   validation {
@@ -110,7 +110,7 @@ variable "worker_2" {
   type = object({ count = number, profile = string, zone = string })
   default = {
     count   = 0
-    profile = "cx2d-8x16"
+    profile = "cx2-8x16"
     zone    = ""
   }
   validation {
@@ -123,7 +123,7 @@ variable "worker_3" {
   type = object({ count = number, profile = string, zone = string })
   default = {
     count   = 0
-    profile = "cx2d-8x16"
+    profile = "cx2-8x16"
     zone    = ""
   }
   validation {
@@ -275,11 +275,5 @@ locals {
 variable "override_region_check" {
   type        = bool
   description = "Set to true if you want to skip region checks."
-  default     = false
-}
-
-variable "vpc_supp_public_ip" {
-  type        = bool
-  description = "Set to true to create a public ip for the PowerVS (vpc) support machine"
   default     = false
 }

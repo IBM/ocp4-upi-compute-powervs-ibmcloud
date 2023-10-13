@@ -11,12 +11,11 @@ variable "vpc_name" {}
 variable "vpc_key_id" {}
 variable "ignition_ip" {}
 
-
 variable "worker_1" {
   type = object({ count = number, profile = string, zone = string })
   default = {
     count   = 1
-    profile = "cx2d-8x16"
+    profile = "cx2-8x16"
     zone    = ""
   }
   validation {
@@ -29,7 +28,7 @@ variable "worker_2" {
   type = object({ count = number, profile = string, zone = string })
   default = {
     count   = 0
-    profile = "cx2d-8x16"
+    profile = "cx2-8x16"
     zone    = ""
   }
   validation {
@@ -42,7 +41,7 @@ variable "worker_3" {
   type = object({ count = number, profile = string, zone = string })
   default = {
     count   = 0
-    profile = "cx2d-8x16"
+    profile = "cx2-8x16"
     zone    = ""
   }
   validation {

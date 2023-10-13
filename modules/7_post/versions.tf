@@ -9,10 +9,6 @@ terraform {
       source  = "hashicorp/null"
       version = "~> 3.2.1"
     }
-    ibm = {
-      source  = "IBM-Cloud/ibm"
-      version = "~> 1.58.1"
-    }
   }
   required_version = ">= 1.5.0"
 }

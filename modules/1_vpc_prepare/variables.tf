@@ -8,9 +8,7 @@ variable "vpc_region" {}
 variable "vpc_zone" {}
 variable "public_key_file" {}
 variable "public_key" {}
-#variable "key_id" {}
 variable "powervs_machine_cidr" {}
-variable "vpc_supp_public_ip" {}
 variable "resource_group" {}
 variable "supp_vm_image_name" {
   type        = string

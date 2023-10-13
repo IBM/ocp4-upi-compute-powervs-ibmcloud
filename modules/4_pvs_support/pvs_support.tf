@@ -150,8 +150,6 @@ resource "null_resource" "wait_on_mcp" {
   # Dev Note: added hardening to the MTU wait, we wait for the condition and then fail
   provisioner "remote-exec" {
     inline = [<<EOF
-export HTTPS_PROXY="http://${var.vpc_support_server_ip}:3128"
-
 echo "-diagnostics-"
 oc get network cluster -o yaml | grep -i mtu
 oc get mcp
