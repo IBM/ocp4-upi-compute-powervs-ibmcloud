@@ -108,7 +108,7 @@ resource "null_resource" "adjust_mtu" {
   provisioner "remote-exec" {
     inline = [<<EOF
 oc patch Network.operator.openshift.io cluster --type=merge --patch \
-  '{"spec": { "migration": { "mtu": { "network": { "from": 1400, "to": 9000 } , "machine": { "to" : 9100} } } } }'
+  '{"spec": { "migration": { "mtu": { "network": { "from": 1450, "to": 9000 } , "machine": { "to" : 9100} } } } }'
 EOF
     ]
   }
