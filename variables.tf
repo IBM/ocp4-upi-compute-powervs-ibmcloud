@@ -200,9 +200,9 @@ variable "connection_timeout" {
 }
 
 variable "rhel_username" {
-  type        = bool
+  type        = string
   description = "The username used to connect to the bastion"
-  default     = false
+  default     = "root"
 }
 
 variable "node_labels" {

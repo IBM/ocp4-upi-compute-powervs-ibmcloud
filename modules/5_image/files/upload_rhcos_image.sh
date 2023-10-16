@@ -39,4 +39,4 @@ then
 fi
 
 # Upload the file to bucket
-ibmcloud cos object-put --bucket "${NAME_PREFIX}-bucket" --key "${NAME_PREFIX}-rhcos.qcow2" --body "${TARGET_DIR}/${TARGET_FILE}"
+ibmcloud cos object-put --bucket "${NAME_PREFIX}-mac-intel" --key "${NAME_PREFIX}-rhcos.qcow2" --body "${TARGET_DIR}/${TARGET_FILE}"
