@@ -154,6 +154,12 @@ echo "-diagnostics-"
 oc get network cluster -o yaml | grep -i mtu
 oc get mcp
 
+if [ $(oc get network.operator cluster -ojson | jq -r '.status.conditions[] | select(.type == "Degraded")' | grep message | grep 'invalid Migration.MTU.Network.From' | wc -l) -ne 0 ]
+then
+  echo "Check the Cluster's MTU, something is wrong"
+  exit 1
+fi
+
 echo 'verifying worker mc'
 start_counter=0
 timeout_counter=10
