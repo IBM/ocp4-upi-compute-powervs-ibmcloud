@@ -18,7 +18,7 @@ powervs_zone                = "<zone>"
 
 # VPC Workers
 # Zone 1
-worker_1                = { count = "1", profile = "cx2-8x16", "zone" = "au-syd-1" }
+worker_1 = { count = "1", profile = "cx2-8x16", "zone" = "au-syd-1" }
 # Zone 2
 # worker_2                = { count = "1", profile = "cx2-8x16", "zone" = "au-syd-2" }
 # Zone 3
