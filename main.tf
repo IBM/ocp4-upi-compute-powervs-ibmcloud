@@ -85,7 +85,7 @@ module "support" {
   }
   depends_on = [module.vpc_prepare]
   #depends_on = [module.transit_gateway]
-  source     = "./modules/4_pvs_support"
+  source = "./modules/4_pvs_support"
 
   private_key_file     = var.private_key_file
   ssh_agent            = var.ssh_agent

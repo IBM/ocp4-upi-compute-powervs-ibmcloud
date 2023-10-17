@@ -200,7 +200,7 @@ EOF
 
 # Dev Note: do this as the last step so we get a good worker ignition file downloaded.
 resource "null_resource" "latest_ignition" {
-#  depends_on = [null_resource.wait_on_mcp]
+  #  depends_on = [null_resource.wait_on_mcp]
   depends_on = [null_resource.set_routing_via_host]
   connection {
     type        = "ssh"
