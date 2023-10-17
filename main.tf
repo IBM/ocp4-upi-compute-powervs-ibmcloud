@@ -92,7 +92,6 @@ module "support" {
   connection_timeout   = var.connection_timeout
   rhel_username        = var.rhel_username
   bastion_public_ip    = var.powervs_bastion_ip
-  openshift_api_url    = var.openshift_api_url
   cidrs                = module.vpc_prepare.mac_vpc_subnets
   powervs_machine_cidr = var.powervs_machine_cidr
 }

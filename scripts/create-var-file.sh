@@ -163,9 +163,6 @@ powervs_service_instance_id = "${POWERVS_SERVICE_INSTANCE_ID}"
 powervs_region              = "${POWERVS_REGION}"
 powervs_zone                = "${POWERVS_ZONE}"
 
-openshift_api_url        = "${OPENSHIFT_API_URL}"
-
-openshift_client_tarball = "${OPENSHIFT_CLIENT_TARBALL}"
 rhel_image_name  = "${RHEL_IMAGE_NAME}"
 rhcos_image_name = "${COREOS_NAME}"
 public_key_file  = "data/id_rsa.pub"

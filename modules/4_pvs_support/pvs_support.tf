@@ -9,9 +9,10 @@ locals {
     rhel_username = var.rhel_username
   }
 
-  # you must use the api-int url so the bastion routes over the correct interface.
+  # you must use the api url so the bastion routes over the correct interface.
+  # Dev Note: should pull this out of the `oc` command and pull out of the bastion.
   helpernode_vars = {
-    openshift_machine_config_url = replace(var.openshift_api_url, ":6443", "")
+    openshift_machine_config_url =  "https://localhost"
   }
 
   cidrs = {

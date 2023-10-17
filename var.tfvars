@@ -16,9 +16,6 @@ powervs_service_instance_id = "<cloud_instance_ID>"
 powervs_region              = "<region>"
 powervs_zone                = "<zone>"
 
-# OpenShift Cluster
-openshift_api_url = "<openshift_cluster_API_URL>"
-
 # Required for ignition and automation to run.
 powervs_bastion_ip         = ""
 powervs_bastion_private_ip = ""
