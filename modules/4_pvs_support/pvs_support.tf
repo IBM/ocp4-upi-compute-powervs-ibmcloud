@@ -32,26 +32,26 @@ resource "null_resource" "setup" {
 
   provisioner "remote-exec" {
     inline = [
-      "rm -rf /root/ocp4-upi-compute/intel/",
+      "rm -rf /root/ocp4-upi-compute-powervs-ibmcloud/intel/",
       "mkdir -p .openshift",
-      "mkdir -p /root/ocp4-upi-compute/intel/"
+      "mkdir -p /root/ocp4-upi-compute-powervs-ibmcloud/intel/"
     ]
   }
 
   # Copies the ansible/support to specific folder
   provisioner "file" {
     source      = "ansible/support"
-    destination = "/root/ocp4-upi-compute/intel/support/"
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/support/"
   }
 
   provisioner "file" {
     content     = templatefile("${path.module}/templates/inventory.tpl", local.helpernode_inventory)
-    destination = "/root/ocp4-upi-compute/intel/support/inventory"
+    destination = "ocp4-upi-compute-powervs-ibmcloud/intel/support/inventory"
   }
 
   provisioner "file" {
     content     = templatefile("${path.module}/templates/vars.yaml.tpl", local.helpernode_vars)
-    destination = "/root/ocp4-upi-compute/intel/support/vars/vars.yaml"
+    destination = "ocp4-upi-compute-powervs-ibmcloud/intel/support/vars/vars.yaml"
   }
 
   # Copies the custom route for env3
@@ -64,9 +64,9 @@ resource "null_resource" "setup" {
     inline = [<<EOF
 nmcli device up env3
 
-echo 'Running ocp4-upi-compute/intel/ playbook...'
-cd /root/ocp4-upi-compute/intel/support
-ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute/intel/support.log ansible-playbook -e @vars/vars.yaml tasks/main.yml --become
+echo 'Running ocp4-upi-compute-powervs-ibmcloud/intel/ playbook...'
+cd ocp4-upi-compute-powervs-ibmcloud/intel/support
+ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud/intel/-support.log ansible-playbook -e @vars/vars.yaml tasks/main.yml --become
 EOF
     ]
   }
@@ -214,10 +214,9 @@ resource "null_resource" "latest_ignition" {
   provisioner "remote-exec" {
     inline = [<<EOF
 nmcli device up env3
-echo 'Running ocp4-upi-compute-powervs playbook for ignition...'
-cd /root/ocp4-upi-compute/intel/support
-#cd ocp4-upi-compute-powervs-ibmcloud/support
-ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-intel-support.log ansible-playbook -e @vars/vars.yaml tasks/ignition.yml --become
+echo 'Running ocp4-upi-compute-powervs-ibmcloud-powervs playbook for ignition...'
+cd ocp4-upi-compute-powervs-ibmcloud-powervs/support
+ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud-support.log ansible-playbook -e @vars/vars.yaml tasks/ignition.yml --become
 EOF
     ]
   }
