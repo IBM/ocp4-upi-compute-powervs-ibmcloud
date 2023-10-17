@@ -31,14 +31,14 @@
     - name: Downloading the ignition file
       get_url:
         url: "{{ openshift_machine_config_url }}"
-        dest: /var/www/html/ignition/worker-intel.ign
+        dest: /var/www/html/ignition/worker.ign
         validate_certs: false
         headers:
           "Accept": "application/vnd.coreos.ignition+json;version=3.2.0"
       ignore_errors: true
 
     - name: Verify the ignition file exists
-      ansible.builtin.shell: stat /var/www/html/ignition/worker-intel.ign
+      ansible.builtin.shell: stat /var/www/html/ignition/worker.ign
 
     - name: Make ignition file readable through the www dir
       ansible.builtin.file:
