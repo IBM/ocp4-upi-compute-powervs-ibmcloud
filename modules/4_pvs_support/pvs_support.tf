@@ -83,9 +83,9 @@ resource "null_resource" "limit_csi_arch" {
     timeout     = "${var.connection_timeout}m"
   }
 
-  # Dev Note: Running the following should show you amd64
-  # ❯ oc get ns openshift-cluster-csi-drivers -oyaml | yq -r '.metadata.annotations' | grep amd64
-  # scheduler.alpha.kubernetes.io/node-selector: kubernetes.io/arch=amd64
+  # Dev Note: Running the following should show you ppc64le
+  # ❯ oc get ns openshift-cluster-csi-drivers -oyaml | yq -r '.metadata.annotations' | grep ppc64le
+  # scheduler.alpha.kubernetes.io/node-selector: kubernetes.io/arch=ppc64le
   provisioner "remote-exec" {
     inline = [<<EOF
 oc annotate --kubeconfig /root/.kube/config ns openshift-cluster-csi-drivers \
