@@ -64,7 +64,7 @@ module "vpc_prepare" {
   #  key_id             = module.vpc_prepare.key_id
   powervs_machine_cidr = var.powervs_machine_cidr
 }
-
+/*
 module "transit_gateway" {
   providers = {
     ibm = ibm.vpc
@@ -78,12 +78,13 @@ module "transit_gateway" {
   vpc_region     = var.vpc_region
   resource_group = module.vpc.vpc_resource_group
 }
-
+*/
 module "support" {
   providers = {
     ibm = ibm.powervs
   }
-  depends_on = [module.transit_gateway]
+  depends_on = [module.vpc_prepare]
+  #depends_on = [module.transit_gateway]
   source     = "./modules/4_pvs_support"
 
   private_key_file     = var.private_key_file
@@ -100,7 +101,7 @@ module "image" {
   providers = {
     ibm = ibm.vpc
   }
-  depends_on = [module.vpc_prepare]
+  depends_on = [module.support]
   source     = "./modules/5_image"
 
   name_prefix         = local.name_prefix

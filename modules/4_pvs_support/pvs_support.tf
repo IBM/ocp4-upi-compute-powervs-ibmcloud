@@ -46,12 +46,12 @@ resource "null_resource" "setup" {
 
   provisioner "file" {
     content     = templatefile("${path.module}/templates/inventory.tpl", local.helpernode_inventory)
-    destination = "ocp4-upi-compute/intel/support/inventory"
+    destination = "/root/ocp4-upi-compute/intel/support/inventory"
   }
 
   provisioner "file" {
     content     = templatefile("${path.module}/templates/vars.yaml.tpl", local.helpernode_vars)
-    destination = "ocp4-upi-compute/intel/support/vars/vars.yaml"
+    destination = "/root/ocp4-upi-compute/intel/support/vars/vars.yaml"
   }
 
   # Copies the custom route for env3
@@ -65,8 +65,8 @@ resource "null_resource" "setup" {
 nmcli device up env3
 
 echo 'Running ocp4-upi-compute/intel/ playbook...'
-cd ocp4-upi-compute/intel/support
-ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute/intel/-support.log ansible-playbook -e @vars/vars.yaml tasks/main.yml --become
+cd /root/ocp4-upi-compute/intel/support
+ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute/intel/support.log ansible-playbook -e @vars/vars.yaml tasks/main.yml --become
 EOF
     ]
   }
@@ -200,7 +200,8 @@ EOF
 
 # Dev Note: do this as the last step so we get a good worker ignition file downloaded.
 resource "null_resource" "latest_ignition" {
-  depends_on = [null_resource.wait_on_mcp]
+#  depends_on = [null_resource.wait_on_mcp]
+  depends_on = [null_resource.set_routing_via_host]
   connection {
     type        = "ssh"
     user        = var.rhel_username
@@ -214,8 +215,9 @@ resource "null_resource" "latest_ignition" {
     inline = [<<EOF
 nmcli device up env3
 echo 'Running ocp4-upi-compute-powervs playbook for ignition...'
-cd ocp4-upi-compute-powervs/support
-ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-support.log ansible-playbook -e @vars/vars.yaml tasks/ignition.yml --become
+cd /root/ocp4-upi-compute/intel/support
+#cd ocp4-upi-compute-powervs-ibmcloud/support
+ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-intel-support.log ansible-playbook -e @vars/vars.yaml tasks/ignition.yml --become
 EOF
     ]
   }
