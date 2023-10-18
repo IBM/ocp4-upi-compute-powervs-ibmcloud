@@ -215,8 +215,8 @@ resource "null_resource" "latest_ignition" {
   provisioner "remote-exec" {
     inline = [<<EOF
 nmcli device up env3
-echo 'Running ocp4-upi-compute-powervs-ibmcloud-powervs playbook for ignition...'
-cd ocp4-upi-compute-powervs-ibmcloud-powervs/support
+echo 'Running ocp4-upi-compute-powervs-ibmcloud playbook for ignition...'
+cd ocp4-upi-compute-powervs-ibmcloud/intel/support
 ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud-support-ignition.log ansible-playbook -e @vars/vars.yaml tasks/ignition.yml --become
 EOF
     ]

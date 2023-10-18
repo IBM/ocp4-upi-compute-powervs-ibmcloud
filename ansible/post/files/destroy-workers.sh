@@ -20,23 +20,23 @@ NAME_PREFIX="${4}"
 IDX=0
 while [ "$IDX" -lt "$COUNT_1" ]
 do
-    echo "Removing the Worker Zone 1: ${NAME_PREFIX}-worker-1-${IDX}"
-    oc delete node ${NAME_PREFIX}-worker-${IDX} || true
+    echo "Removing the Worker Zone 1: ${NAME_PREFIX}-worker-z1-${IDX}"
+    oc delete node ${NAME_PREFIX}-worker-z1-${IDX} || true
     IDX=$(($IDX + 1))
 done
 
 IDX=0
 while [ "$IDX" -lt "$COUNT_2" ]
 do
-    echo "Removing the Worker Zone 2: ${NAME_PREFIX}-worker-2-${IDX}"
-    oc delete node ${NAME_PREFIX}-worker-${IDX} || true
+    echo "Removing the Worker Zone 2: ${NAME_PREFIX}-worker-z2-${IDX}"
+    oc delete node ${NAME_PREFIX}-worker-z2-${IDX} || true
     IDX=$(($IDX + 1))
 done
 
 IDX=0
 while [ "$IDX" -lt "$COUNT_3" ]
 do
-    echo "Removing the Worker Zone 3: ${NAME_PREFIX}-worker-3-${IDX}"
-    oc delete node ${NAME_PREFIX}-worker-${IDX} || true
+    echo "Removing the Worker Zone 3: ${NAME_PREFIX}-worker-z3-${IDX}"
+    oc delete node ${NAME_PREFIX}-worker-z3-${IDX} || true
     IDX=$(($IDX + 1))
 done
