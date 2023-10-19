@@ -6,7 +6,8 @@
 # Creates a Support Machine for the VPC and PowerVS integration
 # This system is ONLY used for ignition
 # Ref: https://github.com/openshift/installer/blob/master/data/data/powervs/cluster/dns/dns.tf
-
+# Commented vsi.tf as this is not needed
+/*
 data "ibm_is_image" "supp_vm_image" {
   count = 1
   name  = var.supp_vm_image_name
@@ -32,3 +33,5 @@ resource "ibm_is_instance" "supp_vm_vsi" {
 
   user_data = templatefile("${path.cwd}/modules/1_vpc_prepare/templates/cloud-init.yaml.tpl", {})
 }
+
+*/
