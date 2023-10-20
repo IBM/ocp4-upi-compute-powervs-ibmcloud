@@ -16,10 +16,11 @@ locals {
 resource "null_resource" "post_setup" {
   connection {
     type        = "ssh"
-    user        = "root"
+    user        = var.rhel_username
     private_key = file(var.private_key_file)
     host        = var.bastion_public_ip
     agent       = var.ssh_agent
+    timeout     = "${var.connection_timeout}m"
   }
 
   #copies the ansible/post to specific folder
@@ -37,6 +38,8 @@ resource "null_resource" "remove_workers" {
     count_1           = var.worker_1["count"]
     count_2           = var.worker_2["count"]
     count_3           = var.worker_3["count"]
+    user              = var.rhel_username
+    timeout           = "${var.connection_timeout}m"
     name_prefix       = "${var.name_prefix}"
     private_key       = file(var.private_key_file)
     host              = var.bastion_public_ip
@@ -46,10 +49,11 @@ resource "null_resource" "remove_workers" {
 
   connection {
     type        = "ssh"
-    user        = "root"
+    user        = self.triggers.rhel_username
     private_key = self.triggers.private_key
     host        = self.triggers.host
     agent       = self.triggers.agent
+    timeout     = self.triggers.timeout
   }
 
   provisioner "remote-exec" {
@@ -68,10 +72,11 @@ resource "null_resource" "post_ansible" {
   depends_on = [null_resource.remove_workers]
   connection {
     type        = "ssh"
-    user        = "root"
+    user        = var.rhel_username
     private_key = file(var.private_key_file)
     host        = var.bastion_public_ip
     agent       = var.ssh_agent
+    timeout     = "${var.connection_timeout}m"
   }
 
   #create ansible_post_vars.json file on bastion (with desired variables to be passed to Ansible from Terraform)
@@ -95,10 +100,11 @@ resource "null_resource" "patch_nfs_arch_ppc64le" {
   depends_on = [null_resource.post_ansible]
   connection {
     type        = "ssh"
-    user        = "root"
+    user        = var.rhel_username
     private_key = file(var.private_key_file)
     host        = var.bastion_public_ip
     agent       = var.ssh_agent
+    timeout     = "${var.connection_timeout}m"
   }
 
   provisioner "remote-exec" {
@@ -113,10 +119,11 @@ resource "null_resource" "create_resolv_conf_for_intel_workers" {
   depends_on = [null_resource.patch_nfs_arch_ppc64le]
   connection {
     type        = "ssh"
-    user        = "root"
+    user        = var.rhel_username
     private_key = file(var.private_key_file)
     host        = var.bastion_public_ip
     agent       = var.ssh_agent
+    timeout     = "${var.connection_timeout}m"
   }
 
   provisioner "remote-exec" {

@@ -4,6 +4,8 @@
 ################################################################
 
 variable "ssh_agent" {}
+variable "connection_timeout" {}
+variable "rhel_username" {}
 variable "bastion_public_ip" {}
 variable "private_key_file" {}
 variable "vpc_region" {}

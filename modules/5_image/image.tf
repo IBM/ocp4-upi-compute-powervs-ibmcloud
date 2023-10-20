@@ -30,7 +30,7 @@ resource "null_resource" "upload_rhcos_image" {
   depends_on = [ibm_resource_instance.cos_instance]
   connection {
     type        = "ssh"
-    user        = "root" #var.rhel_username
+    user        = var.rhel_username
     host        = var.bastion_public_ip
     private_key = file(var.private_key_file)
     agent       = var.ssh_agent
