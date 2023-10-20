@@ -108,3 +108,35 @@ EOF
     ]
   }
 }
+
+resource "null_resource" "create_resolv_conf_for_intel_workers" {
+  depends_on = [null_resource.limit_csi_arch]
+  connection {
+    type        = "ssh"
+    user        = "root"
+    private_key = file(var.private_key_file)
+    host        = var.bastion_public_ip
+    agent       = var.ssh_agent
+  }
+
+  provisioner "remote-exec" {
+    inline = [<<EOF
+mkdir -p /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
+EOF
+    ]
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/files/update-lbs.sh"
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/"
+  }
+
+  # Dev Note: Updates the load balancers
+  provisioner "remote-exec" {
+    inline = [<<EOF
+cd /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
+bash update-lbs.sh
+EOF
+    ]
+  }
+}
