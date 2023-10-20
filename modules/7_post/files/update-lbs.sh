@@ -23,6 +23,11 @@ do
   T_IP=$(echo "${INTEL_WORKER}" | jq -r '.[] | select(.type == "InternalIP").address')
   T_HOSTNAME=$(echo "${INTEL_WORKER}" | jq -r '.[] | select(.type == "Hostname").address')
   echo "FOUND: ${T_IP} ${T_HOSTNAME}"
+
+  if grep ${T_HOSTNAME}-http-router0 /etc/haproxy/haproxy.cfg
+  then
+    continue
+  fi
   HTTP_LN=$(grep -Rn -A3 'backend ingress-http$' /etc/haproxy/haproxy.cfg | grep 'server ' | head -n 1 | sed 's|-| |' | awk '{print $1}')
   sed -i.bak "${HTTP_LN}i\
     server ${T_HOSTNAME}-http-router0 ${T_IP}:80 check
