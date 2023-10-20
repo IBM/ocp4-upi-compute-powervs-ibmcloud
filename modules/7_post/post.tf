@@ -83,9 +83,27 @@ resource "null_resource" "post_ansible" {
   #command to run ansible playbook on Bastion
   provisioner "remote-exec" {
     inline = [<<EOF
-echo "Running ansible-playbook for post Intel worker ignition"
+echo "Running ansible-playbook for post Intel worker added to cluster"
 cd ${local.ansible_post_path}
 ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud-post.log ansible-playbook tasks/main.yml --extra-vars @ansible_post_vars.json
+EOF
+    ]
+  }
+}
+
+resource "null_resource" "patch_nfs_arch_ppc64le" {
+  depends_on = [null_resource.post_ansible]
+  connection {
+    type        = "ssh"
+    user        = "root"
+    private_key = file(var.private_key_file)
+    host        = var.bastion_public_ip
+    agent       = var.ssh_agent
+  }
+
+  provisioner "remote-exec" {
+    inline = [<<EOF
+oc patch deployments nfs-client-provisioner -n nfs-provisioner -p '{"spec": {"template": {"spec": {"nodeSelector": {"kubernetes.io/arch": "ppc64le"}}}}}'
 EOF
     ]
   }
