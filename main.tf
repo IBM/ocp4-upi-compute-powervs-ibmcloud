@@ -63,6 +63,10 @@ module "vpc_prepare" {
   public_key_file = var.public_key_file
   #  key_id             = module.vpc_prepare.key_id
   powervs_machine_cidr = var.powervs_machine_cidr
+  worker_1             = var.worker_1
+  worker_2             = var.worker_2
+  worker_3             = var.worker_3
+  create_custom_subnet = var.create_custom_subnet
 }
 /*
 module "transit_gateway" {

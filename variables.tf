@@ -122,6 +122,12 @@ variable "worker_3" {
   }
 }
 
+variable "create_custom_subnet" {
+  type        = bool
+  description = "creates the subnets, and will error out if the subnets exist"
+  default     = false
+}
+
 ################################################################
 # PowerVS Network - Networking
 ################################################################
