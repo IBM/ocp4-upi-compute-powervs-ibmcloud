@@ -3,7 +3,18 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
+# Loads the VPC Security Groups so we can find the existing ids
+data "ibm_is_security_groups" "sgs" {
+  vpc_id = data.ibm_is_vpc.vpc.id
+}
+
+locals {
+  sg_matches = [for x in data.ibm_is_security_groups.sgs.security_groups : x if endswith(x.name, "${var.vpc_name}-supp-sg")]
+  sg_exists = length(sg_matches) > 0 ? 0 : 1
+}
+
 resource "ibm_is_security_group" "worker_vm_sg" {
+  count = local.sg_exists
   name           = "${var.vpc_name}-supp-sg"
   vpc            = data.ibm_is_vpc.vpc.id
   resource_group = data.ibm_is_vpc.vpc.resource_group
@@ -11,7 +22,8 @@ resource "ibm_is_security_group" "worker_vm_sg" {
 
 # allow all outgoing network traffic
 resource "ibm_is_security_group_rule" "worker_vm_sg_outgoing_all" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "outbound"
   remote    = "0.0.0.0/0"
 }
@@ -19,9 +31,10 @@ resource "ibm_is_security_group_rule" "worker_vm_sg_outgoing_all" {
 # allow all incoming network traffic on port 8080
 # This facilitates the ignition
 resource "ibm_is_security_group_rule" "worker_ignition" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
-  remote    = ibm_is_security_group.worker_vm_sg.id
+  remote    = ibm_is_security_group.worker_vm_sg[0].id
   tcp {
     port_min = 8080
     port_max = 8080
@@ -30,7 +43,8 @@ resource "ibm_is_security_group_rule" "worker_ignition" {
 
 # allow all incoming network traffic on port 22
 resource "ibm_is_security_group_rule" "worker_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = "0.0.0.0/0"
   tcp {
@@ -41,7 +55,8 @@ resource "ibm_is_security_group_rule" "worker_vm_sg_ssh_all" {
 
 # allow all incoming network traffic on port 53
 resource "ibm_is_security_group_rule" "worker_vm_sg_supp_all" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -53,7 +68,8 @@ resource "ibm_is_security_group_rule" "worker_vm_sg_supp_all" {
 # Dev Note: the following are used by PowerVS and VPC VSIs.
 # allow all incoming network traffic on port 2049
 resource "ibm_is_security_group_rule" "nfs_1_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -64,7 +80,8 @@ resource "ibm_is_security_group_rule" "nfs_1_vm_sg_ssh_all" {
 
 # allow all incoming network traffic on port 111
 resource "ibm_is_security_group_rule" "nfs_2_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -75,7 +92,8 @@ resource "ibm_is_security_group_rule" "nfs_2_vm_sg_ssh_all" {
 
 # allow all incoming network traffic on port 2049
 resource "ibm_is_security_group_rule" "nfs_3_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
 
@@ -87,7 +105,8 @@ resource "ibm_is_security_group_rule" "nfs_3_vm_sg_ssh_all" {
 
 # allow all incoming network traffic on port 111
 resource "ibm_is_security_group_rule" "nfs_4_vm_sg_ssh_all" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -99,7 +118,8 @@ resource "ibm_is_security_group_rule" "nfs_4_vm_sg_ssh_all" {
 
 # allow all incoming network traffic for ping
 resource "ibm_is_security_group_rule" "worker_vm_sg_ping_all" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   icmp {
@@ -109,7 +129,8 @@ resource "ibm_is_security_group_rule" "worker_vm_sg_ping_all" {
 }
 
 resource "ibm_is_security_group_rule" "control_plane_sg_mc" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -119,7 +140,8 @@ resource "ibm_is_security_group_rule" "control_plane_sg_mc" {
 }
 
 resource "ibm_is_security_group_rule" "control_plane_sg_api" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -135,7 +157,8 @@ resource "ibm_is_security_group_rule" "control_plane_sg_api" {
 #TCP 	22 	192.168.200.0/24
 #TCP - 9100 192.168.200.0/24
 resource "ibm_is_security_group_rule" "cluster_wide_sg_6081" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -145,7 +168,8 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_6081" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_any" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   icmp {
@@ -153,7 +177,8 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_any" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_4789" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -163,7 +188,8 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_4789" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_ssh" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -173,7 +199,8 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_ssh" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_9100" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -183,7 +210,8 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_9100" {
 }
 
 resource "ibm_is_security_group_rule" "cluster_wide_sg_9537" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -196,7 +224,8 @@ resource "ibm_is_security_group_rule" "cluster_wide_sg_9537" {
 #TCP 	2379-2380 	192.168.200.0/24
 #TCP 	10257-10259 	192.168.200.0/24
 resource "ibm_is_security_group_rule" "cp_internal_sg_r1" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -206,7 +235,8 @@ resource "ibm_is_security_group_rule" "cp_internal_sg_r1" {
 }
 
 resource "ibm_is_security_group_rule" "cp_internal_sg_r2" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -222,7 +252,8 @@ resource "ibm_is_security_group_rule" "cp_internal_sg_r2" {
 # TCP (Out) 	80 	192.168.200.0/24
 # TCP (Out) 	443 	192.168.200.0/24
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_mc" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -232,7 +263,8 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_mc" {
 }
 
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_mc_out" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "outbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -242,7 +274,8 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_mc_out" {
 }
 
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_api_out" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "outbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -252,7 +285,8 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_api_out" {
 }
 
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_http_out" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "outbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -262,7 +296,8 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_http_out" {
 }
 
 resource "ibm_is_security_group_rule" "kube_api_lb_sg_https_out" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "outbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -280,7 +315,8 @@ resource "ibm_is_security_group_rule" "kube_api_lb_sg_https_out" {
 # TCP (IN) 	10250 	192.168.200.0/24
 # Dev Note: originally used 32767 and it's too low. Changed to 65000
 resource "ibm_is_security_group_rule" "openshift_net_sg_r1_in_tcp" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -290,7 +326,8 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_r1_in_tcp" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_r1_in_udp" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -300,7 +337,8 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_r1_in_udp" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_500" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -310,7 +348,8 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_500" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_r2_in_tcp" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -320,7 +359,8 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_r2_in_tcp" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_r2_in_udp" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
@@ -330,7 +370,8 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_r2_in_udp" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_10250_out" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   tcp {
@@ -340,7 +381,8 @@ resource "ibm_is_security_group_rule" "openshift_net_sg_10250_out" {
 }
 
 resource "ibm_is_security_group_rule" "openshift_net_sg_4500" {
-  group     = ibm_is_security_group.worker_vm_sg.id
+  count = local.sg_exists
+  group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = var.powervs_machine_cidr
   udp {
