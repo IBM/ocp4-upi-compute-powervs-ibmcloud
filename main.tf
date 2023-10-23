@@ -68,7 +68,7 @@ module "vpc_prepare" {
   worker_3             = var.worker_3
   create_custom_subnet = var.create_custom_subnet
 }
-/*
+
 module "transit_gateway" {
   providers = {
     ibm = ibm.vpc
@@ -82,7 +82,7 @@ module "transit_gateway" {
   vpc_region     = var.vpc_region
   resource_group = module.vpc.vpc_resource_group
 }
-*/
+
 module "support" {
   providers = {
     ibm = ibm.powervs
