@@ -128,6 +128,12 @@ variable "create_custom_subnet" {
   default     = false
 }
 
+variable "skip_transit_gateway_create" {
+  type        = bool
+  description = "skips the creation of the transit gateway"
+  default     = false
+}
+
 ################################################################
 # PowerVS Network - Networking
 ################################################################

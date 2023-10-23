@@ -70,6 +70,7 @@ module "vpc_prepare" {
 }
 
 module "transit_gateway" {
+  count = var.skip_transit_gateway_create ? 0 : 1
   providers = {
     ibm = ibm.vpc
   }
@@ -87,8 +88,7 @@ module "support" {
   providers = {
     ibm = ibm.powervs
   }
-  depends_on = [module.vpc_prepare]
-  #depends_on = [module.transit_gateway]
+  depends_on = [module.transit_gateway]
   source = "./modules/4_pvs_support"
 
   private_key_file     = var.private_key_file
