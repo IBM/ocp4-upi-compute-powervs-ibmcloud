@@ -10,7 +10,7 @@ data "ibm_is_security_groups" "sgs" {
 
 locals {
   sg_matches = [for x in data.ibm_is_security_groups.sgs.security_groups : x if endswith(x.name, "${var.vpc_name}-supp-sg")]
-  sg_exists  = length(sg_matches) > 0 ? 0 : 1
+  sg_exists  = length(local.sg_matches) > 0 ? 0 : 1
 }
 
 resource "ibm_is_security_group" "worker_vm_sg" {

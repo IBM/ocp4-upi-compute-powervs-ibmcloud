@@ -116,7 +116,7 @@ EOF
 
   provisioner "file" {
     source      = "${path.module}/files/resolv.sh"
-    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/butane/"
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/butane/resolv.sh"
   }
 
   # Dev Note: Creates a worker specific butane configuration
