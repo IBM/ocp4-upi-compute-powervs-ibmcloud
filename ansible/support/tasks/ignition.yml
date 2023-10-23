@@ -32,6 +32,7 @@
 #        url: "{{ openshift_machine_config_url }}"
 #        method: GET
 #        return_content: true
+#         validate_certs: false
 #        headers:
 #          "Accept": "application/vnd.coreos.ignition+json;version=3.2.0"
 #      ignore_errors: true
