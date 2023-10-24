@@ -69,12 +69,24 @@ module "vpc_prepare" {
   create_custom_subnet = var.create_custom_subnet
 }
 
+### Prepares the VPC Support Machine
+module "pvs_link" {
+  providers = {
+    ibm = ibm.powervs
+  }
+  depends_on = [module.vpc_prepare]
+  source     = "./modules/2_pvs_link"
+
+  powervs_service_instance_id = var.powervs_service_instance_id
+  cluster_id = local.cluster_id
+}
+
 module "transit_gateway" {
   count = var.skip_transit_gateway_create ? 0 : 1
   providers = {
     ibm = ibm.vpc
   }
-  depends_on = [module.vpc_prepare]
+  depends_on = [module.vpc_prepare, module.pvs_link]
   source     = "./modules/3_transit_gateway"
 
   cluster_id     = local.cluster_id
