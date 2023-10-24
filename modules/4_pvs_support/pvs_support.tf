@@ -129,6 +129,39 @@ EOF
   }
 }
 
+resource "null_resource" "migrate_mcp" {
+  depends_on = [null_resource.create_resolv_conf_for_intel_workers]
+  connection {
+    type        = "ssh"
+    user        = var.rhel_username
+    host        = var.bastion_public_ip
+    private_key = file(var.private_key_file)
+    agent       = var.ssh_agent
+    timeout     = "${var.connection_timeout}m"
+  }
+
+  provisioner "remote-exec" {
+    inline = [<<EOF
+mkdir -p /root/ocp4-upi-compute-powervs-ibmcloud/intel/migrate-mcp/
+EOF
+    ]
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/files/migrate-mcp.sh"
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/migrate-mcp/migrate-mcp.sh"
+  }
+
+  # Dev Note: Creates a worker specific butane configuration
+  provisioner "remote-exec" {
+    inline = [<<EOF
+cd /root/ocp4-upi-compute-powervs-ibmcloud/intel/migrate-mcp/
+bash migrate-mcp.sh
+EOF
+    ]
+  }
+}
+
 # Dev Note: adjust_mtu comes back if we need to modify the MTU
 # resource "null_resource" "adjust_mtu" {
 #   depends_on = [null_resource.limit_csi_arch]
@@ -152,7 +185,7 @@ EOF
 # ovnkube between vpc/powervs requires routingViaHost for the LBs to work properly
 # ref: https://community.ibm.com/community/user/powerdeveloper/blogs/mick-tarsel/2023/01/26/routingviahost-with-ovnkuberenetes
 resource "null_resource" "set_routing_via_host" {
-  depends_on = [null_resource.create_resolv_conf_for_intel_workers]
+  depends_on = [null_resource.migrate_mcp]
   connection {
     type        = "ssh"
     user        = var.rhel_username
