@@ -57,16 +57,16 @@ resource "null_resource" "setup" {
 
   # Copies the custom route for env3
   provisioner "file" {
-    content     = templatefile("${path.module}/templates/route-env3.tpl", local.cidrs)
-    destination = "/etc/sysconfig/network-scripts/route-env3"
+    content     = templatefile("${path.module}/templates/route-env3.sh.tpl", local.cidrs)
+    destination = "ocp4-upi-compute-powervs-ibmcloud/intel/support/route-env3.sh"
   }
 
   provisioner "remote-exec" {
     inline = [<<EOF
-nmcli device up env3
+cd ocp4-upi-compute-powervs-ibmcloud/intel/support
+bash route-env3.sh
 
 echo 'Running ocp4-upi-compute-powervs-ibmcloud/intel/ playbook...'
-cd ocp4-upi-compute-powervs-ibmcloud/intel/support
 ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud-support-main.log ansible-playbook -e @vars/vars.yaml tasks/main.yml --become
 EOF
     ]
