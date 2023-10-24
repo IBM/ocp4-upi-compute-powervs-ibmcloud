@@ -8,7 +8,7 @@
 # The script creates the butane configuration and then uses the configuration to populate the workers with the right resolv.conf file.
 
 VAL=$(oc get mc -o yaml | grep -c 99-worker-dnsconfig)
-if [ ${VAL} -ne 0 ]
+if [ ${VAL} -eq 0 ]
 then 
 
 dnf install -y butane
