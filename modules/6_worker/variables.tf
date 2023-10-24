@@ -5,7 +5,6 @@
 
 variable "name_prefix" {}
 variable "target_worker_sg_id" {}
-#variable "rhcos_image_name" {}
 variable "rhcos_image_id" {}
 variable "vpc_name" {}
 variable "vpc_key_id" {}

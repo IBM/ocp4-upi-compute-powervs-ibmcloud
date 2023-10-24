@@ -62,8 +62,13 @@ EOF
 
 resource "ibm_is_image" "worker_image_id" {
   depends_on       = [null_resource.upload_rhcos_image]
-  name             = "${var.name_prefix}-img"
+  name             = "${var.name_prefix}-rhcos-img"
   href             = "cos://${var.vpc_region}/${var.name_prefix}-mac-intel/${var.name_prefix}-rhcos.qcow2"
   operating_system = "rhel-coreos-stable-amd64"
   resource_group   = data.ibm_resource_group.resource_group.id
+
+  //increase timeouts as this import may be cross-region
+  timeouts {
+    create = "45m"
+  }
 }
