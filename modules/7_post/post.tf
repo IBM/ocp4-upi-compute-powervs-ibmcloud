@@ -49,7 +49,7 @@ resource "null_resource" "remove_workers" {
 
   connection {
     type        = "ssh"
-    user        = self.triggers.rhel_username
+    user        = self.triggers.user
     private_key = self.triggers.private_key
     host        = self.triggers.host
     agent       = self.triggers.agent
