@@ -78,7 +78,7 @@ module "pvs_link" {
   source     = "./modules/2_pvs_link"
 
   powervs_service_instance_id = var.powervs_service_instance_id
-  cluster_id = local.cluster_id
+  cluster_id                  = local.cluster_id
 }
 
 module "transit_gateway" {

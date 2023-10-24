@@ -81,7 +81,7 @@ variable "powervs_bastion_private_ip" {
   type        = string
   description = "The Bastion private IP of the OpenShift Cluster on PowerVS"
   default     = ""
-    validation {
+  validation {
     condition     = length(var.powervs_bastion_private_ip) > 0
     error_message = "The worker.count value must be greater than 1."
   }
