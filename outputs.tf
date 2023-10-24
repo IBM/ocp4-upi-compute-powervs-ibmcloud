@@ -8,7 +8,5 @@ output "instructions" {
 Login to you OCP cluster and get oc get nodes to see your Intel nodes.
 
 oc get nodes -l kubernetes.io/arch=amd64
-
-The support machine node in VPC can be destroyed at this point.
 EOF
 }
