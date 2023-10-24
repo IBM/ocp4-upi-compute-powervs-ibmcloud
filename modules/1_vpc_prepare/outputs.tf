@@ -16,7 +16,7 @@ output "vpc_crn" {
 }
 
 output "target_worker_sg_id" {
-  value = ibm_is_security_group.worker_vm_sg[0].id
+  value = local.sg_not_exists == 0 ? local.sg_matches[0].id : ibm_is_security_group.worker_vm_sg[0].id
 }
 
 output "mac_vpc_subnets" {
