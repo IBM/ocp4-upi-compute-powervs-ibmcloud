@@ -115,7 +115,7 @@ EOF
   }
 }
 
-resource "null_resource" "create_resolv_conf_for_intel_workers" {
+resource "null_resource" "updating_load_balancers" {
   depends_on = [null_resource.patch_nfs_arch_ppc64le]
   connection {
     type        = "ssh"
