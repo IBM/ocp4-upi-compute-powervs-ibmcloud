@@ -135,7 +135,7 @@ EOF
 
   provisioner "file" {
     source      = "${path.module}/files/update-lbs.sh"
-    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/"
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/update-lbs.sh"
   }
 
   # Dev Note: Updates the load balancers
