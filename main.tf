@@ -79,7 +79,7 @@ module "pvs_link" {
 
   powervs_service_instance_id = var.powervs_service_instance_id
   cluster_id                  = local.cluster_id
-  powervs_network_name = var.powervs_network_name
+  powervs_network_name        = var.powervs_network_name
 }
 
 module "transit_gateway" {

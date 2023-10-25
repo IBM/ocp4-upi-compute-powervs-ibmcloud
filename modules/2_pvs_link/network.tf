@@ -13,12 +13,12 @@ resource "ibm_pi_cloud_connection" "new_cloud_connection" {
 }
 
 data "ibm_pi_network" "target_net" {
-  pi_network_name = var.powervs_network_name
+  pi_network_name      = var.powervs_network_name
   pi_cloud_instance_id = var.powervs_service_instance_id
 }
 
 resource "ibm_pi_cloud_connection_network_attach" "attach_cloud_connection_to_target_net" {
-  pi_cloud_instance_id                = var.powervs_service_instance_id
+  pi_cloud_instance_id   = var.powervs_service_instance_id
   pi_cloud_connection_id = ibm_pi_cloud_connection.new_cloud_connection.cloud_connection_id
-  pi_network_id = data.ibm_pi_network.target_net.id
+  pi_network_id          = data.ibm_pi_network.target_net.id
 }
