@@ -10,3 +10,8 @@ variable "bastion_public_ip" {}
 variable "private_key_file" {}
 variable "connection_timeout" {}
 variable "rhel_username" {}
+variable "ignition_ip" {}
+variable "ibmcloud_api_key" {}
+variable "vpc_name" {}
+variable "vpc_region" {}
+variable "resource_group" {}

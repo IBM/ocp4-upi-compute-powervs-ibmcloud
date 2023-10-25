@@ -111,6 +111,11 @@ module "support" {
   bastion_public_ip    = var.powervs_bastion_ip
   cidrs                = module.vpc_prepare.mac_vpc_subnets
   powervs_machine_cidr = var.powervs_machine_cidr
+  ibmcloud_api_key     = var.ibmcloud_api_key
+  vpc_name             = var.vpc_name
+  vpc_region           = var.vpc_region
+  resource_group       = module.vpc.vpc_resource_group
+  ignition_ip          = var.powervs_bastion_private_ip
 }
 
 module "image" {

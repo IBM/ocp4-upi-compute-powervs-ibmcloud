@@ -29,6 +29,13 @@ storage:
         inline: |
             search $(hostname --long)
             nameserver $(hostname -i | awk '{print $NF}')
+    - path: /etc/NetworkManager/conf.d/90-dns-none.conf
+      overwrite: true
+      mode: 0644
+      contents:
+        inline: |
+            [main]
+            dns=none
 EOF
 
 chmod +x butane
