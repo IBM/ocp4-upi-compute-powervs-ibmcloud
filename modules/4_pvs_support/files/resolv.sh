@@ -11,27 +11,28 @@ VAL=$(oc get mc -o yaml | grep -c 99-worker-dnsconfig)
 if [ ${VAL} -eq 0 ]
 then 
 
-dnf install -y butane
+curl -L -o butane https://github.com/coreos/butane/releases/download/v0.19.0/butane-ppc64le-unknown-linux-gnu
 
 cat << EOF > butane-resolv-conf.bu
 variant: openshift
-version: 4.12.0
+version: 4.14.0
 metadata:
-name: 99-worker-dnsconfig
-labels:
+  name: 99-worker-dnsconfig
+  labels:
     machineconfiguration.openshift.io/role: worker
 storage:
-files:
+  files:
     - path: /etc/resolv.conf
-    mode: 0644
-    overwrite: true
-    contents:
+      overwrite: true
+      mode: 0644
+      contents:
         inline: |
-        search $(hostname --long)
-        nameserver $(hostname -i | awk '{print $NF}')
+            search $(hostname --long)
+            nameserver $(hostname -i | awk '{print $NF}')
 EOF
 
-butane butane-resolv-conf.bu > 99-worker-dnsconfig.yaml
+chmod +x butane
+./butane butane-resolv-conf.bu > 99-worker-dnsconfig.yaml
 cat 99-worker-dnsconfig.yaml
 
 oc apply -f 99-worker-dnsconfig.yaml
