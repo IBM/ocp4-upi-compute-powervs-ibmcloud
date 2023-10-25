@@ -7,6 +7,9 @@
                     "source": "http://${ignition_ip}:8080/ignition/worker.ign"
                 }
             ]
+        },
+        "timeouts": {
+            "httpTotal": 15
         }
     },
     "storage": {
