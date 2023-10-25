@@ -68,11 +68,20 @@ echo "Done creating mc"
 # Wait on the power mcp to update
 echo "waiting small period of time for reconciliation in mcps"
 sleep 60
+MCP_IDX=0
+MCP_COUNT=50
 MACHINE_COUNT=$(oc get mcp power -o json | jq -r '.status.machineCount')
 while [ $(oc get mcp power -o json | jq -r '.status.readyMachineCount') -ne ${MACHINE_COUNT} ]
 do
     echo "WAITING: some more"
     oc get mcp power -o json | jq -r '.status.readyMachineCount'
+
+    MCP_IDX=$(($MCP_IDX + 1))
+    if [ "${MCP_IDX}" -gt "${COUNT}" ]
+    then
+        echo "failed to wait on the machine count"
+        exit 1
+    fi
     sleep 30
 done
 
@@ -83,11 +92,20 @@ oc delete mc preinstall-worker-kargs
 # Wait on the worker mcp to update
 echo "waiting small period of time for reconciliation in mcps"
 sleep 60
+MCP_IDX=0
+MCP_COUNT=50
 MACHINE_COUNT=$(oc get mcp power -o json | jq -r '.status.machineCount')
 while [ $(oc get mcp power -o json | jq -r '.status.readyMachineCount') -ne ${MACHINE_COUNT} ]
 do
     echo "WAITING: some more"
     oc get mcp power -o json | jq -r '.status.readyMachineCount'
+
+    MCP_IDX=$(($MCP_IDX + 1))
+    if [ "${MCP_IDX}" -gt "${COUNT}" ]
+    then
+        echo "failed to wait on the machine count"
+        exit 1
+    fi
     sleep 30
 done
 
