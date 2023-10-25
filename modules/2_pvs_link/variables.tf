@@ -5,3 +5,4 @@
 
 variable "powervs_service_instance_id" {}
 variable "cluster_id" {}
+variable "powervs_network_name" {}

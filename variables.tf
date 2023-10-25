@@ -73,7 +73,7 @@ variable "powervs_bastion_ip" {
   default     = ""
   validation {
     condition     = length(var.powervs_bastion_ip) > 0
-    error_message = "The worker.count value must be greater than 1."
+    error_message = "The powervs_bastion_ip must exist."
   }
 }
 
@@ -83,7 +83,17 @@ variable "powervs_bastion_private_ip" {
   default     = ""
   validation {
     condition     = length(var.powervs_bastion_private_ip) > 0
-    error_message = "The worker.count value must be greater than 1."
+    error_message = "The powervs_bastion_private_ip must exist."
+  }
+}
+
+variable "powervs_network_name" {
+  type        = string
+  description = "The powervs network name where the cluster is installed"
+  default     = "ocp-net"
+  validation {
+    condition     = length(var.powervs_network_name) > 0
+    error_message = "The powervs_network_name value must be greater than 1."
   }
 }
 
