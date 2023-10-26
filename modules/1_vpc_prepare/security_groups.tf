@@ -37,7 +37,7 @@ resource "ibm_is_security_group_rule" "worker_all_outbound_powervs" {
 }
 
 # inbound to security group
-resource "ibm_is_security_group_rule" "worker_all_cidr" {
+resource "ibm_is_security_group_rule" "worker_all_sg" {
   count     = local.sg_not_exists
   group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
@@ -45,7 +45,7 @@ resource "ibm_is_security_group_rule" "worker_all_cidr" {
 }
 
 # inbound to cidr
-resource "ibm_is_security_group_rule" "worker_all_cidr" {
+resource "ibm_is_security_group_rule" "worker_all_powervs_cidr" {
   count     = local.sg_not_exists
   group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
