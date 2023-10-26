@@ -9,13 +9,13 @@ data "ibm_is_security_groups" "sgs" {
 }
 
 locals {
-  sg_matches    = [for x in data.ibm_is_security_groups.sgs.security_groups : x if endswith(x.name, "${var.vpc_name}-supp-sg")]
+  sg_matches    = [for x in data.ibm_is_security_groups.sgs.security_groups : x if endswith(x.name, "${var.vpc_name}-workers-sg")]
   sg_not_exists = length(local.sg_matches) == 0 ? 1 : 0
 }
 
 resource "ibm_is_security_group" "worker_vm_sg" {
   count          = local.sg_not_exists
-  name           = "${var.vpc_name}-supp-sg"
+  name           = "${var.vpc_name}-workers-sg"
   vpc            = data.ibm_is_vpc.vpc.id
   resource_group = data.ibm_is_vpc.vpc.resource_group
 }
