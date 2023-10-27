@@ -16,6 +16,8 @@ if [ -z "$(command -v ibmcloud)" ]
 then
   echo "ibmcloud CLI doesn't exist, installing"
   curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+else
+  ibmcloud update -f
 fi
 
 ibmcloud login --apikey "${API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}"

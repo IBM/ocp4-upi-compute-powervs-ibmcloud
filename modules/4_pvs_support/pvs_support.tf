@@ -61,10 +61,24 @@ resource "null_resource" "setup" {
     destination = "ocp4-upi-compute-powervs-ibmcloud/intel/support/route-env3.sh"
   }
 
+  # Copies the custom routes  for dhcp
+  provisioner "file" {
+    source      = "${path.module}/files/static-route.sh"
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/support/static-route.sh"
+  }
+
+  # Copies the custom route for env3
+  provisioner "file" {
+    content     = templatefile("${path.module}/templates/route.env.tpl", local.cidrs)
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/support/route.env"
+  }
+
   provisioner "remote-exec" {
     inline = [<<EOF
 cd ocp4-upi-compute-powervs-ibmcloud/intel/support
 bash route-env3.sh
+
+bash static-route.sh
 
 echo 'Running ocp4-upi-compute-powervs-ibmcloud/intel/ playbook...'
 ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud-support-main.log ansible-playbook -e @vars/vars.yaml tasks/main.yml --become
