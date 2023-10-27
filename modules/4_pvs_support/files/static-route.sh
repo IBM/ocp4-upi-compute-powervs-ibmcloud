@@ -70,18 +70,43 @@ for i in "${!entries[@]}"; do
 
     echo -n " ${SUBNET_MASK}, ${SUBNET_STR}, ${GATEWAY_FORMAT}" >> /etc/dhcp/classless-static-routes.conf
 done
+
+# Update the static routes for the power nodes.
+for NODE_IP in $(oc get nodes -l kubernetes.io/arch=ppc64le -owide --no-headers=true| awk '{print $6}')
+do
+    echo "NODE_IP to use for classless static route: ${NODE_IP}"
+    echo -n "," >> /etc/dhcp/classless-static-routes.conf
+
+    # Dev Test: 
+    SUBNET=($(echo ${NODE_IP} | sed 's|/| |g' | awk '{print $1}' | sed 's|\.| |g'))
+
+    # DHCPD requires a mask in a special form. We're relying on subnet masks and greatest bits determining how many numbers we include.
+    # Always 32-bit mask
+    SUBNET_STR="${SUBNET[0]},${SUBNET[1]},${SUBNET[2]},${SUBNET[3]}"
+    echo ${SUBNET_STR}
+
+    echo -n " 32, ${SUBNET_STR}, ${GATEWAY_FORMAT}" >> /etc/dhcp/classless-static-routes.conf
+done
+
+# Finally close the static routes
 echo ";" >> /etc/dhcp/classless-static-routes.conf
 
 echo "Static routes are:"
 cat /etc/dhcp/classless-static-routes.conf
+echo ""
+
+echo "Updating the dhcpd.conf include"
+cat << EOF >> /etc/dhcp/dhcpd.conf
+include "/etc/dhcp/classless-static-routes.conf";
+EOF
 
 echo "Restarting the dhcpd"
 systemctl restart dhcpd
 
 # Need to login to each Power Node
-for NODE_IP in $(oc get nodes -l kubernetes.io/arch=ppc64le -owide --no-headers=true| awk '
-{print $6}')
+for NODE_IP in $(oc get nodes -l kubernetes.io/arch=ppc64le -owide --no-headers=true| awk '{print $6}')
 do
+echo "Restarting NetworkManager at NODE_IP: ${NODE_IP}"
 ssh core@${NODE_IP} sudo systemctl restart NetworkManager
 done
 
