@@ -107,9 +107,19 @@ resource "null_resource" "patch_nfs_arch_ppc64le" {
     timeout     = "${var.connection_timeout}m"
   }
 
+  # Dev Note: the original nfs-client-provisioner used gcr.io, and should use the supported path see OCTOPUS-514
   provisioner "remote-exec" {
     inline = [<<EOF
 oc patch deployments nfs-client-provisioner -n nfs-provisioner -p '{"spec": {"template": {"spec": {"nodeSelector": {"kubernetes.io/arch": "ppc64le"}}}}}'
+
+if [ $(oc get deployment -n nfs-provisioner -o json | grep -c 'gcr.io/k8s-staging-sig-storage/nfs-subdir-external-provisioner:v4.0.0') -eq 1 ]
+then 
+
+oc patch deployments nfs-client-provisioner -n nfs-provisioner --type "json" -p '[
+{"op":"remove","path":"/spec/template/spec/containers/0/image"},
+{"op":"add","path":"/spec/template/spec/containers/0/image","value":"registry.k8s.io/sig-storage/nfs-subdir-external-provisioner:v4.0.2"}]'
+
+fi
 EOF
     ]
   }
