@@ -96,8 +96,37 @@ EOF
   }
 }
 
-resource "null_resource" "patch_nfs_arch_ppc64le" {
+# Dev Note: cleans up the image pruner jobs, which is a problem when there are prior failures.
+resource "null_resource" "cleanup_image_pruner" {
   depends_on = [null_resource.post_ansible]
+  connection {
+    type        = "ssh"
+    user        = var.rhel_username
+    private_key = file(var.private_key_file)
+    host        = var.bastion_public_ip
+    agent       = var.ssh_agent
+    timeout     = "${var.connection_timeout}m"
+  }
+
+  # Dev Note: You may see ImagePrunerDegraded
+  # Ref: https://access.redhat.com/solutions/5370391
+  provisioner "remote-exec" {
+    inline = [<<EOF
+if [ $(oc get co image-registry -oyaml | grep -c ImagePrunerDegraded) -ne 0 ]
+then
+  oc patch imagepruner.imageregistry/cluster --patch '{"spec":{"suspend":true}}' --type=merge
+  sleep 15
+  oc -n openshift-image-registry delete jobs --all
+  sleep 15
+  oc patch imagepruner.imageregistry/cluster --patch '{"spec":{"suspend":false}}' --type=merge
+fi
+EOF
+    ]
+  }
+}
+
+resource "null_resource" "patch_nfs_arch_ppc64le" {
+  depends_on = [null_resource.cleanup_image_pruner, null_resource.post_ansible]
   connection {
     type        = "ssh"
     user        = var.rhel_username
