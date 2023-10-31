@@ -20,6 +20,7 @@ resource "ibm_resource_instance" "cos_instance" {
 }
 
 resource "ibm_cos_bucket" "cos_bucket" {
+  depends_on           = [ibm_resource_instance.cos_instance]
   bucket_name          = "${var.name_prefix}-mac-intel"
   resource_instance_id = ibm_resource_instance.cos_instance.id
   region_location      = var.vpc_region
@@ -27,7 +28,7 @@ resource "ibm_cos_bucket" "cos_bucket" {
 }
 
 resource "null_resource" "upload_rhcos_image" {
-  depends_on = [ibm_resource_instance.cos_instance]
+  depends_on = [ibm_cos_bucket.cos_bucket]
   connection {
     type        = "ssh"
     user        = var.rhel_username
