@@ -107,7 +107,10 @@ systemctl restart dhcpd
 for NODE_IP in $(oc get nodes -l kubernetes.io/arch=ppc64le -owide --no-headers=true| awk '{print $6}')
 do
 echo "Restarting NetworkManager at NODE_IP: ${NODE_IP}"
-ssh core@${NODE_IP} sudo systemctl restart NetworkManager
+# Dev Note: tried out the following approaches
+# 1. systemctl restart NetworkManager - had to reboot the nodes.
+# 2. br-ex up to refresh the dhcp lease - refreshed the single device
+ssh core@${NODE_IP} sudo nmcli device up br-ex
 done
 
 else
