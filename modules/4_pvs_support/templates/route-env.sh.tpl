@@ -13,8 +13,7 @@ FOUND="$(nmcli -t -f ipv4.addresses connection show "$${IFACE}" | grep ${bastion
 if [ -n "$${FOUND}" ]
 then
 INT_IFACE="$${IFACE}"
-fi
-done
+echo "$${INT_IFACE} found"
 
 cat << EOF | nmcli connection edit "$${INT_IFACE}"
 goto ipv4
@@ -25,4 +24,7 @@ save
 quit
 EOF
 
-nmcli device up env3
+nmcli connection up "$${INT_IFACE}"
+break
+fi
+done
