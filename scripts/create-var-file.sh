@@ -178,6 +178,8 @@ system_type    = "e980"
 bastion_health_status = "WARNING"
 bastion               = { memory = "16", processors = "1", "count" = 1 }
 worker                = { memory = "16", processors = "1", "count" = ${EXPECTED_NODES} }
+
+cicd_image_pruner_cleanup = true
 EOFXEOF
 }
 

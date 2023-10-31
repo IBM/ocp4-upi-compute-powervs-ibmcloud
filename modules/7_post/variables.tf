@@ -14,3 +14,4 @@ variable "name_prefix" {}
 variable "worker_1" {}
 variable "worker_2" {}
 variable "worker_3" {}
+variable "cicd_image_pruner_cleanup" {}

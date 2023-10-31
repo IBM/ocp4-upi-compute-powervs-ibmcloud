@@ -98,6 +98,7 @@ EOF
 
 # Dev Note: cleans up the image pruner jobs, which is a problem when there are prior failures.
 resource "null_resource" "cleanup_image_pruner" {
+  count      = var.cicd_image_pruner_cleanup ? 1 : 0
   depends_on = [null_resource.post_ansible]
   connection {
     type        = "ssh"

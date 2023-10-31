@@ -297,3 +297,13 @@ variable "override_region_check" {
   description = "Set to true if you want to skip region checks."
   default     = false
 }
+
+################################################################
+# Supports the CICD features
+################################################################
+
+variable "cicd_image_pruner_cleanup" {
+  type        = bool
+  description = "Cleans up image pruner jobs"
+  default     = false
+}
