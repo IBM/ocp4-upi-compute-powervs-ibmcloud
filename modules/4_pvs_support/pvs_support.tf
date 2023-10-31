@@ -19,6 +19,13 @@ locals {
     cidrs_ipv4 = var.cidrs
     gateway    = cidrhost(var.powervs_machine_cidr, 1)
   }
+
+  cidrs_dyna_iface = {
+    cidrs_ipv4 = var.cidrs
+    gateway    = cidrhost(var.powervs_machine_cidr, 1)
+    bastion_ip = var.ignition_ip
+  }
+
 }
 
 resource "null_resource" "setup" {
@@ -57,8 +64,8 @@ resource "null_resource" "setup" {
 
   # Copies the custom route for env3
   provisioner "file" {
-    content     = templatefile("${path.module}/templates/route-env3.sh.tpl", local.cidrs)
-    destination = "ocp4-upi-compute-powervs-ibmcloud/intel/support/route-env3.sh"
+    content     = templatefile("${path.module}/templates/route-env.sh.tpl", local.cidrs_dyna_iface)
+    destination = "ocp4-upi-compute-powervs-ibmcloud/intel/support/route-env.sh"
   }
 
   # Copies the custom routes  for dhcp
@@ -76,7 +83,7 @@ resource "null_resource" "setup" {
   provisioner "remote-exec" {
     inline = [<<EOF
 cd ocp4-upi-compute-powervs-ibmcloud/intel/support
-bash route-env3.sh
+bash route-env.sh
 
 bash static-route.sh
 
