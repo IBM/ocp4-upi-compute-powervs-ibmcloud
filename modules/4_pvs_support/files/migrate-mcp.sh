@@ -77,7 +77,7 @@ do
     oc get mcp power -o json | jq -r '.status.readyMachineCount'
 
     MCP_IDX=$(($MCP_IDX + 1))
-    if [ "${MCP_IDX}" -gt "${COUNT}" ]
+    if [ "${MCP_IDX}" -gt "${MCP_COUNT}" ]
     then
         echo "failed to wait on the machine count"
         exit 1
@@ -101,7 +101,7 @@ do
     oc get mcp power -o json | jq -r '.status.readyMachineCount'
 
     MCP_IDX=$(($MCP_IDX + 1))
-    if [ "${MCP_IDX}" -gt "${COUNT}" ]
+    if [ "${MCP_IDX}" -gt "${MCP_COUNT}" ]
     then
         echo "failed to wait on the machine count"
         exit 1
