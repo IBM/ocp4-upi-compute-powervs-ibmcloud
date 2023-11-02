@@ -62,7 +62,7 @@ EOF
   }
 }
 
-locals { 
+locals {
   cos_region = ibm_cos_bucket.cos_bucket.region_location
 }
 
