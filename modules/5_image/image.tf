@@ -14,7 +14,7 @@ data "ibm_resource_group" "resource_group" {
 resource "ibm_resource_instance" "cos_instance" {
   name              = "${var.name_prefix}-mac-intel-cos"
   resource_group_id = data.ibm_resource_group.resource_group.id
-  allow_cleanup     = true
+  # allow_cleanup     = true // automatically decided by the service-broker
   service           = "cloud-object-storage"
   plan              = "standard"
   location          = "global"
