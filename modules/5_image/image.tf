@@ -11,13 +11,16 @@ data "ibm_resource_group" "resource_group" {
   name = var.resource_group_name
 }
 
+# Dev Note: with "global" location in some datacenters it'll fail as it can't find the bucket.
+# Therefore we're using vpc_region
+# Ref: https://cloud.ibm.com/docs/cloud-object-storage?topic=cloud-object-storage-endpoints
 resource "ibm_resource_instance" "cos_instance" {
   name              = "${var.name_prefix}-mac-intel-cos"
   resource_group_id = data.ibm_resource_group.resource_group.id
   # allow_cleanup     = true // automatically decided by the service-broker
   service  = "cloud-object-storage"
   plan     = "standard"
-  location = "global"
+  location = var.vpc_region
 }
 
 resource "ibm_cos_bucket" "cos_bucket" {
@@ -71,6 +74,10 @@ locals {
   cos_region = ibm_cos_bucket.cos_bucket.region_location
 }
 
+# Dev Note: This message occurs on single-zone regions.check
+# > The IAM token that was specified in the request has expired or is invalid. The request is not authorized to access the Cloud Object Storage resource.
+# ibmcloud is image-create test --file cos://au-syd/mac-f672-mac-intel/mac-f672-rhcos.qcow2 --os-name rhel-coreos-stable-amd64
+# Ref: https://github.com/IBM-Cloud/terraform-provider-ibm/issues/4267
 resource "ibm_is_image" "worker_image_id" {
   depends_on       = [null_resource.upload_rhcos_image, ibm_cos_bucket.cos_bucket]
   name             = "${var.name_prefix}-rhcos-img"
