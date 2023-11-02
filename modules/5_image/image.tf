@@ -69,6 +69,17 @@ EOF
   }
 }
 
+# Dev Note: required however, it may require superadmin privileges to set.
+# Ref: https://github.com/openshift/installer/blob/master/data/data/ibmcloud/network/image/main.tf#L19
+resource "ibm_iam_authorization_policy" "policy" {
+  count                       = var.skip_authorization_policy_create ? 0 : 1
+  source_service_name         = "is"
+  source_resource_type        = "image"
+  target_service_name         = "cloud-object-storage"
+  target_resource_instance_id = element(split(":", ibm_resource_instance.cos_instance.id), 7)
+  roles                       = ["Reader"]
+}
+
 locals {
   cos_region = ibm_cos_bucket.cos_bucket.region_location
 }
@@ -79,7 +90,7 @@ locals {
 # Ref: https://github.com/IBM-Cloud/terraform-provider-ibm/issues/4267
 # Ref: https://cloud.ibm.com/iam/authorizations/grant
 resource "ibm_is_image" "worker_image_id" {
-  depends_on       = [null_resource.upload_rhcos_image, ibm_cos_bucket.cos_bucket]
+  depends_on       = [null_resource.upload_rhcos_image, ibm_cos_bucket.cos_bucket, ibm_iam_authorization_policy.policy]
   name             = "${var.name_prefix}-rhcos-img"
   href             = "cos://${local.cos_region}/${var.name_prefix}-mac-intel/${var.name_prefix}-rhcos.qcow2"
   operating_system = "rhel-coreos-stable-amd64"

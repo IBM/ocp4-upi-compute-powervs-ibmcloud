@@ -307,3 +307,10 @@ variable "cicd_image_pruner_cleanup" {
   description = "Cleans up image pruner jobs"
   default     = false
 }
+
+variable "skip_authorization_policy_create" {
+  type        = bool
+  description = "Skips trying to create the authorization policy for the Image Service for VPC's access to COS"
+  default     = false
+}
+

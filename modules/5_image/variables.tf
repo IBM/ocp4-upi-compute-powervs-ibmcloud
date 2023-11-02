@@ -12,3 +12,4 @@ variable "ssh_agent" {}
 variable "connection_timeout" {}
 variable "ibmcloud_api_key" {}
 variable "resource_group_name" {}
+variable "skip_authorization_policy_create" {}

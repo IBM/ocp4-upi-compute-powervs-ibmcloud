@@ -125,15 +125,16 @@ module "image" {
   depends_on = [module.support]
   source     = "./modules/5_image"
 
-  name_prefix         = local.name_prefix
-  vpc_region          = var.vpc_region
-  rhel_username       = var.rhel_username
-  bastion_public_ip   = var.powervs_bastion_ip
-  private_key_file    = var.private_key_file
-  ssh_agent           = var.ssh_agent
-  connection_timeout  = var.connection_timeout
-  ibmcloud_api_key    = var.ibmcloud_api_key
-  resource_group_name = module.vpc.vpc_resource_group_name
+  name_prefix                      = local.name_prefix
+  vpc_region                       = var.vpc_region
+  rhel_username                    = var.rhel_username
+  bastion_public_ip                = var.powervs_bastion_ip
+  private_key_file                 = var.private_key_file
+  ssh_agent                        = var.ssh_agent
+  connection_timeout               = var.connection_timeout
+  ibmcloud_api_key                 = var.ibmcloud_api_key
+  resource_group_name              = module.vpc.vpc_resource_group_name
+  skip_authorization_policy_create = var.skip_authorization_policy_create
 }
 
 module "worker" {
