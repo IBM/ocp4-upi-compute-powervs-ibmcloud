@@ -4,6 +4,7 @@
 ################################################################
 
 # Loads the VPC Security Groups so we can find the existing ids
+# Ref: https://github.com/openshift/installer/blob/master/data/data/ibmcloud/network/vpc/security-groups.tf#L142
 data "ibm_is_security_groups" "sgs" {
   vpc_id = data.ibm_is_vpc.vpc.id
 }
