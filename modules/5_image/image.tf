@@ -67,7 +67,7 @@ locals {
 }
 
 resource "ibm_is_image" "worker_image_id" {
-  depends_on       = [null_resource.upload_rhcos_image]
+  depends_on       = [null_resource.upload_rhcos_image, ibm_cos_bucket.ibm_cos_bucket.cos_bucket]
   name             = "${var.name_prefix}-rhcos-img"
   href             = "cos://${local.cos_region}/${var.name_prefix}-mac-intel/${var.name_prefix}-rhcos.qcow2"
   operating_system = "rhel-coreos-stable-amd64"
