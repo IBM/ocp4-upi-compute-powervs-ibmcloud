@@ -15,9 +15,9 @@ resource "ibm_resource_instance" "cos_instance" {
   name              = "${var.name_prefix}-mac-intel-cos"
   resource_group_id = data.ibm_resource_group.resource_group.id
   # allow_cleanup     = true // automatically decided by the service-broker
-  service           = "cloud-object-storage"
-  plan              = "standard"
-  location          = "global"
+  service  = "cloud-object-storage"
+  plan     = "standard"
+  location = "global"
 }
 
 resource "ibm_cos_bucket" "cos_bucket" {
