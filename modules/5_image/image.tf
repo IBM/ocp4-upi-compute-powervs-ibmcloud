@@ -32,7 +32,7 @@ resource "null_resource" "upload_rhcos_image" {
   depends_on = [ibm_cos_bucket.cos_bucket]
 
   triggers = {
-    cos_bucket = ibm_cos_bucket.cos_bucket
+    cos_bucket = ibm_cos_bucket.cos_bucket.id
   }
 
   connection {
