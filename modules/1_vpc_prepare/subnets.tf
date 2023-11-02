@@ -47,7 +47,7 @@ resource "ibm_is_subnet" "subnet_worker_zone_2" {
 
 resource "ibm_is_vpc_address_prefix" "address_prefix_worker_zone_3" {
   count = var.create_custom_subnet ? 1 : 0
-  cidr  = "10.0.2.0/24"
+  cidr  = "10.0.3.0/24"
   name  = "worker-zone-2-add-prefix"
   vpc   = data.ibm_is_vpc.vpc.id
   zone  = var.worker_3["zone"]
@@ -58,7 +58,7 @@ resource "ibm_is_subnet" "subnet_worker_zone_3" {
   depends_on = [
     ibm_is_vpc_address_prefix.address_prefix_worker_zone_3
   ]
-  ipv4_cidr_block = "10.0.2.0/24"
+  ipv4_cidr_block = "10.0.3.0/24"
   name            = "worker-zone-2-subnet"
   vpc             = data.ibm_is_vpc.vpc.id
   zone            = var.worker_3["zone"]
