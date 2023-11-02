@@ -68,8 +68,37 @@ EOF
 }
 
 #Command to run ansible playbook on bastion
-resource "null_resource" "post_ansible" {
+resource "null_resource" "approve_and_issue" {
   depends_on = [null_resource.remove_workers]
+  connection {
+    type        = "ssh"
+    user        = var.rhel_username
+    private_key = file(var.private_key_file)
+    host        = var.bastion_public_ip
+    agent       = var.ssh_agent
+    timeout     = "${var.connection_timeout}m"
+  }
+
+  #create approval script
+  provisioner "file" {
+    content     = "${path.module}/files/approve_and_issue.sh"
+    destination = "${local.ansible_post_path}/approve_and_issue.sh"
+  }
+
+  #command to run ansible playbook on Bastion
+  provisioner "remote-exec" {
+    inline = [<<EOF
+echo "Running the CSR approval and issue"
+cd ${local.ansible_post_path}
+bash approve_and_issue.sh
+EOF
+    ]
+  }
+}
+
+#Command to run ansible playbook on bastion
+resource "null_resource" "post_ansible" {
+  depends_on = [null_resource.approve_and_issue]
   connection {
     type        = "ssh"
     user        = var.rhel_username
