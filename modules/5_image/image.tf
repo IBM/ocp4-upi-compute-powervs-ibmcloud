@@ -62,10 +62,14 @@ EOF
   }
 }
 
+locals { 
+  cos_region = ibm_cos_bucket.cos_bucket.region_location
+}
+
 resource "ibm_is_image" "worker_image_id" {
   depends_on       = [null_resource.upload_rhcos_image]
   name             = "${var.name_prefix}-rhcos-img"
-  href             = "cos://${var.vpc_region}/${var.name_prefix}-mac-intel/${var.name_prefix}-rhcos.qcow2"
+  href             = "cos://${local.cos_region}/${var.name_prefix}-mac-intel/${var.name_prefix}-rhcos.qcow2"
   operating_system = "rhel-coreos-stable-amd64"
   resource_group   = data.ibm_resource_group.resource_group.id
 
