@@ -21,7 +21,10 @@ else
 fi
 
 ibmcloud login --apikey "${API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}"
-ibmcloud plugin install -f cloud-internet-services vpc-infrastructure cloud-object-storage power-iaas is
+ibmcloud plugin install -f cloud-internet-services vpc-infrastructure cloud-object-storage is
+
+# Pin the version to 0.4.9 (v1.0.0 may be incompatible)
+ibmcloud plugin install -f power-iaas -v 0.4.9
 
 # Download the RHCOS qcow2
 TARGET_DIR=".openshift/image-local"
