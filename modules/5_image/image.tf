@@ -11,16 +11,15 @@ data "ibm_resource_group" "resource_group" {
   name = var.resource_group_name
 }
 
-# Dev Note: with "global" location in some datacenters it'll fail as it can't find the bucket.
-# Therefore we're using vpc_region
+# Dev Note: Must use global location
+# allow_cleanup is automatically decided by the service-broker
 # Ref: https://cloud.ibm.com/docs/cloud-object-storage?topic=cloud-object-storage-endpoints
 resource "ibm_resource_instance" "cos_instance" {
   name              = "${var.name_prefix}-mac-intel-cos"
   resource_group_id = data.ibm_resource_group.resource_group.id
-  # allow_cleanup     = true // automatically decided by the service-broker
-  service  = "cloud-object-storage"
-  plan     = "standard"
-  location = var.vpc_region
+  service           = "cloud-object-storage"
+  plan              = "standard"
+  location          = "global"
 }
 
 resource "ibm_cos_bucket" "cos_bucket" {
@@ -28,7 +27,7 @@ resource "ibm_cos_bucket" "cos_bucket" {
   bucket_name          = "${var.name_prefix}-mac-intel"
   resource_instance_id = ibm_resource_instance.cos_instance.id
   region_location      = var.vpc_region
-  storage_class        = "standard"
+  storage_class        = "smart"
 }
 
 resource "null_resource" "upload_rhcos_image" {
@@ -74,10 +73,11 @@ locals {
   cos_region = ibm_cos_bucket.cos_bucket.region_location
 }
 
-# Dev Note: This message occurs on single-zone regions.check
+# Dev Note: The following message points to no authorization from VPC to Image.
 # > The IAM token that was specified in the request has expired or is invalid. The request is not authorized to access the Cloud Object Storage resource.
 # ibmcloud is image-create test --file cos://au-syd/mac-f672-mac-intel/mac-f672-rhcos.qcow2 --os-name rhel-coreos-stable-amd64
 # Ref: https://github.com/IBM-Cloud/terraform-provider-ibm/issues/4267
+# Ref: https://cloud.ibm.com/iam/authorizations/grant
 resource "ibm_is_image" "worker_image_id" {
   depends_on       = [null_resource.upload_rhcos_image, ibm_cos_bucket.cos_bucket]
   name             = "${var.name_prefix}-rhcos-img"
