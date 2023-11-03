@@ -63,6 +63,13 @@ variable "vpc_zone" {
   default     = ""
 }
 
+# only used when you have vpc_create set
+variable "vpc_resource_group" {
+  type        = string
+  description = "The resource group to create the vpc within"
+  default     = ""
+}
+
 ################################################################
 # Configure the PowerVS instance bastion details
 ################################################################
@@ -314,3 +321,8 @@ variable "skip_authorization_policy_create" {
   default     = false
 }
 
+variable "vpc_create" {
+  type        = bool
+  description = "creates the vpc with the given name"
+  default     = false
+}

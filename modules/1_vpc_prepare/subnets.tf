@@ -33,7 +33,7 @@ resource "ibm_is_public_gateway" "pg_worker_zone_1" {
   depends_on = [
     ibm_is_subnet.subnet_worker_zone_1
   ]
-  name = "pg_worker_zone_1"
+  name = "pg-worker-zone-1"
   vpc  = data.ibm_is_vpc.vpc.id
   zone = var.worker_1["zone"]
 
@@ -47,8 +47,8 @@ resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_1" {
   depends_on = [
     ibm_is_public_gateway.pg_worker_zone_1
   ]
-  subnet                = ibm_is_subnet.subnet_worker_zone_1.id
-  public_gateway         = ibm_is_public_gateway.pg_worker_zone_1.id
+  subnet         = ibm_is_subnet.subnet_worker_zone_1[0].id
+  public_gateway = ibm_is_public_gateway.pg_worker_zone_1[0].id
 }
 
 ### Zone 2
@@ -78,7 +78,7 @@ resource "ibm_is_public_gateway" "pg_worker_zone_2" {
   depends_on = [
     ibm_is_subnet.subnet_worker_zone_2
   ]
-  name = "pg_worker_zone_2"
+  name = "pg-worker-zone-2"
   vpc  = data.ibm_is_vpc.vpc.id
   zone = var.worker_2["zone"]
 
@@ -92,8 +92,8 @@ resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_2" {
   depends_on = [
     ibm_is_public_gateway.pg_worker_zone_2
   ]
-  subnet                = ibm_is_subnet.subnet_worker_zone_2.id
-  public_gateway         = ibm_is_public_gateway.pg_worker_zone_2.id
+  subnet         = ibm_is_subnet.subnet_worker_zone_2[0].id
+  public_gateway = ibm_is_public_gateway.pg_worker_zone_2[0].id
 }
 
 ### Zone 3
@@ -122,7 +122,7 @@ resource "ibm_is_public_gateway" "pg_worker_zone_3" {
   depends_on = [
     ibm_is_subnet.subnet_worker_zone_3
   ]
-  name = "pg_worker_zone_3"
+  name = "pg-worker-zone-3"
   vpc  = data.ibm_is_vpc.vpc.id
   zone = var.worker_3["zone"]
 
@@ -136,6 +136,6 @@ resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_3" {
   depends_on = [
     ibm_is_public_gateway.pg_worker_zone_3
   ]
-  subnet                = ibm_is_subnet.subnet_worker_zone_3.id
-  public_gateway         = ibm_is_public_gateway.pg_worker_zone_3.id
+  subnet         = ibm_is_subnet.subnet_worker_zone_3[0].id
+  public_gateway = ibm_is_public_gateway.pg_worker_zone_3[0].id
 }

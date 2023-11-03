@@ -27,10 +27,6 @@ variable "vpc_zone" {
   default     = ""
 }
 
-variable "vpc_resource_group" {}
-variable "vpc_create" {}
-variable "name_prefix" {}
-
 variable "powervs_region" {
   type        = string
   description = "The IBM Cloud region where you want to create the PowerVS workers"

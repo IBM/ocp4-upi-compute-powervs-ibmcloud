@@ -39,12 +39,15 @@ module "vpc" {
   source = "./modules/0_vpc"
 
   ibmcloud_api_key      = var.ibmcloud_api_key
+  vpc_create            = var.vpc_create
   vpc_name              = var.vpc_name
   vpc_region            = var.vpc_region
   vpc_zone              = var.vpc_zone
+  vpc_resource_group    = var.vpc_resource_group
   powervs_region        = var.powervs_region
   powervs_zone          = var.powervs_zone
   override_region_check = var.override_region_check
+  name_prefix           = var.name_prefix
 }
 
 ### Prepares the VPC Support Machine
