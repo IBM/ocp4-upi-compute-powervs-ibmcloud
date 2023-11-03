@@ -5,7 +5,7 @@
 
 locals {
   ansible_post_path = "/root/ocp4-upi-compute-powervs-ibmcloud/post"
-  worker_count = sum([var.worker_1["count"], var.worker_2["count"], var.worker_3["count"]])
+  worker_count      = sum([var.worker_1["count"], var.worker_2["count"], var.worker_3["count"]])
   ansible_vars = {
     region       = var.vpc_region
     zone         = var.vpc_zone
