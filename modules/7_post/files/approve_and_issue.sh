@@ -54,7 +54,7 @@ do
     LOCAL_WORKER_SCAN=$(($LOCAL_WORKER_SCAN + 1))
   done
 
-  if [ "${IDX}" -eq "240" ]
+  if [ "${IDX}" -eq "120" ]
   then
     echo "Exceeded the wait time for CSRs to be generated - >120 minutes"
     exit -1
