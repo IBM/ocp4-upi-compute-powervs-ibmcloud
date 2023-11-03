@@ -9,6 +9,7 @@ variable "rhcos_image_id" {}
 variable "vpc_name" {}
 variable "vpc_key_id" {}
 variable "ignition_ip" {}
+variable "create_custom_subnet" {}
 
 variable "worker_1" {
   type = object({ count = number, profile = string, zone = string })

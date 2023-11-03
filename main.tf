@@ -144,15 +144,16 @@ module "worker" {
   depends_on = [module.image]
   source     = "./modules/6_worker"
 
-  worker_1            = var.worker_1
-  worker_2            = var.worker_2
-  worker_3            = var.worker_3
-  name_prefix         = local.name_prefix
-  rhcos_image_id      = module.image.rhcos_image_id
-  vpc_name            = var.vpc_name
-  vpc_key_id          = module.vpc_prepare.vpc_key_id
-  ignition_ip         = var.powervs_bastion_private_ip
-  target_worker_sg_id = module.vpc_prepare.target_worker_sg_id
+  worker_1             = var.worker_1
+  worker_2             = var.worker_2
+  worker_3             = var.worker_3
+  name_prefix          = local.name_prefix
+  rhcos_image_id       = module.image.rhcos_image_id
+  vpc_name             = var.vpc_name
+  vpc_key_id           = module.vpc_prepare.vpc_key_id
+  ignition_ip          = var.powervs_bastion_private_ip
+  target_worker_sg_id  = module.vpc_prepare.target_worker_sg_id
+  create_custom_subnet = var.create_custom_subnet
 }
 
 module "post" {

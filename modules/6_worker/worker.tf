@@ -10,6 +10,14 @@ data "ibm_is_vpc" "vpc" {
   name = var.vpc_name
 }
 
+data "ibm_is_subnets" "vpc_subnets" {
+  routing_table_name = data.ibm_is_vpc.vpc.default_routing_table_name
+}
+
+locals {
+  vpc_subnet_id = var.create_custom_subnet == true ? data.ibm_is_subnets.vpc_subnets.subnets[0].id : data.ibm_is_vpc.vpc.subnets[0].id
+}
+
 resource "ibm_is_instance" "workers_1" {
   count          = var.worker_1["count"]
   name           = "${var.name_prefix}-worker-z1-${count.index}"
@@ -21,7 +29,7 @@ resource "ibm_is_instance" "workers_1" {
   resource_group = data.ibm_is_vpc.vpc.resource_group
 
   primary_network_interface {
-    subnet          = data.ibm_is_vpc.vpc.subnets[0].id
+    subnet          = local.vpc_subnet_id #data.ibm_is_vpc.vpc.subnets[0].id
     security_groups = [var.target_worker_sg_id]
   }
 

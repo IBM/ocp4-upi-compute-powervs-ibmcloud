@@ -24,6 +24,7 @@ resource "ibm_is_subnet" "subnet_worker_zone_1" {
   name            = "worker-zone-1-subnet"
   vpc             = data.ibm_is_vpc.vpc.id
   zone            = var.worker_1["zone"]
+  resource_group  = data.ibm_is_vpc.vpc.resource_group
 }
 
 resource "ibm_is_vpc_address_prefix" "address_prefix_worker_zone_2" {
@@ -43,12 +44,13 @@ resource "ibm_is_subnet" "subnet_worker_zone_2" {
   name            = "worker-zone-2-subnet"
   vpc             = data.ibm_is_vpc.vpc.id
   zone            = var.worker_2["zone"]
+  resource_group  = data.ibm_is_vpc.vpc.resource_group
 }
 
 resource "ibm_is_vpc_address_prefix" "address_prefix_worker_zone_3" {
   count = var.create_custom_subnet ? 1 : 0
   cidr  = "10.0.3.0/24"
-  name  = "worker-zone-2-add-prefix"
+  name  = "worker-zone-3-add-prefix"
   vpc   = data.ibm_is_vpc.vpc.id
   zone  = var.worker_3["zone"]
 }
@@ -59,7 +61,8 @@ resource "ibm_is_subnet" "subnet_worker_zone_3" {
     ibm_is_vpc_address_prefix.address_prefix_worker_zone_3
   ]
   ipv4_cidr_block = "10.0.3.0/24"
-  name            = "worker-zone-2-subnet"
+  name            = "worker-zone-3-subnet"
   vpc             = data.ibm_is_vpc.vpc.id
   zone            = var.worker_3["zone"]
+  resource_group  = data.ibm_is_vpc.vpc.resource_group
 }
