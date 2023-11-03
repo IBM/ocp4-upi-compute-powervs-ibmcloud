@@ -15,6 +15,7 @@ resource "ibm_is_vpc_address_prefix" "address_prefix_worker_zone_1" {
   zone  = var.worker_1["zone"]
 }
 
+### Zone 1
 resource "ibm_is_subnet" "subnet_worker_zone_1" {
   count = var.create_custom_subnet ? 1 : 0
   depends_on = [
@@ -26,6 +27,31 @@ resource "ibm_is_subnet" "subnet_worker_zone_1" {
   zone            = var.worker_1["zone"]
   resource_group  = data.ibm_is_vpc.vpc.resource_group
 }
+
+resource "ibm_is_public_gateway" "pg_worker_zone_1" {
+  count = var.create_custom_subnet ? 1 : 0
+  depends_on = [
+    ibm_is_subnet.subnet_worker_zone_1
+  ]
+  name = "pg_worker_zone_1"
+  vpc  = data.ibm_is_vpc.vpc.id
+  zone = var.worker_1["zone"]
+
+  timeouts {
+    create = "10m"
+  }
+}
+
+resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_1" {
+  count = var.create_custom_subnet ? 1 : 0
+  depends_on = [
+    ibm_is_public_gateway.pg_worker_zone_1
+  ]
+  subnet                = ibm_is_subnet.subnet_worker_zone_1.id
+  public_gateway         = ibm_is_public_gateway.pg_worker_zone_1.id
+}
+
+### Zone 2
 
 resource "ibm_is_vpc_address_prefix" "address_prefix_worker_zone_2" {
   count = var.create_custom_subnet ? 1 : 0
@@ -47,6 +73,30 @@ resource "ibm_is_subnet" "subnet_worker_zone_2" {
   resource_group  = data.ibm_is_vpc.vpc.resource_group
 }
 
+resource "ibm_is_public_gateway" "pg_worker_zone_2" {
+  count = var.create_custom_subnet ? 1 : 0
+  depends_on = [
+    ibm_is_subnet.subnet_worker_zone_2
+  ]
+  name = "pg_worker_zone_2"
+  vpc  = data.ibm_is_vpc.vpc.id
+  zone = var.worker_2["zone"]
+
+  timeouts {
+    create = "10m"
+  }
+}
+
+resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_2" {
+  count = var.create_custom_subnet ? 1 : 0
+  depends_on = [
+    ibm_is_public_gateway.pg_worker_zone_2
+  ]
+  subnet                = ibm_is_subnet.subnet_worker_zone_2.id
+  public_gateway         = ibm_is_public_gateway.pg_worker_zone_2.id
+}
+
+### Zone 3
 resource "ibm_is_vpc_address_prefix" "address_prefix_worker_zone_3" {
   count = var.create_custom_subnet ? 1 : 0
   cidr  = "10.0.3.0/24"
@@ -65,4 +115,27 @@ resource "ibm_is_subnet" "subnet_worker_zone_3" {
   vpc             = data.ibm_is_vpc.vpc.id
   zone            = var.worker_3["zone"]
   resource_group  = data.ibm_is_vpc.vpc.resource_group
+}
+
+resource "ibm_is_public_gateway" "pg_worker_zone_3" {
+  count = var.create_custom_subnet ? 1 : 0
+  depends_on = [
+    ibm_is_subnet.subnet_worker_zone_3
+  ]
+  name = "pg_worker_zone_3"
+  vpc  = data.ibm_is_vpc.vpc.id
+  zone = var.worker_3["zone"]
+
+  timeouts {
+    create = "10m"
+  }
+}
+
+resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_3" {
+  count = var.create_custom_subnet ? 1 : 0
+  depends_on = [
+    ibm_is_public_gateway.pg_worker_zone_3
+  ]
+  subnet                = ibm_is_subnet.subnet_worker_zone_3.id
+  public_gateway         = ibm_is_public_gateway.pg_worker_zone_3.id
 }
