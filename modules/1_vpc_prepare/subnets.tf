@@ -51,7 +51,7 @@ resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_1" {
   subnet         = ibm_is_subnet.subnet_worker_zone_1[0].id
   public_gateway = ibm_is_public_gateway.pg_worker_zone_1[0].id
 }
-/*
+
 ### Zone 2
 
 resource "ibm_is_vpc_address_prefix" "address_prefix_worker_zone_2" {
@@ -143,4 +143,3 @@ resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_3" {
   public_gateway = ibm_is_public_gateway.pg_worker_zone_3[0].id
 }
 
-*/
