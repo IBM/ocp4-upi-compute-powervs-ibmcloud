@@ -82,7 +82,7 @@ resource "null_resource" "approve_and_issue" {
 
   #create approval script
   provisioner "file" {
-    content     = "${path.module}/files/approve_and_issue.sh"
+    source      = "${path.module}/files/approve_and_issue.sh"
     destination = "${local.ansible_post_path}/approve_and_issue.sh"
   }
 
