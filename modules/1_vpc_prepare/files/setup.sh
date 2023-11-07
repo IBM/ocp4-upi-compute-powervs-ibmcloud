@@ -24,4 +24,4 @@ ibmcloud login --apikey "${API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}"
 ibmcloud plugin install -f cloud-internet-services vpc-infrastructure cloud-object-storage is dns cis
 
 # Pin the version to 0.4.9 (v1.0.0 may be incompatible)
-ibmcloud plugin install -f power-iaas -v 0.4.9
+ibmcloud plugin install -v 0.4.9 -f power-iaas

@@ -35,7 +35,7 @@ if [[ $(type -t ic) == function ]]
 then
     IBMCLOUD=ic
 else 
-    ${IBMCLOUD} plugin install power-iaas -f
+    ${IBMCLOUD} plugin install -v 0.4.9 -f power-iaas
 fi
 
 if [ ! -z "${1}" ]
