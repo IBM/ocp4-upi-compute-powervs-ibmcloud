@@ -58,13 +58,17 @@ module "vpc_prepare" {
   depends_on = [module.vpc]
   source     = "./modules/1_vpc_prepare"
 
-  vpc_name        = var.vpc_name
-  vpc_region      = var.vpc_region
-  vpc_zone        = var.vpc_zone
-  resource_group  = module.vpc.vpc_resource_group
-  public_key      = var.public_key
-  public_key_file = var.public_key_file
-  #  key_id             = module.vpc_prepare.key_id
+  private_key_file     = var.private_key_file
+  ssh_agent            = var.ssh_agent
+  connection_timeout   = var.connection_timeout
+  rhel_username        = var.rhel_username
+  bastion_public_ip    = var.powervs_bastion_ip
+  vpc_name             = var.vpc_name
+  vpc_region           = var.vpc_region
+  vpc_zone             = var.vpc_zone
+  resource_group       = module.vpc.vpc_resource_group
+  public_key           = var.public_key
+  public_key_file      = var.public_key_file
   powervs_machine_cidr = var.powervs_machine_cidr
   worker_1             = var.worker_1
   worker_2             = var.worker_2

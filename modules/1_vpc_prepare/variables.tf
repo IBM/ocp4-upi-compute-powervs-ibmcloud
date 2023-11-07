@@ -50,3 +50,10 @@ variable "worker_3" {
   }
 }
 variable "create_custom_subnet" {}
+
+## SSH related
+variable "ssh_agent" {}
+variable "bastion_public_ip" {}
+variable "private_key_file" {}
+variable "connection_timeout" {}
+variable "rhel_username" {}
