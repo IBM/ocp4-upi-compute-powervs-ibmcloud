@@ -6,12 +6,15 @@
 ################################################################
 
 # Approve and Issue CSRs for our generated amd64 workers only
+# The hostname is of the style - ${name_prefix}-worker-${ZONE}-${index}
 
 # Var: ${self.triggers.counts}
 INTEL_COUNT="${1}"
 
 # Var: ${self.triggers.approve}
 INTEL_PREFIX="${2}"
+
+INTEL_ZONE="${3}"
 
 APPROVED_WORKERS=0
 ISSUED_WORKERS=0
@@ -33,7 +36,7 @@ do
     NODE_NAME=$(echo ${CSR_REQU} | base64 -d | openssl req -text | grep 'Subject:' | awk '{print $NF}')
     echo "NODE_NAME: ${NODE_NAME}"
 
-    if grep -q "system:node:${INTEL_PREFIX}-worker-" <<< "$NODE_NAME"
+    if grep -q "system:node:${INTEL_PREFIX}-worker-${INTEL_ZONE}-${INTEL_ZONE}-" <<< "$NODE_NAME"
     then
       echo ""
       echo "${CSR_NAME}" | xargs -r oc adm certificate approve
@@ -45,10 +48,10 @@ do
   while [ "$LOCAL_WORKER_SCAN" -lt "$INTEL_COUNT" ]
   do
     # username: system:node:mac-674e-worker-0
-    for CSR_NAME in $(oc get csr -o json | jq -r '.items[] | select (.spec.username == "'system:node:${INTEL_PREFIX}-worker-${ISSUED_WORKERS}'")' | jq -r '.metadata.name')
+    for CSR_NAME in $(oc get csr -o json | jq -r '.items[] | select (.spec.username == "'system:node:${INTEL_PREFIX}-worker-${INTEL_ZONE}-${ISSUED_WORKERS}'")' | jq -r '.metadata.name')
     do
       # Dev note: will approve more than one matching csr
-      echo "Approving: ${CSR_NAME} system:node:${INTEL_PREFIX}-worker-${ISSUED_WORKERS}"
+      echo "Approving: ${CSR_NAME} system:node:${INTEL_PREFIX}-worker-${INTEL_ZONE}-${ISSUED_WORKERS}"
       echo "${CSR_NAME}" | xargs -r oc adm certificate approve
     done
     LOCAL_WORKER_SCAN=$(($LOCAL_WORKER_SCAN + 1))
@@ -66,10 +69,10 @@ do
   do
     EXISTS=$(oc get nodes -l kubernetes.io/arch=amd64 -o json | \
       jq -r '.items[].metadata.name' | \
-      grep "${INTEL_PREFIX}-worker-${ISSUED_WORKERS}")
+      grep "${INTEL_PREFIX}-worker-${INTEL_ZONE}-${ISSUED_WORKERS}")
     if [ -z "${EXISTS}" ]
     then
-      echo "Haven't found worker yet: ${INTEL_PREFIX}-worker-${ISSUED_WORKERS}"
+      echo "Haven't found worker yet: ${INTEL_PREFIX}-worker-${INTEL_ZONE}-${ISSUED_WORKERS}"
       STOP_SEARCH="NOT_FOUND"
       break
     fi
