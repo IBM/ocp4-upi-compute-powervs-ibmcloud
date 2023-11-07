@@ -187,8 +187,58 @@ EOF
   }
 }
 
-resource "null_resource" "updating_load_balancers" {
+# Dev Note: only on destroy - restore the load balancers
+resource "null_resource" "remove_lbs" {
   depends_on = [null_resource.patch_nfs_arch_ppc64le]
+
+  triggers = {
+    count_1           = var.worker_1["count"]
+    count_2           = var.worker_2["count"]
+    count_3           = var.worker_3["count"]
+    user              = var.rhel_username
+    timeout           = "${var.connection_timeout}m"
+    name_prefix       = "${var.name_prefix}"
+    private_key       = file(var.private_key_file)
+    host              = var.bastion_public_ip
+    agent             = var.ssh_agent
+    ansible_post_path = local.ansible_post_path
+  }
+
+  connection {
+    type        = "ssh"
+    user        = self.triggers.user
+    private_key = self.triggers.private_key
+    host        = self.triggers.host
+    agent       = self.triggers.agent
+    timeout     = self.triggers.timeout
+  }
+
+  provisioner "remote-exec" {
+    inline = [<<EOF
+mkdir -p /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
+EOF
+    ]
+  }
+
+  provisioner "file" {
+    source      = "${path.module}/files/remove_lbs.sh"
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/remove_lbs.sh"
+  }
+
+  provisioner "remote-exec" {
+    when       = destroy
+    on_failure = continue
+    inline = [<<EOF
+cd /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
+bash remove_lbs.sh
+EOF
+    ]
+  }
+}
+
+
+resource "null_resource" "updating_load_balancers" {
+  depends_on = [null_resource.patch_nfs_arch_ppc64le, null_resource.remove_lbs]
   connection {
     type        = "ssh"
     user        = var.rhel_username
@@ -206,15 +256,15 @@ EOF
   }
 
   provisioner "file" {
-    source      = "${path.module}/files/update-lbs.sh"
-    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/update-lbs.sh"
+    source      = "${path.module}/files/update_lbs.sh"
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/update_lbs.sh"
   }
 
   # Dev Note: Updates the load balancers
   provisioner "remote-exec" {
     inline = [<<EOF
 cd /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
-bash update-lbs.sh
+bash update_lbs.sh
 EOF
     ]
   }
