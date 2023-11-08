@@ -82,12 +82,11 @@ resource "ibm_is_instance" "workers_3" {
     security_groups = [var.target_worker_sg_id]
   }
 
-  user_data = base64encode(
-    templatefile(
-      "${path.cwd}/modules/6_worker/templates/worker.ign",
-      {
-        ignition_ip : var.ignition_ip,
-  }))
+  user_data = templatefile(
+    "${path.cwd}/modules/6_worker/templates/worker.ign",
+    {
+      ignition_ip : var.ignition_ip,
+  })
 }
 
 # Waiting for Intel instances to start
