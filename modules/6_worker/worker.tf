@@ -14,8 +14,12 @@ data "ibm_is_subnets" "vpc_subnets" {
   routing_table_name = data.ibm_is_vpc.vpc.default_routing_table_name
 }
 
+# Dev Note: greedy search for the first matching subnet that uses the worker_1's zone.
 locals {
-  vpc_subnet_id = var.create_custom_subnet == true ? data.ibm_is_subnets.vpc_subnets.subnets[0].id : data.ibm_is_vpc.vpc.subnets[0].id
+  vpc_subnet_id    = var.create_custom_subnet == true ? data.ibm_is_subnets.vpc_subnets.subnets[0].id : data.ibm_is_vpc.vpc.subnets[0].id
+  subnet_for_zone1 = [for subnet in data.ibm_is_subnets.vpc_subnets.subnets : subnet.id if subnet.zone == var.worker_1["zone"]]
+  subnet_for_zone2 = [for subnet in data.ibm_is_subnets.vpc_subnets.subnets : subnet.id if subnet.zone == var.worker_2["zone"]]
+  subnet_for_zone3 = [for subnet in data.ibm_is_subnets.vpc_subnets.subnets : subnet.id if subnet.zone == var.worker_3["zone"]]
 }
 
 resource "ibm_is_instance" "workers_1" {
@@ -29,7 +33,8 @@ resource "ibm_is_instance" "workers_1" {
   resource_group = data.ibm_is_vpc.vpc.resource_group
 
   primary_network_interface {
-    subnet          = local.vpc_subnet_id #data.ibm_is_vpc.vpc.subnets[0].id
+    subnet = local.subnet_for_zone1[0]
+    # local.vpc_subnet_id
     security_groups = [var.target_worker_sg_id]
   }
 
@@ -51,7 +56,7 @@ resource "ibm_is_instance" "workers_2" {
   resource_group = data.ibm_is_vpc.vpc.resource_group
 
   primary_network_interface {
-    subnet          = data.ibm_is_vpc.vpc.subnets[1].id
+    subnet          = local.subnet_for_zone2[0]
     security_groups = [var.target_worker_sg_id]
   }
 
@@ -73,7 +78,7 @@ resource "ibm_is_instance" "workers_3" {
   resource_group = data.ibm_is_vpc.vpc.resource_group
 
   primary_network_interface {
-    subnet          = data.ibm_is_vpc.vpc.subnets[2].id
+    subnet          = local.subnet_for_zone3[0]
     security_groups = [var.target_worker_sg_id]
   }
 

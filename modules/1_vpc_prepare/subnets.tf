@@ -142,4 +142,3 @@ resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_3" {
   subnet         = ibm_is_subnet.subnet_worker_zone_3[0].id
   public_gateway = ibm_is_public_gateway.pg_worker_zone_3[0].id
 }
-

@@ -67,8 +67,9 @@ do
   fi
   IDX=$(($IDX + 1))
 
-  # Wait for 10 seconds before we hammer the system
-  sleep 10
+  # Wait for 30 seconds before we hammer the system
+  echo "Sleeping before re-running - 30 seconds"
+  sleep 30
 
   # Re-read the 'Ready' count
   READY_COUNT=$(oc get nodes -l kubernetes.io/arch=amd64 | grep "${MACHINE_PREFIX}" | grep -v NotReady | grep -c Ready)
