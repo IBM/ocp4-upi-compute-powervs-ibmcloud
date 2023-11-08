@@ -53,7 +53,6 @@ resource "ibm_is_subnet_public_gateway_attachment" "attach_pg_worker_zone_1" {
 }
 
 ### Zone 2
-
 resource "ibm_is_vpc_address_prefix" "address_prefix_worker_zone_2" {
   count = var.create_custom_subnet ? 1 : 0
   cidr  = "10.0.2.0/24"

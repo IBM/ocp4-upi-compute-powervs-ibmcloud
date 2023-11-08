@@ -10,6 +10,17 @@
 # Dev Note: This is the file where the VPC should be created in the future.
 # The code should follow the checks, and conditionally create the vpc.
 # outputs need to be updated and passed back to the user.
+### create
+module "create" {
+  count = var.vpc_create ? 1 : 0
+  providers = {
+    ibm = ibm
+  }
+  source = "./create"
+
+  vpc_name           = var.vpc_name
+  vpc_resource_group = var.vpc_resource_group
+}
 
 module "reuse" {
   count = var.vpc_create ? 0 : 1
@@ -25,17 +36,4 @@ module "reuse" {
   powervs_region        = var.powervs_region
   powervs_zone          = var.powervs_zone
   override_region_check = var.override_region_check
-}
-
-
-### create
-module "create" {
-  count = var.vpc_create ? 1 : 0
-  providers = {
-    ibm = ibm
-  }
-  source = "./create"
-
-  vpc_name           = var.vpc_name
-  vpc_resource_group = var.vpc_resource_group
 }
