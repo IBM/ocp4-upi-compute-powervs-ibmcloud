@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
+variable "vpc_create" {}
 variable "vpc_name" {}
 variable "vpc_region" {}
 variable "vpc_zone" {}

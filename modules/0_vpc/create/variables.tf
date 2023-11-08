@@ -3,5 +3,5 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
-variable "name_prefix" {}
+variable "vpc_name" {}
 variable "vpc_resource_group" {}

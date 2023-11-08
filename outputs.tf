@@ -10,3 +10,8 @@ Login to you OCP cluster and get oc get nodes to see your Intel nodes.
 oc get nodes -l kubernetes.io/arch=amd64
 EOF
 }
+
+output "vpc_name" {
+  description = "The name of the vpc"
+  value       = local.vpc_name
+}

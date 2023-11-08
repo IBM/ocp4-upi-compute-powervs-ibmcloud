@@ -36,6 +36,6 @@ module "create" {
   }
   source = "./create"
 
-  name_prefix        = var.name_prefix
+  vpc_name           = var.vpc_name
   vpc_resource_group = var.vpc_resource_group
 }

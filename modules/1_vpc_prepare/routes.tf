@@ -13,10 +13,10 @@ locals {
 }
 
 resource "ibm_is_vpc_routing_table_route" "route_to_powervs" {
-  count         = local.rt_exists
+  count         = var.vpc_create ? 1 : local.rt_exists
   vpc           = data.ibm_is_vpc.vpc.id
   routing_table = data.ibm_is_vpc.vpc.default_routing_table
-  zone          = data.ibm_is_vpc.vpc.subnets[0].zone
+  zone          = var.vpc_create ? ibm_is_subnet.subnet_worker_zone_1[0].zone : data.ibm_is_vpc.vpc.subnets[0].zone
   name          = "to-powervs-route-1"
   destination   = var.powervs_machine_cidr
   action        = "delegate_vpc"
