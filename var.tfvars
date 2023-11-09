@@ -20,9 +20,9 @@ powervs_zone                = "<zone>"
 # Zone 1
 worker_1 = { count = "1", profile = "cx2-8x16", "zone" = "au-syd-1" }
 # Zone 2
-# worker_2                = { count = "1", profile = "cx2-8x16", "zone" = "au-syd-2" }
+worker_2 = { count = "0", profile = "cx2-8x16", "zone" = "au-syd-2" }
 # Zone 3
-# worker_3                = { count = "1", profile = "cx2-8x16", "zone" = "au-syd-3" }
+worker_3 = { count = "0", profile = "cx2-8x16", "zone" = "au-syd-3" }
 
 # Public and Private Key for Bastion Nodes
 public_key_file  = "data/id_rsa.pub"
