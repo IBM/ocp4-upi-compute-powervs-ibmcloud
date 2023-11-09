@@ -19,6 +19,11 @@ INTEL_ZONE="${3}"
 # Machine Prefix
 MACHINE_PREFIX="${INTEL_PREFIX}-worker-${INTEL_ZONE}"
 
+if [ "0" -eq "${INTEL_COUNT}" ]
+then
+  echo "There are no workers in the ${INTEL_ZONE}"
+fi
+
 IDX=0
 READY_COUNT=$(oc get nodes -l kubernetes.io/arch=amd64 | grep "${MACHINE_PREFIX}" | grep -v NotReady | grep -c Ready)
 while [ "${READY_COUNT}" -ne "${INTEL_COUNT}" ]
