@@ -22,6 +22,7 @@ MACHINE_PREFIX="${INTEL_PREFIX}-worker-${INTEL_ZONE}"
 if [ "0" -eq "${INTEL_COUNT}" ]
 then
   echo "There are no workers in the ${INTEL_ZONE}"
+  exit 0
 fi
 
 IDX=0
