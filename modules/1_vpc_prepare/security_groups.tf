@@ -3,6 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
+data "ibm_is_security_groups" "supp_vm_sgs" {
+  vpc_id = data.ibm_is_vpc.vpc.id
+}
+
+locals {
+  sgs = [for x in data.ibm_is_security_groups.supp_vm_sgs.security_groups : x.id if x.name == "${var.vpc_name}-workers-sg"]
+}
+
 resource "ibm_is_security_group" "worker_vm_sg" {
   count          = !var.skip_create_security_group ? 1 : 0
   name           = "${var.vpc_name}-workers-sg"

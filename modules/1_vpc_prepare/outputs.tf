@@ -16,7 +16,7 @@ output "vpc_crn" {
 }
 
 output "target_worker_sg_id" {
-  value = length([for x in data.ibm_is_security_groups.sgs.security_groups : x if endswith(x.name, "${var.vpc_name}-workers-sg")]) == 0 ? ibm_is_security_group.worker_vm_sg[0].id : [for x in data.ibm_is_security_groups.sgs.security_groups : x if endswith(x.name, "${var.vpc_name}-workers-sg")][0].id
+  value = !var.skip_create_security_group ? ibm_is_security_group.worker_vm_sg[0].id : local.sgs[0].id
 }
 
 output "mac_vpc_subnets" {
