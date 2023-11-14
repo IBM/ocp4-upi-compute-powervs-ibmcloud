@@ -68,6 +68,7 @@ module "vpc_prepare" {
   vpc_name             = local.vpc_name
   vpc_region           = var.vpc_region
   vpc_zone             = var.vpc_zone
+  vpc_skip_ssh_key_create = var.vpc_skip_ssh_key_create
   resource_group       = module.vpc.vpc_resource_group
   public_key           = var.public_key
   public_key_file      = var.public_key_file

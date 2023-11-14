@@ -326,3 +326,9 @@ variable "vpc_create" {
   description = "creates the vpc with the given name"
   default     = false
 }
+
+variable "vpc_skip_ssh_key_create" {
+  type = bool
+  description = "skips the creation of the ssh keys in the vpc environment"
+  default     = false
+}

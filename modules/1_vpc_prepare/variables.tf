@@ -7,6 +7,7 @@ variable "vpc_create" {}
 variable "vpc_name" {}
 variable "vpc_region" {}
 variable "vpc_zone" {}
+variable "vpc_skip_ssh_key_create" {}
 variable "public_key_file" {}
 variable "public_key" {}
 variable "powervs_machine_cidr" {}

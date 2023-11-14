@@ -4,11 +4,11 @@
 ################################################################
 
 output "vpc_check_key" {
-  value = local.check_key
+  value = module.keys.vpc_check_key
 }
 
 output "vpc_key_id" {
-  value = local.key_id
+  value = module.keys.vpc_key_id
 }
 
 output "vpc_crn" {
@@ -16,7 +16,7 @@ output "vpc_crn" {
 }
 
 output "target_worker_sg_id" {
-  value = local.sg_not_exists == 1 ? ibm_is_security_group.worker_vm_sg[0].id : [for x in data.ibm_is_security_groups.sgs.security_groups : x.id if endswith(x.name, "${var.vpc_name}-workers-sg")][0]
+  value = ibm_is_security_group.worker_vm_sg[0].id
 }
 
 output "mac_vpc_subnets" {

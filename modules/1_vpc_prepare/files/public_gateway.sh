@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
-# Upload RHCOS to ibmcloud cos and starts an import
+# This script adds public gateways to subnets which don't yet have public gateways.
 
 API_KEY="${1}"
 REGION="${2}"
