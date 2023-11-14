@@ -79,6 +79,7 @@ module "vpc_prepare" {
   worker_3                   = var.worker_3
   create_custom_subnet       = var.create_custom_subnet
   skip_create_security_group = var.skip_create_security_group
+  skip_route_creation        = var.skip_route_creation
 }
 
 ### Prepares the VPC Support Machine
