@@ -17,4 +17,5 @@ module "keys" {
   create_custom_subnet = var.create_custom_subnet
   vpc_resource_group   = data.ibm_is_vpc.vpc.resource_group
   vpc_skip_ssh_key_create = var.vpc_skip_ssh_key_create
+  name_prefix = var.name_prefix
 }

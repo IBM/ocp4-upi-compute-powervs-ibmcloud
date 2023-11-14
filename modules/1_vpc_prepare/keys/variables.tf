@@ -10,3 +10,4 @@ variable "vpc_create" {}
 variable "vpc_name" {}
 variable "vpc_resource_group" {}
 variable "vpc_skip_ssh_key_create" {}
+variable "name_prefix" {}

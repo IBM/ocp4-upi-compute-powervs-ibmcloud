@@ -12,6 +12,7 @@ variable "public_key_file" {}
 variable "public_key" {}
 variable "powervs_machine_cidr" {}
 variable "resource_group" {}
+variable "name_prefix" {}
 
 variable "worker_1" {
   type = object({ count = number, profile = string, zone = string })

@@ -7,3 +7,4 @@ variable "public_key_file" {}
 variable "public_key" {}
 variable "vpc_name" {}
 variable "vpc_resource_group" {}
+variable "name_prefix" {}

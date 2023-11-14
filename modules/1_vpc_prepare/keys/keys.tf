@@ -20,7 +20,6 @@ module "check" {
 }
 
 module "create_new" {
-  count = var.vpc_skip_ssh_key_create ? 0 : 1
   depends_on = [ module.check ]
   providers = {
     ibm = ibm
@@ -32,4 +31,5 @@ module "create_new" {
   public_key         = var.public_key
   vpc_name           = var.vpc_name
   vpc_resource_group = var.vpc_resource_group
+  name_prefix = var.name_prefix
 }
