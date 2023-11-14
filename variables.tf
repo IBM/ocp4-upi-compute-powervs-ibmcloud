@@ -332,3 +332,10 @@ variable "vpc_skip_ssh_key_create" {
   description = "skips the creation of the ssh keys in the vpc environment"
   default     = false
 }
+
+variable "skip_create_security_group" {
+  type        = bool
+  description = "skips the creation of the security group in a vpc environment"
+  default     = false
+}
+

@@ -59,25 +59,26 @@ module "vpc_prepare" {
   depends_on = [module.vpc]
   source     = "./modules/1_vpc_prepare"
 
-  private_key_file        = var.private_key_file
-  ssh_agent               = var.ssh_agent
-  connection_timeout      = var.connection_timeout
-  rhel_username           = var.rhel_username
-  bastion_public_ip       = var.powervs_bastion_ip
-  vpc_create              = var.vpc_create
-  vpc_name                = local.vpc_name
-  vpc_region              = var.vpc_region
-  vpc_zone                = var.vpc_zone
-  vpc_skip_ssh_key_create = var.vpc_skip_ssh_key_create
-  name_prefix             = local.name_prefix
-  resource_group          = module.vpc.vpc_resource_group
-  public_key              = var.public_key
-  public_key_file         = var.public_key_file
-  powervs_machine_cidr    = var.powervs_machine_cidr
-  worker_1                = var.worker_1
-  worker_2                = var.worker_2
-  worker_3                = var.worker_3
-  create_custom_subnet    = var.create_custom_subnet
+  private_key_file           = var.private_key_file
+  ssh_agent                  = var.ssh_agent
+  connection_timeout         = var.connection_timeout
+  rhel_username              = var.rhel_username
+  bastion_public_ip          = var.powervs_bastion_ip
+  vpc_create                 = var.vpc_create
+  vpc_name                   = local.vpc_name
+  vpc_region                 = var.vpc_region
+  vpc_zone                   = var.vpc_zone
+  vpc_skip_ssh_key_create    = var.vpc_skip_ssh_key_create
+  name_prefix                = local.name_prefix
+  resource_group             = module.vpc.vpc_resource_group
+  public_key                 = var.public_key
+  public_key_file            = var.public_key_file
+  powervs_machine_cidr       = var.powervs_machine_cidr
+  worker_1                   = var.worker_1
+  worker_2                   = var.worker_2
+  worker_3                   = var.worker_3
+  create_custom_subnet       = var.create_custom_subnet
+  skip_create_security_group = var.skip_create_security_group
 }
 
 ### Prepares the VPC Support Machine
