@@ -20,7 +20,7 @@ module "check" {
 }
 
 module "create_new" {
-  depends_on = [ module.check ]
+  depends_on = [module.check]
   providers = {
     ibm = ibm
   }
@@ -31,5 +31,5 @@ module "create_new" {
   public_key         = var.public_key
   vpc_name           = var.vpc_name
   vpc_resource_group = var.vpc_resource_group
-  name_prefix = var.name_prefix
+  name_prefix        = var.name_prefix
 }
