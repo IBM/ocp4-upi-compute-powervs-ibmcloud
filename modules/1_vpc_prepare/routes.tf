@@ -4,6 +4,7 @@
 ################################################################
 
 resource "ibm_is_vpc_routing_table_route" "route_to_powervs" {
+  count = var.skip_route_creation ? 0 : 1
   vpc           = data.ibm_is_vpc.vpc.id
   routing_table = data.ibm_is_vpc.vpc.default_routing_table
   zone          = var.vpc_create || var.create_custom_subnet ? ibm_is_subnet.subnet_worker_zone_1[0].zone : data.ibm_is_vpc.vpc.subnets[0].zone

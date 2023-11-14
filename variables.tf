@@ -339,3 +339,9 @@ variable "skip_create_security_group" {
   default     = false
 }
 
+variable "skip_route_creation" {
+  type        = bool
+  description = "skips the creation of the route table entry in a vpc environment"
+  default     = false
+}
+

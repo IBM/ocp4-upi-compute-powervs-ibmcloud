@@ -61,3 +61,4 @@ variable "private_key_file" {}
 variable "connection_timeout" {}
 variable "rhel_username" {}
 variable "skip_create_security_group" {}
+variable "skip_route_creation" {}
