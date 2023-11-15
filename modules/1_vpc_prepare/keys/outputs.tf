@@ -4,9 +4,9 @@
 ################################################################
 
 output "vpc_check_key" {
-  value = var.vpc_create || var.create_custom_subnet ? module.create_new[0].vpc_check_key : module.check.check_key
+  value = var.vpc_create || var.create_custom_subnet ? module.create_new.vpc_check_key : module.check.check_key
 }
 
 output "vpc_key_id" {
-  value = var.vpc_create || var.create_custom_subnet ? module.create_new[0].vpc_key_id : module.check.keys
+  value = var.vpc_create || var.create_custom_subnet ? module.create_new.vpc_key_id : module.check.keys
 }
