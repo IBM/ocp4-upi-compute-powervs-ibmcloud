@@ -27,10 +27,10 @@ module "create_new" {
 
   source = "./create_new"
 
-  public_key_file    = var.public_key_file
-  public_key         = var.public_key
-  vpc_name           = var.vpc_name
-  vpc_resource_group = var.vpc_resource_group
-  name_prefix        = var.name_prefix
-  vpc_skip_ssh_key_create =var.vpc_skip_ssh_key_create
+  public_key_file         = var.public_key_file
+  public_key              = var.public_key
+  vpc_name                = var.vpc_name
+  vpc_resource_group      = var.vpc_resource_group
+  name_prefix             = var.name_prefix
+  vpc_skip_ssh_key_create = var.vpc_skip_ssh_key_create
 }
