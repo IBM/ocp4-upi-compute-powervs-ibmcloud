@@ -23,12 +23,12 @@ locals {
 
 resource "ibm_is_ssh_key" "vpc_support_ssh_key_cond_create" {
   depends_on     = [data.ibm_is_ssh_keys.keys]
-  count          = length(data.ibm_is_ssh_keys.keys) == 0 ? 1 : 0
+  count          = !var.vpc_skip_ssh_key_create ? 1 : 0
   name           = "${var.vpc_name}-${var.name_prefix}-keypair"
   public_key     = local.public_key
   resource_group = var.vpc_resource_group
 }
 
 locals {
-  key_id = local.keys == [] ? ibm_is_ssh_key.vpc_support_ssh_key_cond_create[0].id : local.keys[0].id
+  key_id = !var.vpc_skip_ssh_key_create ? ibm_is_ssh_key.vpc_support_ssh_key_cond_create[0].id : local.keys[0].id
 }
