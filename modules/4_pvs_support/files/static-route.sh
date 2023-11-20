@@ -110,7 +110,7 @@ echo "Restarting NetworkManager at NODE_IP: ${NODE_IP}"
 # Dev Note: tried out the following approaches
 # 1. systemctl restart NetworkManager - had to reboot the nodes.
 # 2. br-ex up to refresh the dhcp lease - refreshed the single device
-ssh core@${NODE_IP} sudo nmcli device up br-ex
+ssh -o StrictHostKeyChecking=no core@${NODE_IP} sudo nmcli device up br-ex
 done
 
 else
