@@ -26,22 +26,27 @@ ibmcloud plugin install -f cloud-internet-services vpc-infrastructure cloud-obje
 # Pin the version to 0.4.9 (v1.0.0 may be incompatible)
 ibmcloud plugin install -v 0.4.9 -f power-iaas
 
-# Download the RHCOS qcow2
-TARGET_DIR=".openshift/image-local"
-mkdir -p ${TARGET_DIR}
-DOWNLOAD_URL=$(openshift-install coreos print-stream-json | jq -r '.architectures.x86_64.artifacts.ibmcloud.formats."qcow2.gz".disk.location')
-TARGET_GZ_FILE=$(echo "${DOWNLOAD_URL}" | sed 's|/| |g' | awk '{print $NF}')
-TARGET_FILE=$(echo "${TARGET_GZ_FILE}" | sed 's|.gz||g')
+ibmcloud is vpc rdr-mac-qe-varad-tor-vpc --show-attached --output json | jq -r '.subnets[]' > subnets.json
+cat subnets.json | jq -cr '.name,.public_gateway'
 
-if [ -n "${TARGET_FILE}" ]
+VPC_NAME=rdr-mac-qe-varad-tor-vpc
+for SUBNET in $(cat subnets.json | jq -cr '.name')
+do
+JSON=$(ibmcloud is subnet ${SUBNET} --vpc ${VPC_NAME} --output json)
+PG=$(echo ${JSON} | jq -rc .public_gateway.name)
+if [ "${PG}" = "null" ]
 then
-  echo "Deleting old qcow2 file if exists"
-  rm -f ${TARGET_DIR}/${TARGET_FILE}
-  echo "Downloading from URL - ${DOWNLOAD_URL}"
-  cd "${TARGET_DIR}" \
-    && curl -o "${TARGET_GZ_FILE}" -L "${DOWNLOAD_URL}" \
-    && gunzip ${TARGET_GZ_FILE} && cd -
+  echo "WARNING: Public Gateway doesn't exist for the subnet: ${SUBNET}"
+  # Dev Note: 
+  # Does it match one of the zones and counts are greater than zero
+  if true # 
+  then
+    ZONE=$(echo ${JSON} | jq -rc .zone.name)
+    # Check the Zone is one we're going to use
+    # if match then create a public gateway
+    ibmcloud is public-gateway-create gw-z1 ${VPC_NAME} ${ZONE} --resource-group-name ${RESOURCE_GROUP}
+    ibmcloud is subnet-public-gateway-attach
+  fi
 fi
+done
 
-# Upload the file to bucket
-ibmcloud cos object-put --bucket "${NAME_PREFIX}-mac-intel" --key "${NAME_PREFIX}-rhcos.qcow2" --body "${TARGET_DIR}/${TARGET_FILE}"
