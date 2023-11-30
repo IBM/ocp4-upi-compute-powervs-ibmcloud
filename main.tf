@@ -51,7 +51,7 @@ module "vpc" {
   name_prefix           = local.name_prefix
 }
 
-### Prepares the VPC Support Machine
+### Prepares the VPC
 module "vpc_prepare" {
   providers = {
     ibm = ibm.vpc
@@ -80,6 +80,31 @@ module "vpc_prepare" {
   create_custom_subnet       = var.create_custom_subnet
   skip_create_security_group = var.skip_create_security_group
   skip_route_creation        = var.skip_route_creation
+}
+
+### Prepares the VPC gateway
+module "vpc_gateway" {
+  providers = {
+    ibm = ibm.vpc
+  }
+  depends_on = [module.vpc]
+  source     = "./modules/1_vpc_gateway"
+
+  ibmcloud_api_key           = var.ibmcloud_api_key
+  vpc_region                 = var.vpc_region
+  resource_group_name        = module.vpc.vpc_resource_group_name
+  vpc_name                   = local.vpc_name
+  vpc_create_public_gateways = var.vpc_create_public_gateways
+
+  private_key_file   = var.private_key_file
+  rhel_username      = var.rhel_username
+  bastion_public_ip  = var.powervs_bastion_ip
+  ssh_agent          = var.ssh_agent
+  connection_timeout = var.connection_timeout
+
+  worker_1 = var.worker_1
+  worker_2 = var.worker_2
+  worker_3 = var.worker_3
 }
 
 ### Prepares the VPC Support Machine
