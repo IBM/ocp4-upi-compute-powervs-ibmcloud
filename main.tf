@@ -84,9 +84,6 @@ module "vpc_prepare" {
 
 ### Prepares the VPC gateway
 module "vpc_gateway" {
-  providers = {
-    ibm = ibm.vpc
-  }
   depends_on = [module.vpc]
   source     = "./modules/1_vpc_gateway"
 
