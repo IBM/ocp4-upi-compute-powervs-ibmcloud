@@ -327,6 +327,12 @@ variable "vpc_create" {
   default     = false
 }
 
+variable "vpc_create_public_gateways" {
+  type        = bool
+  description = "adds public gateways to the zones that the workers may use."
+  default     = false
+}
+
 variable "vpc_skip_ssh_key_create" {
   type        = bool
   description = "skips the creation of the ssh keys in the vpc environment"
