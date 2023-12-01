@@ -57,7 +57,7 @@ else
 fi
 
 RHCOS_BUILD=$(oc adm release info -a ~/.openshift/pull-secret -o json | jq -r '.displayVersions."machine-os".Version')
-DOWNLOAD_URL="https://rhcos.mirror.openshift.com/art/storage/prod/streams/${OCP_VERSION}/builds/${RHCOS_BUILD}/x86_64/rhcos-${RHCOS_BUILD}-ibmcloud.x86_64.qcow2.gz"
+DOWNLOAD_URL="https://rhcos.mirror.openshift.com/art/storage/prod/streams/${RHCOS_VERSION}/builds/${RHCOS_BUILD}/x86_64/rhcos-${RHCOS_BUILD}-ibmcloud.x86_64.qcow2.gz"
 TARGET_GZ_FILE=$(echo "${DOWNLOAD_URL}" | sed 's|/| |g' | awk '{print $NF}')
 TARGET_FILE=$(echo "${TARGET_GZ_FILE}" | sed 's|.gz||g')
 
