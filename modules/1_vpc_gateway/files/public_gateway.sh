@@ -14,10 +14,13 @@ VPC_NAME="${4}"
 ADD_GATEWAY="${5}"
 Z1_COUNT="${6}"
 Z1_ZONE="${7}"
+Z1_HAS_PG=""
 Z2_COUNT="${8}"
 Z2_ZONE="${9}"
+Z2_HAS_PG=""
 Z3_COUNT="${10}"
 Z3_ZONE="${11}"
+Z3_HAS_PG=""
 
 if [ -z "$(command -v ibmcloud)" ]
 then
@@ -30,8 +33,40 @@ fi
 ibmcloud login --apikey "${API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}"
 ibmcloud plugin install -f cloud-internet-services vpc-infrastructure cloud-object-storage is
 
+echo "Grabbing the Subnet Details"
 ibmcloud is vpc ${1} --show-attached --output json | jq -r '.subnets[]' > subnets.json
 cat subnets.json | jq -cr '.name,.public_gateway'
+
+# Dev Note: only one PG can be added to a zone
+for SUBNET in $(cat subnets.json | jq -cr '.name')
+do
+  JSON=$(ibmcloud is subnet ${SUBNET} --vpc ${VPC_NAME} --output json)
+  PG=$(echo ${JSON} | jq -rc .public_gateway.name)
+  if [ "${PG}" = "null" ]
+  then
+    echo "PG doesn't exist in : $PG"
+  else
+    if [ "${ADD_GATEWAY}" = "true" ] 
+    then
+      VPC_ZONE=$(echo ${JSON} | jq -rc .zone.name)
+      if [ "${Z1_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z1_ZONE}" ]
+      then
+        echo "PG exists on zone"
+        Z1_HAS_PG="true"
+      elif [ "${Z2_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z2_ZONE}" ]
+      then
+        echo "PG exists on zone"
+        Z2_HAS_PG="true"
+      elif [ "${Z3_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z3_ZONE}" ]
+      then
+        echo "PG exists on zone"
+        Z3_HAS_PG="true"
+      else 
+        echo "ZONE: ${VPC_ZONE} not configured for day-2 workers"
+      fi
+    fi
+  fi
+done
 
 for SUBNET in $(cat subnets.json | jq -cr '.name')
 do
@@ -46,18 +81,21 @@ do
     if [ "${ADD_GATEWAY}" = "true" ] 
     then
       VPC_ZONE=$(echo ${JSON} | jq -rc .zone.name)
-      if [ "${Z1_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z1_ZONE}" ]
+      if [ -z "${Z1_HAS_PG}" ] && [ "${Z1_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z1_ZONE}" ]
       then
         echo "Adding a public gateway to the zone - ${VPC_ZONE}"
         ibmcloud is public-gateway-create ${ZONE}-z1-gw ${VPC_NAME} ${ZONE} --resource-group-name ${RESOURCE_GROUP}
-      elif [ "${Z2_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z2_ZONE}" ]
+        Z1_HAS_PG="true"
+      elif [ -z "${Z2_HAS_PG}" ] && [ "${Z2_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z2_ZONE}" ]
       then
         echo "Adding a public gateway to the zone - ${VPC_ZONE}"
         ibmcloud is public-gateway-create ${ZONE}-z2-gw ${VPC_NAME} ${ZONE} --resource-group-name ${RESOURCE_GROUP}
-      elif [ "${Z3_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z3_ZONE}" ]
+        Z2_HAS_PG="true"
+      elif [ -z "${Z3_HAS_PG}" ] && [ "${Z3_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z3_ZONE}" ]
       then
         echo "Adding a public gateway to the zone - ${VPC_ZONE}"
         ibmcloud is public-gateway-create ${ZONE}-z3-gw ${VPC_NAME} ${ZONE} --resource-group-name ${RESOURCE_GROUP}
+        Z3_HAS_PG="true"
       else 
         echo "ZONE: ${VPC_ZONE} not configured for day-2 workers"
       fi
