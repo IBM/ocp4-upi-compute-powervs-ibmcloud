@@ -31,7 +31,7 @@ else
 fi
 
 ibmcloud login --apikey "${API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}"
-ibmcloud plugin install -f cloud-internet-services vpc-infrastructure cloud-object-storage is
+ibmcloud plugin install -f vpc-infrastructure is
 
 echo "Grabbing the Subnet Details"
 ibmcloud is vpc ${1} --show-attached --output json | jq -r '.subnets[]' > subnets.json
