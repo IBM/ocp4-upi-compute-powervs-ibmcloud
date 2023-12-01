@@ -34,7 +34,7 @@ ibmcloud login --apikey "${API_KEY}" -r "${REGION}" -g "${RESOURCE_GROUP}"
 ibmcloud plugin install -f vpc-infrastructure is
 
 echo "Grabbing the Subnet Details"
-ibmcloud is vpc ${1} --show-attached --output json | jq -r '.subnets[]' > subnets.json
+ibmcloud is vpc ${VPC_NAME} --show-attached --output json | jq -r '.subnets[]' > subnets.json
 cat subnets.json | jq -cr '.name,.public_gateway'
 
 # Dev Note: only one PG can be added to a zone
