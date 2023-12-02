@@ -85,19 +85,22 @@ do
       then
         echo "Adding a public gateway to the zone - ${VPC_ZONE}"
         PGC_JSON=$(ibmcloud is public-gateway-create ${REGION}-z1-gw ${VPC_NAME} ${Z1_ZONE} --resource-group-name ${RESOURCE_GROUP} --output json)
-        
-        echo "Public Gateway JSON is: " $( echo $PGC_JSON | jq -rc . )
+        # Dev Note: for debug - echo "Public Gateway JSON is: " $( echo $PGC_JSON | jq -rc . )
         ibmcloud is subnet-update ${SUBNET} --pgw $(echo ${PGC_JSON} | jq -r '.id')
         Z1_HAS_PG="true"
       elif [ -z "${Z2_HAS_PG}" ] && [ "${Z2_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z2_ZONE}" ]
       then
         echo "Adding a public gateway to the zone - ${VPC_ZONE}"
-        ibmcloud is public-gateway-create ${REGION}-z2-gw ${VPC_NAME} ${Z2_ZONE} --resource-group-name ${RESOURCE_GROUP}
+        PGC_JSON=$(ibmcloud is public-gateway-create ${REGION}-z2-gw ${VPC_NAME} ${Z2_ZONE} --resource-group-name ${RESOURCE_GROUP} --output json)
+        # Dev Note: for debug - echo "Public Gateway JSON is: " $( echo $PGC_JSON | jq -rc . )
+        ibmcloud is subnet-update ${SUBNET} --pgw $(echo ${PGC_JSON} | jq -r '.id')
         Z2_HAS_PG="true"
       elif [ -z "${Z3_HAS_PG}" ] && [ "${Z3_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z3_ZONE}" ]
       then
         echo "Adding a public gateway to the zone - ${VPC_ZONE}"
-        ibmcloud is public-gateway-create ${REGION}-z3-gw ${VPC_NAME} ${Z3_ZONE} --resource-group-name ${RESOURCE_GROUP}
+        PGC_JSON=$(ibmcloud is public-gateway-create ${REGION}-z3-gw ${VPC_NAME} ${Z3_ZONE} --resource-group-name ${RESOURCE_GROUP} --output json)
+        # Dev Note: for debug - echo "Public Gateway JSON is: " $( echo $PGC_JSON | jq -rc . )
+        ibmcloud is subnet-update ${SUBNET} --pgw $(echo ${PGC_JSON} | jq -r '.id')
         Z3_HAS_PG="true"
       else 
         echo "ZONE: ${VPC_ZONE} not configured for day-2 workers"
