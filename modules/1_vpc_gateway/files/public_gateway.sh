@@ -84,7 +84,9 @@ do
       if [ -z "${Z1_HAS_PG}" ] && [ "${Z1_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z1_ZONE}" ]
       then
         echo "Adding a public gateway to the zone - ${VPC_ZONE}"
-        ibmcloud is public-gateway-create ${REGION}-z1-gw ${VPC_NAME} ${Z1_ZONE} --resource-group-name ${RESOURCE_GROUP}
+        PGC_JSON=$(ibmcloud is public-gateway-create ${REGION}-z1-gw ${VPC_NAME} ${Z1_ZONE} --resource-group-name ${RESOURCE_GROUP} --output json)
+        echo $PGC_JSON
+        ibmcloud is subnet-update ${SUBNET} --pgw $(echo ${PGC_JSON} | jq -r '.')
         Z1_HAS_PG="true"
       elif [ -z "${Z2_HAS_PG}" ] && [ "${Z2_COUNT}" != "0" ] && [ "ZONE_${VPC_ZONE}" = "ZONE_${Z2_ZONE}" ]
       then
