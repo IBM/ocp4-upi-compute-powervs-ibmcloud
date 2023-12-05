@@ -36,8 +36,29 @@ mkdir -p ${TARGET_DIR}
 # However, this is not always consistent with the running cluster.
 # We now generate the URL - https://rhcos.mirror.openshift.com/art/storage/prod/streams/4.15-9.2/builds/415.92.202309142014-0/x86_64/rhcos-415.92.202309142014-0-ibmcloud.x86_64.qcow2.gz
 
+# Account for random quay.io 502 outages.
+IDX=0
+while true
+do
+IDX=$(($IDX + 1))
+oc adm release info -a ~/.openshift/pull-secret -o json > ocpversion.json
+EXIT_CODE="${NF}"
+if [ "${IDX}" -ne "10" ]
+then
+  echo "Too many checks... invalid after 20 minutes"
+  exit 5
+elif [ "${EXIT_CODE}" -eq "0" ]
+then
+  echo "Found..."
+  break
+else
+echo "waiting 120 seconds... retrieval failed"
+sleep 120
+fi
+done
+
 RHCOS_VERSION="4.15-9.2"
-OCP_VERSION="$(oc adm release info -a ~/.openshift/pull-secret -o json | jq -r . | grep v4.15. |  tr -d 'v",' | awk -F '=' '{print $2}')"
+OCP_VERSION="$(cat ocpversion.json | jq -r . | grep v4.15. |  tr -d 'v",' | awk -F '=' '{print $2}')"
 if [[ "${OCP_VERSION}" == *"4.15."* ]]
 then
   RHCOS_VERSION="4.15-9.2"
@@ -56,7 +77,7 @@ else
   exit 1
 fi
 
-RHCOS_BUILD=$(oc adm release info -a ~/.openshift/pull-secret -o json | jq -r '.displayVersions."machine-os".Version')
+RHCOS_BUILD=$(cat ocpversion.json | jq -r '.displayVersions."machine-os".Version')
 DOWNLOAD_URL="https://rhcos.mirror.openshift.com/art/storage/prod/streams/${RHCOS_VERSION}/builds/${RHCOS_BUILD}/x86_64/rhcos-${RHCOS_BUILD}-ibmcloud.x86_64.qcow2.gz"
 TARGET_GZ_FILE=$(echo "${DOWNLOAD_URL}" | sed 's|/| |g' | awk '{print $NF}')
 TARGET_FILE=$(echo "${TARGET_GZ_FILE}" | sed 's|.gz||g')
