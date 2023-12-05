@@ -104,6 +104,7 @@ variable "powervs_network_name" {
   }
 }
 
+
 ################################################################
 # Configure the Intel workers to be added to the compute plane
 ################################################################
@@ -348,6 +349,12 @@ variable "skip_create_security_group" {
 variable "skip_route_creation" {
   type        = bool
   description = "skips the creation of the route table entry in a vpc environment"
+  default     = false
+}
+
+variable "ibm_cloud_cis" {
+  type        = bool
+  description = "ibm_cloud_cis flag which indicates LoadBalancer and Security Groups are created by UPI automation"
   default     = false
 }
 

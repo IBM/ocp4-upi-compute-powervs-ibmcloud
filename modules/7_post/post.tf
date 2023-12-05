@@ -187,85 +187,19 @@ EOF
   }
 }
 
-# Dev Note: only on destroy - restore the load balancers
-resource "null_resource" "remove_lbs" {
-  depends_on = [null_resource.patch_nfs_arch_ppc64le]
+module "haproxy_lb_support" {
+  source = "./haproxy_lb"
 
-  triggers = {
-    count_1           = var.worker_1["count"]
-    count_2           = var.worker_2["count"]
-    count_3           = var.worker_3["count"]
-    user              = var.rhel_username
-    timeout           = "${var.connection_timeout}m"
-    name_prefix       = "${var.name_prefix}"
-    private_key       = file(var.private_key_file)
-    host              = var.bastion_public_ip
-    agent             = var.ssh_agent
-    ansible_post_path = local.ansible_post_path
-  }
-
-  connection {
-    type        = "ssh"
-    user        = self.triggers.user
-    private_key = self.triggers.private_key
-    host        = self.triggers.host
-    agent       = self.triggers.agent
-    timeout     = self.triggers.timeout
-  }
-
-  provisioner "remote-exec" {
-    inline = [<<EOF
-mkdir -p /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
-EOF
-    ]
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/files/remove_lbs.sh"
-    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/remove_lbs.sh"
-  }
-
-  provisioner "remote-exec" {
-    when       = destroy
-    on_failure = continue
-    inline = [<<EOF
-cd /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
-bash remove_lbs.sh
-EOF
-    ]
-  }
+  ssh_agent          = var.ssh_agent
+  rhel_username      = var.rhel_username
+  connection_timeout = var.connection_timeout
+  bastion_public_ip  = var.bastion_public_ip
+  private_key_file   = var.private_key_file
+  vpc_region         = var.vpc_region
+  vpc_zone           = var.vpc_zone
+  name_prefix        = var.name_prefix
+  worker_1           = var.worker_1
+  worker_2           = var.worker_2
+  worker_3           = var.worker_3
 }
 
-
-resource "null_resource" "updating_load_balancers" {
-  depends_on = [null_resource.patch_nfs_arch_ppc64le, null_resource.remove_lbs]
-  connection {
-    type        = "ssh"
-    user        = var.rhel_username
-    private_key = file(var.private_key_file)
-    host        = var.bastion_public_ip
-    agent       = var.ssh_agent
-    timeout     = "${var.connection_timeout}m"
-  }
-
-  provisioner "remote-exec" {
-    inline = [<<EOF
-mkdir -p /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
-EOF
-    ]
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/files/update_lbs.sh"
-    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/update_lbs.sh"
-  }
-
-  # Dev Note: Updates the load balancers
-  provisioner "remote-exec" {
-    inline = [<<EOF
-cd /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
-bash update_lbs.sh
-EOF
-    ]
-  }
-}
