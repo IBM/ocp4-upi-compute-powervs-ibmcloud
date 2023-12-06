@@ -310,44 +310,6 @@ EOF
   }
 }
 
-# # Dev Note: create the dns lookup
-# resource "null_resource" "update_dns_resolver_for_vpc" {
-#   #  depends_on = [null_resource.wait_on_mcp]
-#   depends_on = [null_resource.latest_ignition]
-#   connection {
-#     type        = "ssh"
-#     user        = var.rhel_username
-#     host        = var.bastion_public_ip
-#     private_key = file(var.private_key_file)
-#     agent       = var.ssh_agent
-#     timeout     = "${var.connection_timeout}m"
-#   }
-
-#   provisioner "remote-exec" {
-#     inline = [<<EOF
-# if [ -z "$(command -v ibmcloud)" ]
-# then
-#   echo "ibmcloud CLI doesn't exist, installing"
-#   curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-# fi
-
-# ibmcloud login --apikey "${var.ibmcloud_api_key}" -r "${var.vpc_region}" -g "${var.resource_group}"
-# ibmcloud plugin install -f cloud-internet-services vpc-infrastructure cloud-object-storage power-iaas is
-
-# export IBMCLOUD_IS_FEATURE_VPC_DNS_SHARING=true
-# ibmcloud is vpcu ${var.vpc_name}  --dns-enable-hub true --dns-resolver-type manual --dns-resolver-manual-servers '[
-#     {
-#         "address": "${var.ignition_ip}"
-#     }
-# ]'
-
-# echo "waiting to reconcile the status"
-# sleep 60
-# EOF
-#     ]
-#   }
-# }
-
 # Dev Note: only on destroy - restore chrony
 resource "null_resource" "remove_chrony_changes" {
   depends_on = [null_resource.set_routing_via_host]
