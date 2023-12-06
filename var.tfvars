@@ -28,6 +28,6 @@ worker_3 = { count = "0", profile = "cx2-8x16", "zone" = "au-syd-3" }
 public_key_file  = "data/id_rsa.pub"
 private_key_file = "data/id_rsa"
 
-# Required for Ignition and Automation to Run
-powervs_bastion_private_ip = "<Private IP Address of Bastion> e.g. 192.168.200.x"
+# Required for Ignition and Automation to Run (powervs_bastion_private_ip generally belongs to 192.168.200.x range)
+powervs_bastion_private_ip = "<Private IP Address of Bastion>"
 powervs_bastion_ip         = "<Public IP Address of Bastion>"

@@ -354,7 +354,7 @@ variable "skip_route_creation" {
 
 variable "ibm_cloud_cis" {
   type        = bool
-  description = "ibm_cloud_cis flag which indicates LoadBalancer and Security Groups are created by UPI automation"
+  description = "indicates LoadBalancer and Security Groups are created by UPI automation"
   default     = false
 }
 

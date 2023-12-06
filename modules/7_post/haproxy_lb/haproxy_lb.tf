@@ -9,7 +9,6 @@ locals {
 
 # Dev Note: only on destroy - restore the load balancers
 resource "null_resource" "remove_lbs" {
-  #  depends_on = [null_resource.patch_nfs_arch_ppc64le]
 
   triggers = {
     count_1           = var.worker_1["count"]
@@ -56,9 +55,8 @@ EOF
   }
 }
 
-
 resource "null_resource" "updating_load_balancers" {
-  #  depends_on = [null_resource.patch_nfs_arch_ppc64le, null_resource.remove_lbs]
+  depends_on = [null_resource.remove_lbs]
   connection {
     type        = "ssh"
     user        = var.rhel_username

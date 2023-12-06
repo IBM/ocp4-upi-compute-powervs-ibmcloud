@@ -188,7 +188,8 @@ EOF
 }
 
 module "haproxy_lb_support" {
-  source = "./haproxy_lb"
+  depends_on = [null_resource.patch_nfs_arch_ppc64le]
+  source     = "./haproxy_lb"
 
   ssh_agent          = var.ssh_agent
   rhel_username      = var.rhel_username

@@ -30,7 +30,7 @@ locals {
   name_prefix                 = var.name_prefix == "" ? "mac-${random_id.label[0].hex}" : "${var.name_prefix}"
   node_prefix                 = var.use_zone_info_for_names ? "${var.powervs_zone}-" : ""
   vpc_name                    = var.vpc_create ? "${local.name_prefix}-vpc" : var.vpc_name
-  skip_transit_gateway_create = var.ibm_cloud_cis == true ? true : false
+  skip_transit_gateway_create = var.ibm_cloud_cis
 }
 
 ### Prepares the VPC Support Machine
