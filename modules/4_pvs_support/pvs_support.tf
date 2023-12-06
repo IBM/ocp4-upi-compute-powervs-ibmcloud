@@ -88,7 +88,7 @@ EOF
 
 # Dev Note: adds static routes to the dhcpd.conf file
 resource "null_resource" "add_dhcp_static_routes" {
-  count = var.ibm_cloud_cis ? 0 : 1
+  count      = var.ibm_cloud_cis ? 0 : 1
   depends_on = [null_resource.setup]
   connection {
     type        = "ssh"
