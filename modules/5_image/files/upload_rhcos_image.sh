@@ -42,8 +42,8 @@ while true
 do
 IDX=$(($IDX + 1))
 oc adm release info -a ~/.openshift/pull-secret -o json > ocpversion.json
-EXIT_CODE="${NF}"
-if [ "${IDX}" -ne "10" ]
+EXIT_CODE="${?}"
+if [ "${IDX}" -ge "10" ]
 then
   echo "Too many checks... invalid after 20 minutes"
   exit 5
