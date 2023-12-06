@@ -21,7 +21,7 @@ else
     then
         IBMCLOUD=ic
     else 
-        ibmcloud plugin install -v 0.4.9 -f power-iaas
+        ibmcloud plugin install -v 0.6.0 -f power-iaas
     fi
 fi
 
