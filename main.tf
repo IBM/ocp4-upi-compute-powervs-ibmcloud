@@ -153,6 +153,7 @@ module "support" {
   vpc_region           = var.vpc_region
   resource_group       = module.vpc.vpc_resource_group
   ignition_ip          = var.powervs_bastion_private_ip
+  ibm_cloud_cis = var.ibm_cloud_cis
 }
 
 module "image" {

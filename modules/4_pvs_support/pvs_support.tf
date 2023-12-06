@@ -68,12 +68,6 @@ resource "null_resource" "setup" {
     destination = "ocp4-upi-compute-powervs-ibmcloud/intel/support/route-env.sh"
   }
 
-  # Copies the custom routes for dhcp
-  provisioner "file" {
-    source      = "${path.module}/files/static-route.sh"
-    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/support/static-route.sh"
-  }
-
   # Copies the custom route for env3
   provisioner "file" {
     content     = templatefile("${path.module}/templates/route.env.tpl", local.cidrs)
@@ -85,8 +79,6 @@ resource "null_resource" "setup" {
 cd ocp4-upi-compute-powervs-ibmcloud/intel/support
 bash route-env.sh
 
-bash static-route.sh
-
 echo 'Running ocp4-upi-compute-powervs-ibmcloud/intel/ playbook...'
 ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud-support-main.log ansible-playbook -e @vars/vars.yaml tasks/main.yml --become
 EOF
@@ -94,8 +86,37 @@ EOF
   }
 }
 
-resource "null_resource" "limit_csi_arch" {
+# Dev Note: adds static routes to the dhcpd.conf file
+resource "null_resource" "add_dhcp_static_routes" {
+  count = var.ibm_cloud_cis ? 0 : 1
   depends_on = [null_resource.setup]
+  connection {
+    type        = "ssh"
+    user        = var.rhel_username
+    host        = var.bastion_public_ip
+    private_key = file(var.private_key_file)
+    agent       = var.ssh_agent
+    timeout     = "${var.connection_timeout}m"
+  }
+
+  # Copies the custom routes for dhcp
+  provisioner "file" {
+    source      = "${path.module}/files/static-route.sh"
+    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/support/static-route.sh"
+  }
+
+  # Dev Note: Adds static routes
+  provisioner "remote-exec" {
+    inline = [<<EOF
+cd ocp4-upi-compute-powervs-ibmcloud/intel/support
+bash static-route.sh
+EOF
+    ]
+  }
+}
+
+resource "null_resource" "limit_csi_arch" {
+  depends_on = [null_resource.setup, null_resource.add_dhcp_static_routes]
   connection {
     type        = "ssh"
     user        = var.rhel_username

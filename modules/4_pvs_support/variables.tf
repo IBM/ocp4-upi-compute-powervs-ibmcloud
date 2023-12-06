@@ -15,3 +15,4 @@ variable "ibmcloud_api_key" {}
 variable "vpc_name" {}
 variable "vpc_region" {}
 variable "resource_group" {}
+variable "ibm_cloud_cis" {}
