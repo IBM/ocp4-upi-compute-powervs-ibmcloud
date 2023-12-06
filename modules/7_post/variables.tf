@@ -15,3 +15,4 @@ variable "worker_1" {}
 variable "worker_2" {}
 variable "worker_3" {}
 variable "cicd_image_pruner_cleanup" {}
+variable "ibm_cloud_cis" {}

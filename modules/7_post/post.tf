@@ -187,7 +187,9 @@ EOF
   }
 }
 
+# Dev Note: we skip this as it implies the CIS, Security Groups and Load Balancers are used
 module "haproxy_lb_support" {
+  count      = var.ibm_cloud_cis ? 0 : 1
   depends_on = [null_resource.patch_nfs_arch_ppc64le]
   source     = "./haproxy_lb"
 
@@ -203,4 +205,3 @@ module "haproxy_lb_support" {
   worker_2           = var.worker_2
   worker_3           = var.worker_3
 }
-

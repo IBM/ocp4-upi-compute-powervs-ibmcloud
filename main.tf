@@ -197,17 +197,18 @@ module "post" {
   depends_on = [module.worker]
   source     = "./modules/7_post"
 
-  ssh_agent                 = var.ssh_agent
-  rhel_username             = var.rhel_username
-  connection_timeout        = var.connection_timeout
-  bastion_public_ip         = var.powervs_bastion_ip
-  private_key_file          = var.private_key_file
-  vpc_region                = var.vpc_region
-  vpc_zone                  = var.vpc_zone
-  name_prefix               = local.name_prefix
-  worker_1                  = var.worker_1
-  worker_2                  = var.worker_2
-  worker_3                  = var.worker_3
-  cicd_image_pruner_cleanup = var.cicd_image_pruner_cleanup
+  ssh_agent                   = var.ssh_agent
+  rhel_username               = var.rhel_username
+  connection_timeout          = var.connection_timeout
+  bastion_public_ip           = var.powervs_bastion_ip
+  private_key_file            = var.private_key_file
+  vpc_region                  = var.vpc_region
+  vpc_zone                    = var.vpc_zone
+  name_prefix                 = local.name_prefix
+  worker_1                    = var.worker_1
+  worker_2                    = var.worker_2
+  worker_3                    = var.worker_3
+  cicd_image_pruner_cleanup   = var.cicd_image_pruner_cleanup
+  ibm_cloud_cis = var.ibm_cloud_cis
 }
 
