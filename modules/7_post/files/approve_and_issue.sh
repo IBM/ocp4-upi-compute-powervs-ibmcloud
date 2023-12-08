@@ -68,7 +68,7 @@ do
   # End Early... we've checked enough.
   if [ "${IDX}" -eq "120" ]
   then
-    echo "Exceeded the wait time for CSRs to be generated - >120 minutes"
+    echo "Exceeded the wait time for CSRs to be generated - > 60 minutes"
     exit -1
   fi
   IDX=$(($IDX + 1))
