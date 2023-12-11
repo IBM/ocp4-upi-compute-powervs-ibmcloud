@@ -338,7 +338,7 @@ resource "null_resource" "remove_chrony_changes" {
   triggers = {
     user        = var.rhel_username
     timeout     = "${var.connection_timeout}m"
-    private_key = file(var.private_key_file)
+    private_key = sensitive(file(var.private_key_file))
     host        = var.bastion_public_ip
     agent       = var.ssh_agent
   }

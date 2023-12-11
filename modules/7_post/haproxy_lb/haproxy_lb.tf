@@ -17,7 +17,7 @@ resource "null_resource" "remove_lbs" {
     user              = var.rhel_username
     timeout           = "${var.connection_timeout}m"
     name_prefix       = "${var.name_prefix}"
-    private_key       = file(var.private_key_file)
+    private_key       = sensitive(file(var.private_key_file))
     host              = var.bastion_public_ip
     agent             = var.ssh_agent
     ansible_post_path = local.ansible_post_path
