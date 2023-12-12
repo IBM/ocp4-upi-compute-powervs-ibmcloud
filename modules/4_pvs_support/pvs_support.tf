@@ -139,7 +139,7 @@ EOF
 }
 
 resource "null_resource" "create_resolv_conf_for_intel_workers" {
-  count      = var.ibm_cloud_cis ? 0 : 1
+  count = var.ibm_cloud_cis ? 0 : 1
 
   depends_on = [null_resource.limit_csi_arch]
   connection {
