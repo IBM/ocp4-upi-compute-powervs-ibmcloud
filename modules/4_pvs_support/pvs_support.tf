@@ -139,12 +139,14 @@ EOF
 }
 
 resource "null_resource" "create_resolv_conf_for_intel_workers" {
+  count      = var.ibm_cloud_cis ? 0 : 1
+
   depends_on = [null_resource.limit_csi_arch]
   connection {
     type        = "ssh"
     user        = var.rhel_username
     host        = var.bastion_public_ip
-    private_key = file(var.private_key_file)
+    private_key = sensitive(file(var.private_key_file))
     agent       = var.ssh_agent
     timeout     = "${var.connection_timeout}m"
   }
@@ -172,12 +174,12 @@ EOF
 }
 
 resource "null_resource" "migrate_mcp" {
-  depends_on = [null_resource.limit_csi_arch]
+  depends_on = [null_resource.limit_csi_arch, null_resource.create_resolv_conf_for_intel_workers]
   connection {
     type        = "ssh"
     user        = var.rhel_username
     host        = var.bastion_public_ip
-    private_key = file(var.private_key_file)
+    private_key = sensitive(file(var.private_key_file))
     agent       = var.ssh_agent
     timeout     = "${var.connection_timeout}m"
   }
