@@ -4,15 +4,8 @@
 ################################################################
 
 locals {
-  # The Inventory File
   helpernode_inventory = {
     rhel_username = var.rhel_username
-  }
-
-  # you must use the api url so the bastion routes over the correct interface.
-  # Dev Note: should pull this out of the `oc` command and pull out of the bastion.
-  helpernode_vars = {
-    openshift_machine_config_url = "https://localhost"
   }
 
   cidrs = {
@@ -25,7 +18,6 @@ locals {
     gateway    = cidrhost(var.powervs_machine_cidr, 1)
     bastion_ip = var.ignition_ip
   }
-
 }
 
 resource "null_resource" "setup" {
