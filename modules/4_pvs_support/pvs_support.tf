@@ -49,11 +49,6 @@ resource "null_resource" "setup" {
     destination = "ocp4-upi-compute-powervs-ibmcloud/intel/support/inventory"
   }
 
-  provisioner "file" {
-    content     = templatefile("${path.module}/templates/vars.yaml.tpl", local.helpernode_vars)
-    destination = "ocp4-upi-compute-powervs-ibmcloud/intel/support/vars/vars.yaml"
-  }
-
   # Copies the custom route for env3
   provisioner "file" {
     content     = templatefile("${path.module}/templates/route-env.sh.tpl", local.cidrs_dyna_iface)
@@ -70,9 +65,6 @@ resource "null_resource" "setup" {
     inline = [<<EOF
 cd ocp4-upi-compute-powervs-ibmcloud/intel/support
 bash route-env.sh
-
-echo 'Running ocp4-upi-compute-powervs-ibmcloud/intel/ playbook...'
-ANSIBLE_LOG_PATH=/root/.openshift/ocp4-upi-compute-powervs-ibmcloud-support-main.log ansible-playbook -e @vars/vars.yaml tasks/main.yml --become
 EOF
     ]
   }
