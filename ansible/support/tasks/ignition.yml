@@ -1,18 +1,7 @@
 ---
 - hosts: all
 
-  ####################################################################################
-  # Verify and Validate prior to starting execution
-  pre_tasks:
-  - name: Verify Ansible version.
-    assert:
-      that: "ansible_version.full is version_compare('2.12', '>=')"
-      msg: >
-          "You must update Ansible to at least 2.12"
-
-  ####################################################################################
   tasks:
-
   - name: Create Apache directories for installing
     file:
       path: "{{ item }}"
@@ -23,22 +12,23 @@
 
   - name: Disable fcontext
     shell: "semanage fcontext -a -t httpd_sys_rw_content_t /var/www/html/ignition/worker.ign || true"
+
   - name: Download the Ignition file
     block:
-#    - name: Loop until TARGET_MTU is correct
-#      ansible.builtin.uri:
-#        url: "{{ openshift_machine_config_url }}"
-#        method: GET
-#        return_content: true
-#         validate_certs: false
-#        headers:
-#          "Accept": "application/vnd.coreos.ignition+json;version=3.2.0"
-#      ignore_errors: true
-#      register: result
-#      retries: 120
-#      delay: 10
-#      until: 'result.status in [200]'
-    # This conditional is updated when the MTU is changed - and "TARGET_MTU=9100" in result.content
+    - name: Loop until TARGET_MTU is correct
+      ansible.builtin.uri:
+        url: "{{ openshift_machine_config_url }}"
+        method: GET
+        return_content: true
+        headers:
+          "Accept": "application/vnd.coreos.ignition+json;version=3.2.0"
+        validate_certs: false
+      ignore_errors: true
+      register: result
+      retries: 120
+      delay: 10
+      until: 'result.status in [200] and "mpath" not in result.content'
+
     - name: Downloading the ignition file
       get_url:
         url: "{{ openshift_machine_config_url }}"
@@ -51,16 +41,6 @@
       retries: 120
       delay: 10
       until: '"Request failed: <urlopen error timed out>" not in result.msg'
-    - name: Downloading the ignition file using a https_proxy
-      get_url:
-        url: "{{ openshift_machine_config_url }}"
-        dest: /var/www/html/ignition/worker.ign
-        validate_certs: false
-        headers:
-          "Accept": "application/vnd.coreos.ignition+json;version=3.2.0"
-      ignore_errors: true
-    #  environment:
-    #    https_proxy: http://{{ vpc_support_server_ip }}:3128
 
     - name: Verify the ignition file exists
       ansible.builtin.shell: stat /var/www/html/ignition/worker.ign
