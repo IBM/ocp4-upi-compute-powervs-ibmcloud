@@ -1,2 +1,1 @@
 ---
-openshift_machine_config_url: "https://<HOSTNAME>:22623/config/worker"

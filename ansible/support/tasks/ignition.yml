@@ -2,22 +2,21 @@
 - hosts: all
 
   tasks:
-  - name: Create Apache directories for installing
-    file:
-      path: "{{ item }}"
-      state: directory
-      mode: 0755
-    with_items:
-      - /var/www/html/ignition
+  - name: Assemble the MachineConfig url
+    shell: |
+      oc config view -ojson | jq -r '.clusters[].cluster.server' | sed 's|/api\.|/api-int.|' | sed 's|:6443||' | 
+    register: openshift_machine_config_hostname
 
-  - name: Disable fcontext
-    shell: "semanage fcontext -a -t httpd_sys_rw_content_t /var/www/html/ignition/worker.ign || true"
+  - name: Print the MachineConfig Hostname
+    ansible.builtin.debug:
+      msg: MachineConfig Hostname is {{ openshift_machine_config_hostname.stdout_lines[0] }}
 
-  - name: Download the Ignition file
+  # Loop until the Machine Config is updated
+  - name: Wait until the mcp/worker is updated properly
     block:
-    - name: Loop until TARGET_MTU is correct
+    - name: Loop until mpath is correct
       ansible.builtin.uri:
-        url: "{{ openshift_machine_config_url }}"
+        url: "{{ openshift_machine_config_hostname.stdout_lines[0] }}:22623/config/worker"
         method: GET
         return_content: true
         headers:
@@ -29,29 +28,24 @@
       delay: 10
       until: 'result.status in [200] and "mpath" not in result.content'
 
-    - name: Downloading the ignition file
-      get_url:
-        url: "{{ openshift_machine_config_url }}"
-        dest: /var/www/html/ignition/worker.ign
-        validate_certs: false
-        headers:
-          "Accept": "application/vnd.coreos.ignition+json;version=3.2.0"
-      ignore_errors: true
-      register: result
-      retries: 120
-      delay: 10
-      until: '"Request failed: <urlopen error timed out>" not in result.msg'
+  - name: Disable fcontext
+    shell: "semanage fcontext -a -t httpd_sys_rw_content_t /var/www/html/ignition/worker.ign || true"
 
-    - name: Verify the ignition file exists
-      ansible.builtin.shell: stat /var/www/html/ignition/worker.ign
+  # In some circumstances the certificates used in the worker ingnition can expire
+  - name: Refresh the worker ignition file
+    shell: |
+      oc extract -n openshift-machine-api secret/worker-user-data --keys=userData --to=- > /var/www/html/ignition/worker.ign
 
-    - name: Make ignition file readable through the www dir
-      ansible.builtin.file:
-        path: /var/www
-        owner: apache
-        group: apache
-        recurse: true 
-        mode: u+rwx,g-rx,o-rx
+  - name: Verify the ignition file exists
+    ansible.builtin.shell: stat /var/www/html/ignition/worker.ign
+
+  - name: Make ignition file readable through the www dir
+    ansible.builtin.file:
+      path: /var/www
+      owner: apache
+      group: apache
+      recurse: true 
+      mode: u+rwx,g-rx,o-rx
 
   - name: Best effort SELinux repair - Apache
     shell: "restorecon -vR /var/www/html/ignition || true"
