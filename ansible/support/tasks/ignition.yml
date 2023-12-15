@@ -4,7 +4,7 @@
   tasks:
   - name: Assemble the MachineConfig url
     shell: |
-      oc config view -ojson | jq -r '.clusters[].cluster.server' | sed 's|/api\.|/api-int.|' | sed 's|:6443||'
+      oc whoami --show-server=true | sed 's|/api\.|/api-int.|' | sed 's|:6443||'
     register: openshift_machine_config_hostname
 
   - name: Print the MachineConfig Hostname
