@@ -64,3 +64,27 @@ resource "ibm_is_security_group_rule" "worker_all_powervs_cidr" {
     ignore_changes = all
   }
 }
+
+# TCP Inbound 80
+resource "ibm_is_security_group_rule" "lbs_to_workers_http" {
+  count     = !var.skip_create_security_group ? 1 : 0
+  group     = ibm_is_security_group.worker_vm_sg[0].id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
+  tcp {
+    port_min = 80
+    port_max = 80
+  }
+}
+
+# TCP Inbound 443
+resource "ibm_is_security_group_rule" "lbs_to_workers_https" {
+  count     = !var.skip_create_security_group ? 1 : 0
+  group     = ibm_is_security_group.worker_vm_sg[0].id
+  direction = "inbound"
+  remote    = "0.0.0.0/0"
+  tcp {
+    port_min = 443
+    port_max = 443
+  }
+}
