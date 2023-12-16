@@ -205,3 +205,22 @@ module "haproxy_lb_support" {
   worker_2           = var.worker_2
   worker_3           = var.worker_3
 }
+
+# Dev Note: we only execute when CIS, Security Groups and Load Balancers are used
+module "ibmcloud_lb_support" {
+  count      = var.ibm_cloud_cis ? 1 : 0
+  depends_on = [null_resource.patch_nfs_arch_ppc64le]
+  source     = "./ibmcloud_lb"
+
+  ssh_agent          = var.ssh_agent
+  rhel_username      = var.rhel_username
+  connection_timeout = var.connection_timeout
+  bastion_public_ip  = var.bastion_public_ip
+  private_key_file   = var.private_key_file
+  vpc_region         = var.vpc_region
+  vpc_zone           = var.vpc_zone
+  name_prefix        = var.name_prefix
+  worker_1           = var.worker_1
+  worker_2           = var.worker_2
+  worker_3           = var.worker_3
+}
