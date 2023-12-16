@@ -66,14 +66,14 @@ resource "ibm_is_security_group_rule" "worker_all_powervs_cidr" {
 }
 
 locals {
-  lbs_sg = [for x in data.ibm_is_security_groups.sgs.security_groups : x if endswith(x.name, "-ocp-sec-group")]
+  lbs_sg = [for x in data.ibm_is_security_groups.supp_vm_sgs.security_groups : x if endswith(x.name, "-ocp-sec-group")]
 }
 
 # TCP Inbound 80 - Security group *ocp-sec-group
 # Dev Note: Only opens to the Load Balancers SG
 # If it exists, it implies that the SG needs to be updated.
 resource "ibm_is_security_group_rule" "lbs_to_workers_http" {
-  count     = length(lbs_sg) > 0 ? 1 : 0
+  count     = length(local.lbs_sg) > 0 ? 1 : 0
   group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = local.lbs_sg[0].id
@@ -85,7 +85,7 @@ resource "ibm_is_security_group_rule" "lbs_to_workers_http" {
 
 # TCP Inbound 443 - Security group *ocp-sec-group
 resource "ibm_is_security_group_rule" "lbs_to_workers_https" {
-  count     = length(lbs_sg) > 0 ? 1 : 0
+  count     = length(local.lbs_sg) > 0 ? 1 : 0
   group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = local.lbs_sg[0].id
