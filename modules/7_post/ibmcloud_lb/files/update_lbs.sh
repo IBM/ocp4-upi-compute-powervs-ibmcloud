@@ -4,17 +4,32 @@
 ################################################################
 
 # The script updates the ibmcloud entries for the new Intel nodes pool
-REGION=$1
-RESOURCE_GROUP=$2
-VPC_NAME=$3
+IBMCLOUD_API_KEY=$1
+VPC_REGION=$2
+RESOURCE_GROUP=$3
+VPC_NAME=$4
 
-ibmcloud target -r ${REGION} -g ${RESOURCE_GROUP}
+# Dev Note: we want to refresh the credentials and not assume it's OK.
+echo "Login to the IBM Cloud"
+ibmcloud login --apikey ${IBMCLOUD_API_KEY} -r ${VPC_REGION} -g ${RESOURCE_GROUP}
+
+# 1. Fetch IP addresses of newly added x86 workers
+for IP in $(oc get nodes -lkubernetes.io/arch=amd64 -owide --no-headers=true | awk '{print $6}')
+do
+# Find the Load Balancer
+
+# 2. Modify front end listeners for internal and external load balancers with Pool name 'ingress-http' and 'ingress-https'
+
+
+# 3.Add Server Instances to above listeners
+
+
 ibmcloud is vpc ${VPC_NAME} --output json
 ibmcloud is load-balancers --resource-group-name ${RESOURCE_GROUP} --output json
 --- figure out which ones are in the vpc 
 
-GET THE INTERNAL IP.
-oc get nodes -lkubernetes.io/arch=amd64 -owide --no-headers=true | awk '{print $6}' 
+1. GET THE INTERNAL IP.
+oc get nodes -lkubernetes.io/arch=amd64 -owide --no-headers=true | awk '{print $6}'
 
 LB=
 POOL=
@@ -24,6 +39,7 @@ ibmcloud is load-balancer-pool-member-create \
 ibmcloud is load-balancer-pool-member-create \
 	"${INGRESS_HTTPS_LB}" "${HTTPS_POOL}" 443 ${IP} --output JSON
 
+done
 
 load-balancer-pools
 load-balancer-pool-member-create, lb-pmc                                        Create a load balancer pool member
