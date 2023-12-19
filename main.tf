@@ -81,6 +81,7 @@ module "vpc_prepare" {
   create_custom_subnet       = var.create_custom_subnet
   skip_create_security_group = var.skip_create_security_group
   skip_route_creation        = var.skip_route_creation
+  ibm_cloud_cis              = var.ibm_cloud_cis
 }
 
 ### Prepares the VPC gateway
