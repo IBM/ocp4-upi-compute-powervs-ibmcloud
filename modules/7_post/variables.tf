@@ -9,7 +9,10 @@ variable "rhel_username" {}
 variable "bastion_public_ip" {}
 variable "private_key_file" {}
 variable "vpc_region" {}
+variable "vpc_name" {}
 variable "vpc_zone" {}
+variable "ibmcloud_api_key" {}
+variable "resource_group_name" {}
 variable "name_prefix" {}
 variable "worker_1" {}
 variable "worker_2" {}

@@ -205,7 +205,10 @@ module "post" {
   bastion_public_ip         = var.powervs_bastion_ip
   private_key_file          = var.private_key_file
   vpc_region                = var.vpc_region
+  vpc_name                  = local.vpc_name
   vpc_zone                  = var.vpc_zone
+  ibmcloud_api_key          = var.ibmcloud_api_key
+  resource_group_name       = module.vpc.vpc_resource_group_name
   name_prefix               = local.name_prefix
   worker_1                  = var.worker_1
   worker_2                  = var.worker_2

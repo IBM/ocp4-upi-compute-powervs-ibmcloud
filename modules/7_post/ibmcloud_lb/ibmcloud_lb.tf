@@ -82,7 +82,7 @@ EOF
   provisioner "remote-exec" {
     inline = [<<EOF
 cd /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
-bash update_lbs.sh
+bash update_lbs.sh "${var.ibmcloud_api_key}" "${var.vpc_region}" "${var.resource_group_name}" "${var.vpc_name}"
 EOF
     ]
   }
