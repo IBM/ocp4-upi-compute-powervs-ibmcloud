@@ -8,6 +8,9 @@ variable "connection_timeout" {}
 variable "rhel_username" {}
 variable "bastion_public_ip" {}
 variable "private_key_file" {}
+variable "ibmcloud_api_key" {}
+variable "resource_group_name" {}
+variable "vpc_name" {}
 variable "vpc_region" {}
 variable "vpc_zone" {}
 variable "name_prefix" {}
