@@ -11,16 +11,20 @@ locals {
 resource "null_resource" "remove_lbs" {
 
   triggers = {
-    count_1           = var.worker_1["count"]
-    count_2           = var.worker_2["count"]
-    count_3           = var.worker_3["count"]
-    user              = var.rhel_username
-    timeout           = "${var.connection_timeout}m"
-    name_prefix       = "${var.name_prefix}"
-    private_key       = sensitive(file(var.private_key_file))
-    host              = var.bastion_public_ip
-    agent             = var.ssh_agent
-    ansible_post_path = local.ansible_post_path
+    count_1             = var.worker_1["count"]
+    count_2             = var.worker_2["count"]
+    count_3             = var.worker_3["count"]
+    user                = var.rhel_username
+    timeout             = "${var.connection_timeout}m"
+    name_prefix         = "${var.name_prefix}"
+    private_key         = sensitive(file(var.private_key_file))
+    host                = var.bastion_public_ip
+    agent               = var.ssh_agent
+    ansible_post_path   = local.ansible_post_path
+    ibmcloud_api_key    = var.ibmcloud_api_key
+    vpc_region          = var.vpc_region
+    resource_group_name = var.resource_group_name
+    vpc_name            = var.vpc_name
   }
 
   connection {
@@ -49,7 +53,8 @@ EOF
     on_failure = continue
     inline = [<<EOF
 cd /root/ocp4-upi-compute-powervs-ibmcloud/intel/lbs/
-bash remove_lbs.sh
+bash remove_lbs.sh "${self.triggers.ibmcloud_api_key}" "${self.triggers.vpc_region}" "${self.triggers.resource_group_name}" "${self.triggers.vpc_name}"
+
 EOF
     ]
   }
