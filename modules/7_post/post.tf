@@ -208,9 +208,9 @@ module "haproxy_lb_support" {
 
 # Dev Note: we only execute when CIS, Security Groups and Load Balancers are used
 module "ibmcloud_lb_support" {
-  count               = var.ibm_cloud_cis ? 1 : 0
-  depends_on          = [null_resource.patch_nfs_arch_ppc64le]
-  source              = "./ibmcloud_lb"
+  count      = var.ibm_cloud_cis ? 1 : 0
+  depends_on = [null_resource.patch_nfs_arch_ppc64le]
+  source     = "./ibmcloud_lb"
 
   ssh_agent           = var.ssh_agent
   rhel_username       = var.rhel_username
