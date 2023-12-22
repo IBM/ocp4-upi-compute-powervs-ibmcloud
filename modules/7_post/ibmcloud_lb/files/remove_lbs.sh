@@ -19,6 +19,21 @@ HTTPS_POOL="ingress-https"
 INTERNAL_LB_NAME=`ibmcloud is lbs | grep internal-loadbalancer | awk '{print $2}'`
 EXTERNAL_LB_NAME=`ibmcloud is lbs | grep external-loadbalancer | awk '{print $2}'`
 
+# Function to wait till Load Balancer state is active
+function wait_for_active_lb_state() {
+  for (( i=1 ; i<=20 ; i++ ));
+  do
+    LB_STATE=`ibmcloud is lbs | grep $1 | awk '{print $6}'`
+    echo "Load Balancer - $1 is having state - $LB_STATE"
+    if [[ $LB_STATE == "active" ]]
+    then
+     break
+    else
+      sleep 10
+    fi
+  done
+}
+
 # Fetch IP addresses of newly added x86 workers
 for IP in $(oc get nodes -l kubernetes.io/arch=amd64 -owide --no-headers=true | awk '{print $6}')
 do
@@ -28,7 +43,7 @@ do
   ibmcloud is load-balancer-pool-member-delete \
         "${INTERNAL_LB_NAME}" "${HTTP_POOL}" "${HTTP_MEMBER_ID}" --vpc "${VPC_NAME}" --output JSON
 
-  sleep 60
+  wait_for_active_lb_state "$INTERNAL_LB_NAME"
 
   HTTPS_MEMBER_ID=`ibmcloud is load-balancer-pool-members "${INTERNAL_LB_NAME}" "${HTTPS_POOL}" | grep ${IP} | awk '{print $1}'`
   ibmcloud is load-balancer-pool-member-delete \
@@ -39,7 +54,7 @@ do
   ibmcloud is load-balancer-pool-member-delete \
         "${EXTERNAL_LB_NAME}" "${HTTP_POOL}" "${HTTP_MEMBER_ID}" --vpc "${VPC_NAME}" --output JSON
 
-  sleep 60
+  wait_for_active_lb_state "$EXTERNAL_LB_NAME"
 
   HTTPS_MEMBER_ID=`ibmcloud is load-balancer-pool-members "${EXTERNAL_LB_NAME}" "${HTTPS_POOL}" | grep ${IP} | awk '{print $1}'`
   ibmcloud is load-balancer-pool-member-delete \
