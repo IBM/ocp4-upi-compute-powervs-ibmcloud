@@ -72,7 +72,7 @@ mac-d263-worker-0   Ready    worker   40h   v1.27.4+4e87926   192.168.200.10   <
 
 ### Frequently Asked Questions (FAQ)
 
-Q: I am using the VPC Load Balancers. The Load Balancers report failed members, like this:
+Q: I am using the VPC Load Balancers. The Load Balancers internal-loadbalancer ingress-http/ingress-https report failed members, like this:
 ![Alt text](docs/failed_members.png)
 A: The installation uses a platform type of none. When a Platform Type of none is set, the IngressController can be scaled up to match the number of nodes on your cluster, or tweaked to match where you want Ingress to the cluster to pass-through.
 
