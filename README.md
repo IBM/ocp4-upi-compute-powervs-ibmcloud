@@ -70,6 +70,12 @@ NAME                STATUS   ROLES    AGE   VERSION           INTERNAL-IP      E
 mac-d263-worker-0   Ready    worker   40h   v1.27.4+4e87926   192.168.200.10   <none>        Red Hat Enterprise Linux CoreOS 414.92.202308151250-0 (Plow)   5.14.0-284.25.1.el9_2.ppc64le   cri-o://1.27.1-6.rhaos4.14.gitc2c9f36.el9
 ```
 
+### Frequently Asked Questions (FAQ)
+
+Q: I am using the VPC Load Balancers. The Load Balancers report failed members, like this:
+![Alt text](docs/failed_members.png)
+A: The installation uses a platform type of none. When a Platform Type of none is set, the IngressController can be scaled up to match the number of nodes on your cluster, or tweaked to match where you want Ingress to the cluster to pass-through.
+
 ## Contributing
 
 If you have any questions or issues you can create a new [issue here][issues].
