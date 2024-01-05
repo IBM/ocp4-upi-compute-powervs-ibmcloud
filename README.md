@@ -76,6 +76,12 @@ Q: I am using the VPC Load Balancers. The Load Balancers internal-loadbalancer i
 ![Alt text](docs/failed_members.png)
 A: The installation uses a platform type of none. When a Platform Type of none is set, the IngressController can be scaled up to match the number of nodes on your cluster, or tweaked to match where you want Ingress to the cluster to pass-through.
 
+You can learn more about scalling up the ingress controller at [`Scaling an Ingress Controller`](https://docs.openshift.com/container-platform/4.14/networking/ingress-operator.html#nw-ingress-controller-configuration_configuring-ingress)
+
+```
+$ oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"replicas": 3}}' --type=merge
+```
+
 ## Contributing
 
 If you have any questions or issues you can create a new [issue here][issues].
