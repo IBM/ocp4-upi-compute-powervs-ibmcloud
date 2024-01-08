@@ -6,6 +6,7 @@ The [`ocp4-upi-compute-powervs-ibmcloud` project](https://github.com/ibm/ocp4-up
 
 1. Requires Terraform v1.5.0 or Higher
 2. An Existing OpenShift Container Platform Cluster installed on IBM Power Virtual Server (PowerVS)
+- The cluster must be installed with Transit Gateway enabled with a Power Edge Router Connection
 - The cluster must have the NFS Storage Provider installed.
 3. An Existing IBM Cloud Virtual Private Computing (VPC) setup with at least one subnet with a Public Gateway
 4. IAM Authorization configured:
