@@ -83,6 +83,12 @@ You can learn more about scalling up the ingress controller at [`Scaling an Ingr
 $ oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"replicas": 3}}' --type=merge
 ```
 
+Q: The execution reports `No route to host` during setup of the cluster. I see:
+
+> module.install.null_resource.bootstrap_config (remote-exec): fatal: [syd05-bootstrap]: FAILED! => {"changed": false, "elapsed": 2718, "msg": "timed out waiting for ping module test: Data could not be sent to remote host \"syd05-bootstrap\". Make sure this host can be reached over ssh: ssh: connect to host syd05-bootstrap port 22: No route to host\r\n"}
+
+A: This indicates an issue with the networking routes. Please work with support to confirm your routes.
+
 ## Contributing
 
 If you have any questions or issues you can create a new [issue here][issues].
