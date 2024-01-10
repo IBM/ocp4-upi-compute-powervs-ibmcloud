@@ -70,37 +70,8 @@ EOF
   }
 }
 
-# Dev Note: adds static routes to the dhcpd.conf file
-resource "null_resource" "add_dhcp_static_routes" {
-  count      = var.ibm_cloud_cis ? 0 : 1
-  depends_on = [null_resource.setup]
-  connection {
-    type        = "ssh"
-    user        = var.rhel_username
-    host        = var.bastion_public_ip
-    private_key = file(var.private_key_file)
-    agent       = var.ssh_agent
-    timeout     = "${var.connection_timeout}m"
-  }
-
-  # Copies the custom routes for dhcp
-  provisioner "file" {
-    source      = "${path.module}/files/static-route.sh"
-    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/support/static-route.sh"
-  }
-
-  # Dev Note: Adds static routes
-  provisioner "remote-exec" {
-    inline = [<<EOF
-cd ocp4-upi-compute-powervs-ibmcloud/intel/support
-bash static-route.sh
-EOF
-    ]
-  }
-}
-
 resource "null_resource" "limit_csi_arch" {
-  depends_on = [null_resource.setup, null_resource.add_dhcp_static_routes]
+  depends_on = [null_resource.setup]
   connection {
     type        = "ssh"
     user        = var.rhel_username
@@ -122,43 +93,8 @@ EOF
   }
 }
 
-resource "null_resource" "create_resolv_conf_for_intel_workers" {
-  count = var.ibm_cloud_cis ? 0 : 1
-
-  depends_on = [null_resource.limit_csi_arch]
-  connection {
-    type        = "ssh"
-    user        = var.rhel_username
-    host        = var.bastion_public_ip
-    private_key = sensitive(file(var.private_key_file))
-    agent       = var.ssh_agent
-    timeout     = "${var.connection_timeout}m"
-  }
-
-  provisioner "remote-exec" {
-    inline = [<<EOF
-mkdir -p /root/ocp4-upi-compute-powervs-ibmcloud/intel/butane/
-EOF
-    ]
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/files/resolv.sh"
-    destination = "/root/ocp4-upi-compute-powervs-ibmcloud/intel/butane/resolv.sh"
-  }
-
-  # Dev Note: Creates a worker specific butane configuration
-  provisioner "remote-exec" {
-    inline = [<<EOF
-cd /root/ocp4-upi-compute-powervs-ibmcloud/intel/butane/
-bash resolv.sh
-EOF
-    ]
-  }
-}
-
 resource "null_resource" "migrate_mcp" {
-  depends_on = [null_resource.limit_csi_arch, null_resource.create_resolv_conf_for_intel_workers]
+  depends_on = [null_resource.limit_csi_arch]
   connection {
     type        = "ssh"
     user        = var.rhel_username

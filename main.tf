@@ -27,10 +27,9 @@ resource "random_id" "label" {
 locals {
   cluster_id = var.cluster_id == "" ? random_id.label[0].hex : (var.cluster_id_prefix == "" ? var.cluster_id : "${var.cluster_id_prefix}-${var.cluster_id}")
   # Generates vm_id as combination of vm_id_prefix + (random_id or user-defined vm_id)
-  name_prefix                 = var.name_prefix == "" ? "mac-${random_id.label[0].hex}" : "${var.name_prefix}"
-  node_prefix                 = var.use_zone_info_for_names ? "${var.powervs_zone}-" : ""
-  vpc_name                    = var.vpc_create ? "${local.name_prefix}-vpc" : var.vpc_name
-  skip_transit_gateway_create = var.ibm_cloud_cis
+  name_prefix = var.name_prefix == "" ? "mac-${random_id.label[0].hex}" : "${var.name_prefix}"
+  node_prefix = var.use_zone_info_for_names ? "${var.powervs_zone}-" : ""
+  vpc_name    = var.vpc_create ? "${local.name_prefix}-vpc" : var.vpc_name
 }
 
 ### Prepares the VPC Support Machine
@@ -81,7 +80,6 @@ module "vpc_prepare" {
   create_custom_subnet       = var.create_custom_subnet
   skip_create_security_group = var.skip_create_security_group
   skip_route_creation        = var.skip_route_creation
-  ibm_cloud_cis              = var.ibm_cloud_cis
 }
 
 ### Prepares the VPC gateway
@@ -106,40 +104,11 @@ module "vpc_gateway" {
   worker_3 = var.worker_3
 }
 
-### Prepares the VPC Support Machine
-module "pvs_link" {
-  count = var.ibm_cloud_cis ? 0 : 1
-  providers = {
-    ibm = ibm.powervs
-  }
-  depends_on = [module.vpc_prepare]
-  source     = "./modules/2_pvs_link"
-
-  powervs_service_instance_id = var.powervs_service_instance_id
-  cluster_id                  = local.cluster_id
-  powervs_network_name        = var.powervs_network_name
-}
-
-module "transit_gateway" {
-  count = local.skip_transit_gateway_create ? 0 : 1
-  providers = {
-    ibm = ibm.vpc
-  }
-  depends_on = [module.vpc_prepare, module.pvs_link]
-  source     = "./modules/3_transit_gateway"
-
-  cluster_id     = local.cluster_id
-  vpc_name       = local.vpc_name
-  vpc_crn        = module.vpc_prepare.vpc_crn
-  vpc_region     = var.vpc_region
-  resource_group = module.vpc.vpc_resource_group
-}
-
 module "support" {
   providers = {
     ibm = ibm.powervs
   }
-  depends_on = [module.transit_gateway]
+  depends_on = [module.vpc_gateway]
   source     = "./modules/4_pvs_support"
 
   private_key_file     = var.private_key_file
@@ -154,7 +123,6 @@ module "support" {
   vpc_region           = var.vpc_region
   resource_group       = module.vpc.vpc_resource_group
   ignition_ip          = var.powervs_bastion_private_ip
-  ibm_cloud_cis        = var.ibm_cloud_cis
 }
 
 module "image" {
@@ -214,6 +182,4 @@ module "post" {
   worker_2                  = var.worker_2
   worker_3                  = var.worker_3
   cicd_image_pruner_cleanup = var.cicd_image_pruner_cleanup
-  ibm_cloud_cis             = var.ibm_cloud_cis
 }
-

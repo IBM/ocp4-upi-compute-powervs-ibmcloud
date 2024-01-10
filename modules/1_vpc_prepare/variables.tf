@@ -13,7 +13,6 @@ variable "public_key" {}
 variable "powervs_machine_cidr" {}
 variable "resource_group" {}
 variable "name_prefix" {}
-variable "ibm_cloud_cis" {}
 
 variable "worker_1" {
   type = object({ count = number, profile = string, zone = string })
@@ -54,8 +53,6 @@ variable "worker_3" {
   }
 }
 variable "create_custom_subnet" {}
-
-## SSH related
 variable "ssh_agent" {}
 variable "bastion_public_ip" {}
 variable "private_key_file" {}
