@@ -3,15 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
-# 
 variable "ibmcloud_api_key" {}
 variable "vpc_region" {}
 variable "resource_group_name" {}
 variable "vpc_name" {}
 variable "vpc_create_public_gateways" {}
-
-
-## Null Provider
 variable "private_key_file" {}
 variable "rhel_username" {}
 variable "bastion_public_ip" {}
