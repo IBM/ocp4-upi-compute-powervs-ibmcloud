@@ -189,7 +189,6 @@ EOF
 
 # Dev Note: we only execute when CIS, Security Groups and Load Balancers are used
 module "ibmcloud_lb_support" {
-  count      = 1
   depends_on = [null_resource.patch_nfs_arch_ppc64le]
   source     = "./ibmcloud_lb"
 
