@@ -9,21 +9,17 @@
 
 # The following environment variables need to be set:
 # IC_API_KEY or IBMCLOUD_API_KEY - the ibm cloud api key
-# INSTALL_CONFIG_FILE - path to the install config file
 # POWERVS_SERVICE_INSTANCE_ID - the workspace instance id
-# KUBECONFIG - the path to the kubeconfig
 # PUBLIC_KEY_FILE - the path to the public key file
 # PRIVATE_KEY_FILE - the path to the private key file
-# RHEL_IMAGE_NAME - the name of the Centos/RHEL image to use as the bastion in PowerVS.
+# VPC_NAME - the name of the VPC where worker node gets created
 
 # Requires:
-# - Path to install-config.yaml
-# - Path to kubeconfig
 # - Path to id_rsa / id_rsa.pub
-# - Command: openshift-install
 # - Command: ibmcloud
 # - Command: yq
 # - Command: jq
+
 EXPECTED_NODES=$2
 if [ -z "${EXPECTED_NODES}" ]
 then
@@ -50,7 +46,7 @@ fi
 # format file var.tfvars
 create_var_file () {
 
-# API IBMCLOUD VPC pattern
+# API Key check
 if [ -z "${IC_API_KEY}" ]
 then
     # PowerVS Pattern
@@ -63,17 +59,19 @@ then
 fi
 
 # VPC Update
-if [ -z "${INSTALL_CONFIG_FILE}" ]
+
+if [ -z "${VPC_NAME}" ]
 then
-    echo "ERROR: missing install-config.yaml"
+    echo "ERROR: Should fail.... VPC_NAME needs to be set"
+    echo "From the newly created or existing VPC"
     return
 else
-    VPC_REGION=$(yq -r '.platform.ibmcloud.region' ${INSTALL_CONFIG_FILE})
-    VPC_ZONE=$(yq -r '.controlPlane.platform.ibmcloud.zones[0]' ${INSTALL_CONFIG_FILE})
-
-    VPC_NAME_PREFIX=$(yq -r '.metadata.name' ${INSTALL_CONFIG_FILE})
-    VPC_NAME=$(${IBMCLOUD} is vpcs --output json | jq -r '.[] | select(.name | contains("'${VPC_NAME_PREFIX}'")).name')
+    ibmcloud login --apikey "${IC_API_KEY}"
+    VPC_REGION=$(ibmcloud is vpc ${VPC_NAME} --output json | jq -r '.crn' | cut -d ':' -f 6)
+    echo "VPC REGION: ${VPC_REGION}" 
 fi
+
+# PowerVS Update
 
 if [ -z "${POWERVS_SERVICE_INSTANCE_ID}" ]
 then
@@ -82,9 +80,6 @@ then
     return
 else
     # PowerVS Service Instance exists
-    # To get the CRN...
-    # POWERVS_CRN=$(ibmcloud resource service-instances --output json | jq -r '.[] | select(.guid == "'${POWERVS_SERVICE_INSTANCE_ID}'").id')
-    # ibmcloud pi st "${POWERVS_CRN}"
     POWERVS_ZONE=$(${IBMCLOUD} resource service-instances --output json | jq -r '.[] | select(.guid == "'${POWERVS_SERVICE_INSTANCE_ID}'").region_id')
     POWERVS_REGION=$(
         case "$POWERVS_ZONE" in
@@ -105,18 +100,8 @@ else
             ("osa21") echo "osa" ;;
             (*) echo "$POWERVS_ZONE" ;;
         esac)
-    echo "REGION: ${POWERVS_REGION}"
-    echo "ZONE: ${POWERVS_ZONE}"
-fi
-
-# OpenShift URL
-if [ -z "${KUBECONFIG}" ]
-then 
-    echo "ERROR: kubeconfig is not set"
-    return
-else
-    OPENSHIFT_API_URL=$(cat "${KUBECONFIG}" | yq -r '.clusters[].cluster.server')
-    cp "${KUBECONFIG}" data/kubeconfig
+    echo "PowerVS REGION: ${POWERVS_REGION}"
+    echo "PowerVS ZONE: ${POWERVS_ZONE}"
 fi
 
 if [ -z "${PUBLIC_KEY_FILE}" ]
@@ -129,57 +114,47 @@ then
     echo "ERROR: PRIVATE KEY FILE is not set"
     return
 fi
+
+# copy public/private key files
 cp "${PUBLIC_KEY_FILE}" data/id_rsa.pub
 cp "${PRIVATE_KEY_FILE}" data/id_rsa
 
-# Check to see if the outside is setting the TARBALL's location
-if [ -z "${OPENSHIFT_CLIENT_TARBALL}" ]
-then
-    # Stable is fine.
-    OPENSHIFT_CLIENT_TARBALL=https://mirror.openshift.com/pub/openshift-v4/multi/clients/ocp/stable/ppc64le/openshift-client-linux.tar.gz
-fi
-
-# rhcos_import_image_filename        = "rhcos-414-92-202307050443-0-ppc64le-powervs.ova.gz"
-COREOS_URL=$(openshift-install coreos print-stream-json | jq -r '.architectures.ppc64le.artifacts.powervs.formats."ova.gz".disk.location')
-COREOS_FILE=$(echo ${COREOS_URL} | sed 's|/| |g' | awk '{print $NF}')
-COREOS_NAME=$(echo ${COREOS_FILE} | sed 's|\.ova\.gz||' | tr '.' '-' | sed 's|-0-powervs-ppc64le||g')
-
-# RHEL_IMAGE_NAME
-if [ -z "${RHEL_IMAGE_NAME}" ]
-then
-    echo "WARNING: RHEL_IMAGE_NAME is not set, defaulting to 'CentOS-Stream-8'"
-    RHEL_IMAGE_NAME="CentOS-Stream-8"
-fi
-
 # creates the var file
 cat << EOFXEOF > data/var.tfvars
+################################################################
+# Copyright 2023 - IBM Corporation. All rights reserved
+# SPDX-License-Identifier: Apache-2.0
+################################################################
+
+### IBM Cloud
 ibmcloud_api_key = "${IC_API_KEY}"
 
+# VPC
 vpc_name   = "${VPC_NAME}"
 vpc_region = "${VPC_REGION}"
-vpc_zone   = "${VPC_ZONE}"
+vpc_zone   = "<Choose VPC ZONE. e.g. ${VPC_REGION}-1 >"
 
+# PowerVS
 powervs_service_instance_id = "${POWERVS_SERVICE_INSTANCE_ID}"
 powervs_region              = "${POWERVS_REGION}"
 powervs_zone                = "${POWERVS_ZONE}"
 
-rhel_image_name  = "${RHEL_IMAGE_NAME}"
-rhcos_image_name = "${COREOS_NAME}"
+# Public and Private Key for Bastion Nodes
 public_key_file  = "data/id_rsa.pub"
 private_key_file = "data/id_rsa"
 
-# Example file name: rhcos-414-92-202307050443-0-ppc64le-powervs.ova.gz
-rhcos_import_image                 = true
-rhcos_import_image_filename        = "${COREOS_NAME}-0-ppc64le-powervs.ova.gz"
-rhcos_import_image_region_override = "us-east"
+# VPC Workers
+# Zone 1
+worker_1 = { count = "${EXPECTED_NODES}", profile = "cx2-8x16", "zone" = "${VPC_REGION}-1" }
+# Zone 2
+worker_2 = { count = "0", profile = "cx2-8x16", "zone" = "${VPC_REGION}-2" }
+# Zone 3
+worker_3 = { count = "0", profile = "cx2-8x16", "zone" = "${VPC_REGION}-3" }
 
-processor_type = "shared"
-system_type    = "e980"
-bastion_health_status = "WARNING"
-bastion               = { memory = "16", processors = "1", "count" = 1 }
-worker                = { memory = "16", processors = "1", "count" = ${EXPECTED_NODES} }
+# Required for Ignition and Automation to Run (powervs_bastion_private_ip generally belongs to 192.168.200.x range)
+powervs_bastion_private_ip = "<Private IP Address of Bastion>"
+powervs_bastion_ip         = "<Public IP Address of Bastion>"
 
-cicd_image_pruner_cleanup = true
 EOFXEOF
 }
 
