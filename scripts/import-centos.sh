@@ -21,12 +21,12 @@ else
     then
         IBMCLOUD=ic
     else 
-        ibmcloud plugin install -v 0.6.0 -f power-iaas
+        ibmcloud plugin install -f power-iaas
     fi
 fi
 
-POWERVS_CRN=$(${IBMCLOUD} pi sl 2>&1 | grep "${SERVICE_INSTANCE_ID}" | awk '{print $1}')
-${IBMCLOUD} pi st "${POWERVS_CRN}"
+POWERVS_CRN=$(${IBMCLOUD} pi workspace ls 2>&1 | grep "${SERVICE_INSTANCE_ID}" | awk '{print $1}')
+${IBMCLOUD} pi workspace target "${POWERVS_CRN}"
 
-${IBMCLOUD} pi image-create CentOS-Stream-8
+${IBMCLOUD} pi image create CentOS-Stream-8
 echo "Finished importing CentOS-Stream-8"

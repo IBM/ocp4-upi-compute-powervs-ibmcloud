@@ -10,7 +10,7 @@ if [[ $(type -t ic) == function ]]
 then
     IBMCLOUD=ic
 else 
-    ibmcloud plugin install -v 0.6.0 -f power-iaas
+    ibmcloud plugin install -f power-iaas
 fi
 
 if [ -z "${WORKSPACE_NAME}" ]
@@ -31,8 +31,9 @@ then
     return -1
 fi
 
-SERVICE_NAME=power-iaas
-SERVICE_PLAN_NAME=power-virtual-server-group
-
-${IBMCLOUD} resource service-instance-create "${WORKSPACE_NAME}" \
-    "${SERVICE_NAME}" "${SERVICE_PLAN_NAME}" "${REGION}" -g "${RESOURCE_GROUP}"
+# Create the service instance
+ibmcloud pi workspace create "${WORKSPACE_NAME}" \
+    --plan public \
+    --datacenter "${REGION}" \
+    --json \
+    --group "${RESOURCE_GROUP}" 2>&1
