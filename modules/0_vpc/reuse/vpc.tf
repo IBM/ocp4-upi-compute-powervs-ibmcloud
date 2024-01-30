@@ -16,8 +16,8 @@
 locals {
   vpc_pvs = {
     us-south = {
-      region = "us-south",
-      zone   = "us-south"
+      region = "dal10",
+      zone   = "dal"
     },
     us-east = {
       region = "us-east",
@@ -31,6 +31,10 @@ locals {
       region = "tor",
       zone   = "tor01"
     },
+	ca-mon = {
+      region = "mon",
+      zone   = "mon01"
+    },
     eu-de = {
       region = "eu-de",
       zone   = "eu-de-1"
@@ -38,6 +42,10 @@ locals {
     eu-gb = {
       region = "lon",
       zone   = "lon06"
+    },
+    eu-es = {
+      region = "mad",
+      zone   = "mad02"
     },
     au-syd = {
       region = "syd",
