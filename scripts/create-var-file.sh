@@ -31,7 +31,7 @@ if [[ $(type -t ic) == function ]]
 then
     IBMCLOUD=ic
 else 
-    ${IBMCLOUD} plugin install -v 0.6.0 -f power-iaas
+    ${IBMCLOUD} plugin install -f power-iaas
 fi
 
 if [ ! -z "${1}" ]
@@ -83,6 +83,7 @@ else
     POWERVS_ZONE=$(${IBMCLOUD} resource service-instances --output json | jq -r '.[] | select(.guid == "'${POWERVS_SERVICE_INSTANCE_ID}'").region_id')
     POWERVS_REGION=$(
         case "$POWERVS_ZONE" in
+            ("dal10") echo "dal" ;;
             ("dal12") echo "dal" ;;
             ("us-south") echo "us-south" ;;
             ("wdc06") echo "wdc" ;;
@@ -90,6 +91,7 @@ else
             ("sao01") echo "sao" ;;
             ("tor01") echo "tor" ;;
             ("mon01") echo "mon" ;;
+            ("mad01") echo "mad" ;;
             ("eu-de-1") echo "eu-de" ;;
             ("eu-de-2") echo "eu-de" ;;
             ("lon04") echo "lon" ;;

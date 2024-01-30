@@ -31,7 +31,7 @@ locals {
       region = "tor",
       zone   = "tor01"
     },
-	ca-mon = {
+    ca-mon = {
       region = "mon",
       zone   = "mon01"
     },

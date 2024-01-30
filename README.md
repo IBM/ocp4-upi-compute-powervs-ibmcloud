@@ -96,7 +96,7 @@ A: Yes, as part of the setup, you will import from the RHCOS bucket.
 To import rhcos:
 
 ```
-ibmcloud pi image-import rhcos-415-92-202312071243-t1
+ibmcloud pi image import rhcos-415-92-202312071243-t1
        --bucket-access public --storage-pool Tier1-Flash-1
        --bucket rhcos-powervs-images-us-east --region us-east --job --json --os-type rhel
        --image-file-name rhcos-415-92-202312071243-0-ppc64le-powervs.ova.gz
@@ -105,7 +105,7 @@ ibmcloud pi image-import rhcos-415-92-202312071243-t1
 To import the Centos stock image:
 
 ```
-ibmcloud pi image-create CentOS-Stream-8
+ibmcloud pi image create CentOS-Stream-8
 ```
 
 ## Contributing
