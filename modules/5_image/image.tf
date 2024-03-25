@@ -20,7 +20,7 @@ resource "ibm_resource_instance" "cos_instance" {
   service           = "cloud-object-storage"
   plan              = "standard"
   location          = "global"
-  tags              = [ "mac-power-control-plane" ]
+  tags              = ["mac-power-control-plane"]
 }
 
 resource "ibm_cos_bucket" "cos_bucket" {
