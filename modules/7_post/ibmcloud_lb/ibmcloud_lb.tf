@@ -18,13 +18,13 @@ resource "null_resource" "remove_lbs" {
     timeout             = "${var.connection_timeout}m"
     name_prefix         = "${var.name_prefix}"
     private_key         = sensitive(file(var.private_key_file))
-    host                = var.bastion_public_ip
+    host                = sensitive(var.bastion_public_ip)
     agent               = var.ssh_agent
     ansible_post_path   = local.ansible_post_path
-    ibmcloud_api_key    = var.ibmcloud_api_key
+    ibmcloud_api_key    = sensitive(var.ibmcloud_api_key)
     vpc_region          = var.vpc_region
-    resource_group_name = var.resource_group_name
-    vpc_name            = var.vpc_name
+    resource_group_name = sensitive(var.resource_group_name)
+    vpc_name            = sensitive(var.vpc_name)
   }
 
   connection {
