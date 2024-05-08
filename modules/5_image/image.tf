@@ -73,7 +73,7 @@ EOF
 # Dev Note: required however, it may require superadmin privileges to set.
 # Ref: https://github.com/openshift/installer/blob/master/data/data/ibmcloud/network/image/main.tf#L19
 resource "ibm_iam_authorization_policy" "policy" {
-  depends_on                  = [ibm_resource_instance.cos_instance]
+  depends_on                  = [ibm_resource_instance.cos_instance, null_resource.upload_rhcos_image]
   count                       = var.skip_authorization_policy_create ? 0 : 1
   source_service_name         = "is"
   source_resource_type        = "image"
