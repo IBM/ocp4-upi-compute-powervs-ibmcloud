@@ -95,7 +95,7 @@ resource "ibm_is_image" "worker_image_id" {
   depends_on       = [null_resource.upload_rhcos_image, ibm_cos_bucket.cos_bucket, ibm_iam_authorization_policy.policy]
   name             = "${var.name_prefix}-rhcos-img"
   href             = "cos://${local.cos_region}/${var.name_prefix}-mac-intel/${var.name_prefix}-rhcos.qcow2"
-  operating_system = "rhel-coreos-stable-amd64-byol"
+  operating_system = "red-coreos-amd64-byol"
   resource_group   = data.ibm_resource_group.resource_group.id
 
   //increase timeouts as this import may be cross-region
