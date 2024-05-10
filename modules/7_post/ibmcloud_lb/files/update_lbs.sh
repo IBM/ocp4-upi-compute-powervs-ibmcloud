@@ -1,16 +1,16 @@
 ################################################################
-# Copyright 2023 - IBM Corporation. All rights reserved
+# Copyright 2023,2024 - IBM Corporation. All rights reserved
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
 # The script updates the front end listeners for Internal/External UPI automation generated Load Balancers
-IBMCLOUD_API_KEY=$1
-VPC_REGION=$2
-RESOURCE_GROUP=$3
-VPC_NAME=$4
+IBMCLOUD_API_KEY="${1}"
+VPC_REGION="${2}"
+RESOURCE_GROUP="${3}"
+VPC_NAME="${4}"
 
 echo "Login to the IBM Cloud"
-ibmcloud login --apikey ${IBMCLOUD_API_KEY} -r ${VPC_REGION} -g ${RESOURCE_GROUP}
+ibmcloud login --apikey "${IBMCLOUD_API_KEY}" -r "${VPC_REGION}" -g "${RESOURCE_GROUP}"
 
 HTTP_POOL="ingress-http"
 HTTPS_POOL="ingress-https"
@@ -27,8 +27,33 @@ do
     echo "- No Load Balancers on Subnet - ${SN}"
   else
     echo "- Load Balancers found"
-    INTERNAL_LB_NAME=$(echo "${SUBNET_JSON}" | jq -r '.load_balancers[] | select(.name | contains( "-internal-loadbalancer")).name')
-    EXTERNAL_LB_NAME=$(echo "${SUBNET_JSON}" | jq -r '.load_balancers[] | select(.name | contains( "-external-loadbalancer")).name')
+
+    # Internal
+    for LB in $(echo "${SUBNET_JSON}" | jq -r '.load_balancers[] | select(.name | contains( "-internal-loadbalancer")) | select(.pools[] | length > 0).name' | sort -u)
+    do
+        echo "Checking Load Balancer: ${LB}"
+        MEMBERS=$(ibmcloud is load-balancer-pool-members "${LB}" ingress-https --vpc "${VPC_NAME}" --output json | jq -r '. | length' || true)
+        if [[ "${MEMBERS}" != "0" ]]
+        then
+            # Only get the first LB
+            INTERNAL_LB_NAME="${LB}"
+            break
+        fi
+    done
+
+    # External
+    for LB in $(echo "${SUBNET_JSON}" | jq -r '.load_balancers[] | select(.name | contains( "-external-loadbalancer")) | select(.pools[] | length > 0).name' | sort -u)
+    do
+        echo "Checking Load Balancer: ${LB}"
+        MEMBERS=$(ibmcloud is load-balancer-pool-members "${LB}" ingress-https --vpc "${VPC_NAME}" --output json | jq -r '. | length' || true)
+        if [ ! -z "${MEMBERS}" ]
+        then
+            # Only get the first LB
+            EXTERNAL_LB_NAME="${LB}"
+            break
+        fi
+    done
+
     echo "Internal LB - ${INTERNAL_LB_NAME}"
     echo "External LB - ${EXTERNAL_LB_NAME}"
   fi
@@ -48,14 +73,17 @@ fi
 function wait_for_active_lb_state() {
   for (( i=1 ; i<=20 ; i++ ));
   do
-    LB_STATE=$(ibmcloud is lbs | grep $1 | awk '{print $6}')
-    echo "Load Balancer - $1 is having state - $LB_STATE"
-    if [[ "$LB_STATE" == "active" ]]
-    then
-     break
-    else
-      sleep 10
-    fi
+    for UNIQUE_LB in $(echo "${1}")
+    do
+        LB_STATE=$(ibmcloud is lbs | grep "${UNIQUE_LB}" | awk '{print $6}')
+        echo "Load Balancer - $1 is having state - $LB_STATE"
+        if [[ "$LB_STATE" == "active" ]]
+        then
+            break
+        else
+            sleep 10
+        fi
+    done
   done
 }
 
