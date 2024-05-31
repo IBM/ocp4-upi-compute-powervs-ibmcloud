@@ -15,13 +15,13 @@
 # If the PowerVS Region or Zone is empty, the code auto-populates the zone/region information
 locals {
   vpc_pvs = {
-    us-south = {
+    us-south = { #OK
       region = "dal10",
       zone   = "dal"
     },
-    us-east = {
-      region = "us-east",
-      zone   = "us-east"
+    us-east = { #OK
+      region = "wdc",
+      zone   = "wdc07"
     },
     br-sao = {
       region = "sao",
@@ -35,7 +35,7 @@ locals {
       region = "mon",
       zone   = "mon01"
     },
-    eu-de = {
+    eu-de = { #OK
       region = "eu-de",
       zone   = "eu-de-1"
     },
@@ -49,7 +49,7 @@ locals {
     },
     au-syd = {
       region = "syd",
-      zone   = "syd05"
+      zone   = "syd04"
     },
     jp-tok = {
       region = "tok",
@@ -58,6 +58,10 @@ locals {
     jp-osa = {
       region = "osa",
       zone   = "osa21"
+    },
+    br-sao = { #OK
+      region = "sao",
+      zone   = "sao04"
     }
   }
   # Certain regions don't have a good mapping
