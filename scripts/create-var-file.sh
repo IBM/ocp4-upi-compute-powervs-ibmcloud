@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ################################################################
-# Copyright 2023 - IBM Corporation. All rights reserved
+# Copyright 2024 - IBM Corporation. All rights reserved
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
@@ -156,7 +156,7 @@ worker_3 = { count = "0", profile = "cx2-8x16", "zone" = "${VPC_REGION}-3" }
 # Required for Ignition and Automation to Run (powervs_bastion_private_ip generally belongs to 192.168.200.x range)
 powervs_bastion_private_ip = "<Private IP Address of Bastion>"
 powervs_bastion_ip         = "<Public IP Address of Bastion>"
-
+vpc_skip_ssh_key_create = true
 EOFXEOF
 }
 
