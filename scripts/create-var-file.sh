@@ -121,6 +121,9 @@ fi
 cp "${PUBLIC_KEY_FILE}" data/id_rsa.pub
 cp "${PRIVATE_KEY_FILE}" data/id_rsa
 
+# vpc_skip_ssh_key_create is set, and we need to skip creating it.
+${IBMCLOUD} is key-create cicd-key @data/id_rsa.pub || true
+
 # creates the var file
 cat << EOFXEOF > data/var.tfvars
 ################################################################
