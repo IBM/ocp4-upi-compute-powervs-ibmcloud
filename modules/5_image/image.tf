@@ -15,17 +15,17 @@ data "ibm_resource_group" "resource_group" {
 # allow_cleanup is automatically decided by the service-broker
 # Ref: https://cloud.ibm.com/docs/cloud-object-storage?topic=cloud-object-storage-endpoints
 resource "ibm_resource_instance" "cos_instance" {
-  name              = "${var.name_prefix}-mac-intel-cos"
+  name              = "${var.name_prefix}-multi-arch-intel-cos"
   resource_group_id = data.ibm_resource_group.resource_group.id
   service           = "cloud-object-storage"
   plan              = "standard"
   location          = "global"
-  tags              = ["mac-power-control-plane"]
+  tags              = ["multi-arch-power-control-plane"]
 }
 
 resource "ibm_cos_bucket" "cos_bucket" {
   depends_on           = [ibm_resource_instance.cos_instance]
-  bucket_name          = "${var.name_prefix}-mac-intel"
+  bucket_name          = "${var.name_prefix}-multi-arch-intel"
   resource_instance_id = ibm_resource_instance.cos_instance.id
   region_location      = var.vpc_region
   storage_class        = "smart"
