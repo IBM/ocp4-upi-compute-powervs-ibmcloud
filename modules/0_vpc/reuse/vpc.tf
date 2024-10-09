@@ -1,10 +1,10 @@
 ################################################################
-# Copyright 2023 - IBM Corporation. All rights reserved
+# Copyright 2024 - IBM Corporation. All rights reserved
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
 # Ref: VPC Regions https://cloud.ibm.com/docs/overview?topic=overview-locations
-# Ref: PowerVS Regions https://cloud.ibm.com/docs/power-iaas?topic=power-iaas-creating-power-virtual-server
+# Ref: PowerVS Regions https://cloud.ibm.com/docs/power-iaas?topic=power-iaas-ibm-cloud-reg
 # Ref: https://cluster-api-ibmcloud.sigs.k8s.io/reference/regions-zones-mapping.html
 
 # Dev Note: This is the file where the VPC should be created in the future.
@@ -15,17 +15,17 @@
 # If the PowerVS Region or Zone is empty, the code auto-populates the zone/region information
 locals {
   vpc_pvs = {
-    us-south = { #OK
-      region = "dal10",
-      zone   = "dal"
+    us-south = {
+      region = "us-south",
+      zone   = "us-south-1"
     },
-    us-east = { #OK
+    us-east = {
       region = "wdc",
       zone   = "wdc07"
     },
     br-sao = {
       region = "sao",
-      zone   = "sao01"
+      zone   = "sao04"
     },
     ca-tor = {
       region = "tor",
@@ -35,7 +35,7 @@ locals {
       region = "mon",
       zone   = "mon01"
     },
-    eu-de = { #OK
+    eu-de = {
       region = "eu-de",
       zone   = "eu-de-1"
     },
@@ -59,9 +59,13 @@ locals {
       region = "osa",
       zone   = "osa21"
     },
-    br-sao = { #OK
+    br-sao = {
       region = "sao",
       zone   = "sao04"
+    },
+    che01 = {
+      region = "che01",
+      zone   = "che01"
     }
   }
   # Certain regions don't have a good mapping
