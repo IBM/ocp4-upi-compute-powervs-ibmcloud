@@ -86,7 +86,7 @@ resource "null_resource" "limit_csi_arch" {
   # scheduler.alpha.kubernetes.io/node-selector: kubernetes.io/arch=ppc64le
   provisioner "remote-exec" {
     inline = [<<EOF
-oc annotate --kubeconfig /root/.kube/config ns openshift-cluster-csi-drivers \
+oc annotate ns openshift-cluster-csi-drivers \
   scheduler.alpha.kubernetes.io/node-selector=kubernetes.io/arch=ppc64le
 EOF
     ]
