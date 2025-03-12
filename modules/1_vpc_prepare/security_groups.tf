@@ -73,6 +73,7 @@ locals {
 # Dev Note: Only opens to the Load Balancers SG
 # If it exists, it implies that the SG needs to be updated.
 resource "ibm_is_security_group_rule" "lbs_to_workers_http" {
+  count     = !var.skip_create_security_group ? 1 : 0
   group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = local.lbs_sg[0].id
@@ -84,7 +85,39 @@ resource "ibm_is_security_group_rule" "lbs_to_workers_http" {
 
 # TCP Inbound 443 - Security group *ocp-sec-group
 resource "ibm_is_security_group_rule" "lbs_to_workers_https" {
+  count     = !var.skip_create_security_group ? 1 : 0
   group     = ibm_is_security_group.worker_vm_sg[0].id
+  direction = "inbound"
+  remote    = local.lbs_sg[0].id
+  tcp {
+    port_min = 443
+    port_max = 443
+  }
+}
+
+data "ibm_security_group" "workers_sg" {
+  name = "${var.vpc_name}-workers-sg"
+}
+
+# Security Group already exists
+# TCP Inbound 80 - Security group *ocp-sec-group
+# Dev Note: Only opens to the Load Balancers SG
+# If it exists, it implies that the SG needs to be updated.
+resource "ibm_is_security_group_rule" "exists_lbs_to_workers_http" {
+  count     = var.skip_create_security_group ? 1 : 0
+  group     = data.ibm_security_group.workers_sg.id
+  direction = "inbound"
+  remote    = local.lbs_sg[0].id
+  tcp {
+    port_min = 80
+    port_max = 80
+  }
+}
+
+# TCP Inbound 443 - Security group *ocp-sec-group
+resource "ibm_is_security_group_rule" "exists_lbs_to_workers_https" {
+  count     = var.skip_create_security_group ? 1 : 0
+  group     = data.ibm_security_group.workers_sg.id
   direction = "inbound"
   remote    = local.lbs_sg[0].id
   tcp {
