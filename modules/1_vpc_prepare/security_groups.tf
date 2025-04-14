@@ -95,8 +95,10 @@ resource "ibm_is_security_group_rule" "lbs_to_workers_https" {
   }
 }
 
+# depends_on is needed to ensure we're not hitting this before it's possibly created.
 data "ibm_security_group" "workers_sg" {
-  name = "${var.vpc_name}-workers-sg"
+  depends_on = [ibm_is_security_group.worker_vm_sg]
+  name       = "${var.vpc_name}-workers-sg"
 }
 
 # Security Group already exists
