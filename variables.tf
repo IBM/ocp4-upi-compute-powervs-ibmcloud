@@ -367,6 +367,6 @@ variable "skip_image_creation" {
 variable "image_id_for_skip_image" {
   type        = string
   description = "The id of the image to use when skipped"
-  default     = "8e4856cc-c256-48c5-9502-1766a01f596c"
+  default     = "r014-05bd1566-b321-45d6-8078-c3bcd0dfe1d2"
 }
 
