@@ -358,3 +358,15 @@ variable "ibm_cloud_cis" {
   default     = false
 }
 
+variable "skip_image_creation" {
+  type        = bool
+  description = "skips the creation of the vpc rhel-coreos image"
+  default     = false
+}
+
+variable "image_id_for_skip_image" {
+  type        = string
+  description = "The id of the image to use when skipped"
+  default     = "<image-id>"
+}
+

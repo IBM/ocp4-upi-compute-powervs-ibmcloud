@@ -126,6 +126,7 @@ module "support" {
 }
 
 module "image" {
+  count = !var.skip_image_creation ? 0 : 1
   providers = {
     ibm = ibm.vpc
   }
@@ -155,7 +156,7 @@ module "worker" {
   worker_2             = var.worker_2
   worker_3             = var.worker_3
   name_prefix          = local.name_prefix
-  rhcos_image_id       = module.image.rhcos_image_id
+  rhcos_image_id       = !var.skip_image_creation ? module.image[0].rhcos_image_id : var.image_id_for_skip_image
   vpc_name             = local.vpc_name
   vpc_key_id           = module.vpc_prepare.vpc_key_id
   ignition_ip          = var.powervs_bastion_private_ip
