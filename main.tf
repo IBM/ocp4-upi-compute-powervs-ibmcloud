@@ -126,7 +126,7 @@ module "support" {
 }
 
 module "image" {
-  count = !var.skip_image_creation ? 0 : 1
+  count = var.skip_image_creation ? 0 : 1
   providers = {
     ibm = ibm.vpc
   }
