@@ -117,7 +117,7 @@ resource "null_resource" "post_ansible" {
     destination = "${local.ansible_post_path}/ansible_post_vars.json"
   }
 
-    provisioner "remote-exec" {
+  provisioner "remote-exec" {
     inline = [
       "sudo yum install -y ansible",
       "ansible-galaxy collection install community.crypto",
