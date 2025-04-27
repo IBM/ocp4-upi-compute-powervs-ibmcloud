@@ -117,6 +117,15 @@ resource "null_resource" "post_ansible" {
     destination = "${local.ansible_post_path}/ansible_post_vars.json"
   }
 
+    provisioner "remote-exec" {
+    inline = [
+      "sudo yum install -y ansible",
+      "ansible-galaxy collection install community.crypto",
+      "ansible-galaxy collection install ansible.posix",
+      "ansible-galaxy collection install kubernetes.core"
+    ]
+  }
+
   #command to run ansible playbook on Bastion
   provisioner "remote-exec" {
     inline = [<<EOF
