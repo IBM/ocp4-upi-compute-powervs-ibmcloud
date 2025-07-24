@@ -16,7 +16,7 @@ output "vpc_crn" {
 }
 
 output "target_worker_sg_id" {
-  value = !var.skip_create_security_group ? module.security_groups.target_worker_sg_id : module.no_security_groups.target_worker_sg_id
+  value = !var.skip_create_security_group ? module.security_groups[0].target_worker_sg_id : module.no_security_groups[0].target_worker_sg_id
 }
 
 output "mac_vpc_subnets" {
