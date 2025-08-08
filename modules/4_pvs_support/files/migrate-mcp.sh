@@ -18,8 +18,11 @@ oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-h
 
 for POWER_NODE in $(oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-headers=true | awk '{print $1}')
 do
-echo "Adding label to Power Node: ${POWER_NODE}"
+echo "Adding power label to Power Node: ${POWER_NODE}"
 oc label node ${POWER_NODE} node-role.kubernetes.io/power=
+
+echo "Removing worker label to Power Node: ${POWER_NODE}"
+oc label node ${POWER_NODE} node-role.kubernetes.io/worker-
 done
 echo "Done Labeling the nodes"
 
