@@ -82,6 +82,10 @@ do
     MCP_IDX=$(($MCP_IDX + 1))
     if [ "${MCP_IDX}" -gt "${MCP_COUNT}" ]
     then
+        echo "[MachineConfigPool/power]"
+        oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power --no-headers=true
+        echo "[MachineConfigPool/worker+power]"
+        oc get nodes -l kubernetes.io/arch=ppc64le --no-headers=true
         echo "failed to wait on the machine count"
         exit 1
     fi
