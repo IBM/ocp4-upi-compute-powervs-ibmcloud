@@ -25,6 +25,8 @@ quit
 EOF
 
 nmcli connection up "$${INT_IFACE}"
+sleep 15
+nmcli connection up "$${INT_IFACE}"
 break
 fi
 done
