@@ -101,7 +101,8 @@ resource "null_resource" "migrate_mcp" {
     host        = var.bastion_public_ip
     private_key = sensitive(file(var.private_key_file))
     agent       = var.ssh_agent
-    timeout     = "${var.connection_timeout}m"
+    # originally this was ${var.connection_timeout} minutes for the timeout
+    timeout = "70m"
   }
 
   provisioner "remote-exec" {

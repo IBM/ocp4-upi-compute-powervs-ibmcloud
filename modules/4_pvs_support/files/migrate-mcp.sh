@@ -12,24 +12,6 @@ if [ ${VAL} -eq 1 ]
 then 
 echo "Migrating the preinstall-worker-kargs"
 
-# Assign a role label in addition to worker called power [To existing running PowerVs worker nodes ]
-echo "list of worker nodes: "
-oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-headers=true
-
-for POWER_NODE in $(oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-headers=true | awk '{print $1}')
-do
-echo "Adding power label to Power Node: ${POWER_NODE}"
-oc label node ${POWER_NODE} node-role.kubernetes.io/power=
-
-echo "Removing worker label to Power Node: ${POWER_NODE}"
-oc label node ${POWER_NODE} node-role.kubernetes.io/worker-
-done
-echo "Done Labeling the nodes"
-
-# Check the Nodes and you should see two roles listed
-echo "The following nodes have the power node-role label"
-oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power --no-headers=true
-
 # Create a mcp for power
 cat <<EOF | oc apply -f -
 apiVersion: machineconfiguration.openshift.io/v1
@@ -46,11 +28,7 @@ spec:
         matchLabels:
             node-role.kubernetes.io/power: ""
 EOF
-echo "Done creating the 'power' MCP"
-
-# Check to see the MachineConfigPools
-echo "Verify the MCPs are listed:"
-oc get mcp
+echo "Done creating the 'MachineConfigPool/power'"
 
 # Create the 'preinstall-power-kargs' mc and check it is part of the power mcp
 echo "Create the preinstall power kargs mc"
@@ -66,13 +44,36 @@ spec:
   - rd.multipath=default
   - root=/dev/disk/by-label/dm-mpath-root
 EOF
-echo "Done creating mc"
+echo "Done creating MachineConfig/preinstall-power-kargs"
+
+# Assign a role label in addition to worker called power [To existing running PowerVs worker nodes ]
+echo "list of worker nodes: "
+oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-headers=true
+
+for POWER_NODE in $(oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-headers=true | awk '{print $1}')
+do
+    echo "Adding power label to Power Node: ${POWER_NODE}"
+    oc label node ${POWER_NODE} node-role.kubernetes.io/power=
+
+    echo "Removing worker label to Power Node: ${POWER_NODE}"
+    oc label node ${POWER_NODE} node-role.kubernetes.io/worker-
+done
+echo "Done Labeling the nodes"
+
+# Check the Nodes and you should see two roles listed
+echo "The following nodes have the power node-role label"
+oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power --no-headers=true
+
+# Check to see the MachineConfigPools
+echo "Verify the MCPs are listed:"
+oc get mcp
 
 # Wait on the power mcp to update
-echo "waiting small period of time for reconciliation in mcps"
+echo "waiting small period of time for reconciliation in mcps - first update"
 sleep 60
+
 MCP_IDX=0
-MCP_COUNT=50
+MCP_COUNT=120
 MACHINE_COUNT=$(oc get mcp power -o json | jq -r '.status.machineCount')
 while [ $(oc get mcp power -o json | jq -r '.status.readyMachineCount') -ne ${MACHINE_COUNT} ]
 do
@@ -97,10 +98,10 @@ echo "Deleting the worker kargs"
 oc delete mc preinstall-worker-kargs
 
 # Wait on the worker mcp to update
-echo "waiting small period of time for reconciliation in mcps"
+echo "waiting small period of time for reconciliation in mcps - second update"
 sleep 60
 MCP_IDX=0
-MCP_COUNT=50
+MCP_COUNT=120
 MACHINE_COUNT=$(oc get mcp power -o json | jq -r '.status.machineCount')
 while [ $(oc get mcp power -o json | jq -r '.status.readyMachineCount') -ne ${MACHINE_COUNT} ]
 do
