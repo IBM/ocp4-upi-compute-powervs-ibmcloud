@@ -73,12 +73,19 @@ echo "waiting small period of time for reconciliation in mcps - first update"
 sleep 60
 
 MCP_IDX=0
+UNCORDON_COUNT=60
 MCP_COUNT=120
 MACHINE_COUNT=$(oc get mcp power -o json | jq -r '.status.machineCount')
 while [ $(oc get mcp power -o json | jq -r '.status.readyMachineCount') -ne ${MACHINE_COUNT} ]
 do
     echo "WAITING: some more"
     oc get mcp power -o json | jq -r '.status.readyMachineCount'
+
+    # Strange issue with cordoned nodes. Forcing it uncordoned after 60 counts (30 minutes)
+    if [ "${MCP_IDX}" -gt "${UNCORDON_COUNT}" ]
+    then
+        oc adm uncordon $(oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power -oname)
+    fi
 
     MCP_IDX=$(($MCP_IDX + 1))
     if [ "${MCP_IDX}" -gt "${MCP_COUNT}" ]
