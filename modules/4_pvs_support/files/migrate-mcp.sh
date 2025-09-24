@@ -91,6 +91,7 @@ do
     if [ "${MCP_IDX}" -gt "${MCP_COUNT}" ]
     then
         echo "[MachineConfigPool/power]"
+        oc get mcp power -o json | jq -r '.'
         oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power --no-headers=true
         echo "[MachineConfigPool/worker+power]"
         oc get nodes -l kubernetes.io/arch=ppc64le --no-headers=true
@@ -115,10 +116,14 @@ do
     echo "WAITING: some more"
     oc get mcp power -o json | jq -r '.status.readyMachineCount'
 
+    echo "MachineConfigPool/power: $(oc get mcp power)"
+
     MCP_IDX=$(($MCP_IDX + 1))
     if [ "${MCP_IDX}" -gt "${MCP_COUNT}" ]
     then
         echo "failed to wait on the machine count"
+        oc get mcp -oyaml power
+        oc get mcp -oyaml worker
         exit 1
     fi
     sleep 30
