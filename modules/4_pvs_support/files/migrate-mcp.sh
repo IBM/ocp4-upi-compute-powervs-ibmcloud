@@ -84,6 +84,8 @@ do
     # Strange issue with cordoned nodes. Forcing it uncordoned after 60 counts (30 minutes)
     if [ "${MCP_IDX}" -gt "${UNCORDON_COUNT}" ]
     then
+        oc get csr
+        echo "::UNCORDONING NODE::"
         oc adm uncordon $(oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power -oname)
     fi
 
