@@ -29,10 +29,14 @@ IDX=0
 READY_COUNT=$(oc get nodes -l kubernetes.io/arch=amd64 | grep "${MACHINE_PREFIX}" | grep -v NotReady | grep -c Ready)
 while [ "${READY_COUNT}" -ne "${INTEL_COUNT}" ]
 do
-  echo "Approve and Issue - #${IDX}"
+  echo "::::: Approve and Issue - #${IDX}"
   echo "List of Intel Workers in ${INTEL_ZONE}: "
   oc get nodes -l 'kubernetes.io/arch=amd64' --no-headers=true | grep "${MACHINE_PREFIX}"
-  echo ""
+  echo "::::: End List of Nodes"
+
+  echo "::::: Start CSR"
+  oc get csr -ojson
+  echo "::::: End CSR"
 
   # Approve
   APPROVED_WORKERS=0
