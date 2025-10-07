@@ -91,9 +91,9 @@ resource "null_resource" "approve_and_issue" {
     inline = [<<EOF
 echo "Running the CSR approval and issue"
 cd ${local.ansible_post_path}
-bash approve_and_issue.sh ${var.worker_1["count"]} ${var.name_prefix} "z1"
-bash approve_and_issue.sh ${var.worker_2["count"]} ${var.name_prefix} "z2"
-bash approve_and_issue.sh ${var.worker_3["count"]} ${var.name_prefix} "z3"
+bash approve_and_issue.sh ${var.worker_1["count"]} ${var.name_prefix} "z1" "${var.resource_group_name}"
+bash approve_and_issue.sh ${var.worker_2["count"]} ${var.name_prefix} "z2" "${var.resource_group_name}"
+bash approve_and_issue.sh ${var.worker_3["count"]} ${var.name_prefix} "z3" "${var.resource_group_name}"
 EOF
     ]
   }

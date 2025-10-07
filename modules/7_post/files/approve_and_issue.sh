@@ -8,72 +8,6 @@
 # Approve and Issue CSRs for our generated amd64 workers only
 # The hostname is of the style - ${name_prefix}-worker-${ZONE}-${index}
 
-# Function to list VPC compute instances
-list_vpc_instances() {
-  local vpc_name=$1
-  local region=$2
-
-  echo "::::: Listing VPC compute instances in VPC: ${vpc_name}, Region: ${region}"
-
-  # Set the region
-  if ! ibmcloud target -r "$region" &> /dev/null; then
-    echo "Error: Failed to target region: ${region}"
-    echo "Available regions:"
-    ibmcloud regions
-    return 1
-  fi
-
-  # Get VPC ID from name if provided
-  local vpc_id=""
-  if [ -n "$vpc_name" ]; then
-    echo "Looking up VPC: ${vpc_name}"
-    vpc_id=$(ibmcloud is vpcs --output json 2>/dev/null | jq -r --arg NAME "$vpc_name" '.[] | select(.name==$NAME) | .id')
-    if [ -z "$vpc_id" ]; then
-      echo "Error: Could not find VPC with name: ${vpc_name}"
-      echo "Available VPCs:"
-      ibmcloud is vpcs --output json 2>/dev/null | jq -r '.[] | "  - \(.name) (ID: \(.id))"'
-      return 1
-    fi
-  fi
-
-  # List instances, filter by VPC if provided
-  if [ -n "$vpc_id" ]; then
-    echo "Instances in VPC ${vpc_name} (${vpc_id}):"
-    local instances_json
-    instances_json=$(ibmcloud is instances --output json 2>/dev/null)
-    if [ $? -ne 0 ]; then
-      echo "Error: Failed to retrieve instances"
-      return 1
-    fi
-
-    local filtered_instances
-    filtered_instances=$(echo "$instances_json" | jq --arg VPCID "$vpc_id" '[.[] | select(.vpc.id==$VPCID)]')
-
-    if [ "$(echo "$filtered_instances" | jq 'length')" -eq 0 ]; then
-      echo "No instances found in VPC ${vpc_name}"
-    else
-      echo "$filtered_instances" | \
-        jq -r '.[] | "Name: \(.name), ID: \(.id), Status: \(.status), Profile: \(.profile.name), Zone: \(.zone.name)"'
-    fi
-  else
-    echo "All VPC instances in region ${region}:"
-    local instances_json
-    instances_json=$(ibmcloud is instances --output json 2>/dev/null)
-    if [ $? -ne 0 ]; then
-      echo "Error: Failed to retrieve instances"
-      return 1
-    fi
-
-    if [ "$(echo "$instances_json" | jq 'length')" -eq 0 ]; then
-      echo "No instances found in region ${region}"
-    else
-      echo "$instances_json" | \
-        jq -r '.[] | "Name: \(.name), ID: \(.id), Status: \(.status), Profile: \(.profile.name), Zone: \(.zone.name), VPC: \(.vpc.name)"'
-    fi
-  fi
-  return 0
-}
-
 # Var: ${self.triggers.counts}
 INTEL_COUNT="${1}"
 
@@ -82,9 +16,7 @@ INTEL_PREFIX="${2}"
 
 INTEL_ZONE="${3}"
 
-# Optional VPC name and region parameters
-VPC_NAME="${4:-${INTEL_PREFIX}-vpc}"
-REGION="${5:-us-south}"
+RESOURCE_GROUP_NAME="${4}"
 
 # Machine Prefix
 MACHINE_PREFIX="${INTEL_PREFIX}-worker-${INTEL_ZONE}"
@@ -94,6 +26,14 @@ then
   echo "There are no workers in the ${INTEL_ZONE}"
   exit 0
 fi
+
+# List VPC compute instances in the resource group
+list_vpc_instances() {
+  echo "::::: Listing VPC compute instances"
+  ibmcloud is instances --resource-group-name "${RESOURCE_GROUP_NAME}"
+  echo "::::: End Listing VPC compute instances"
+  return 0
+}
 
 IDX=0
 READY_COUNT=$(oc get nodes -l kubernetes.io/arch=amd64 | grep "${MACHINE_PREFIX}" | grep -v NotReady | grep -c Ready)
@@ -106,7 +46,7 @@ do
   
   # List VPC instances to compare with OpenShift nodes
   echo "::::: Start VPC Instances"
-  list_vpc_instances "${VPC_NAME}" "${REGION}"
+  list_vpc_instances
   echo "::::: End VPC Instances"
 
   echo "::::: Start CSR"

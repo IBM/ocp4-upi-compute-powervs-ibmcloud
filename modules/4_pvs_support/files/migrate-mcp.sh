@@ -95,14 +95,15 @@ EOF
 
             echo "failed to wait on the machine count"
             echo "Now checking the openshift-machine-config operator status"
-            oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-daemon -l kubernetes.io/arch=ppc64le
+            oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-server -owide
         fi
         sleep 1m
     done
 
     # You can check the power nodes.
-    echo "Now checking the openshift-machine-config operator status"
-    oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-daemon -l kubernetes.io/arch=ppc64le
+    echo "Now checking the openshift-machine-config-operator operator status"
+    oc get mcp
+    oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-server -owide
 
     # Now you can manually download the worker ignition file and use it to create the intel worker nodes. They should be listed under worker MCP.
     echo "Completed setup of the power mcp"
