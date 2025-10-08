@@ -35,6 +35,15 @@ list_vpc_instances() {
   return 0
 }
 
+echo "::::: START DEBUG :::::"
+echo "::::: MCP :::::"
+oc get mcp worker -oyaml
+echo "::::: MC :::::"
+oc get mc
+echo "::::: NODES :::::"
+oc get nodes
+echo "::::: DONE DEBUG :::::"
+
 IDX=0
 READY_COUNT=$(oc get nodes -l kubernetes.io/arch=amd64 | grep "${MACHINE_PREFIX}" | grep -v NotReady | grep -c Ready)
 while [ "${READY_COUNT}" -ne "${INTEL_COUNT}" ]
@@ -48,10 +57,6 @@ do
   echo "::::: Start VPC Instances"
   list_vpc_instances
   echo "::::: End VPC Instances"
-
-  echo "::::: Start CSR"
-  oc get csr -ojson
-  echo "::::: End CSR"
 
   # Approve
   APPROVED_WORKERS=0
