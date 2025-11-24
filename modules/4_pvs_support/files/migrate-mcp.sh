@@ -7,10 +7,70 @@
 
 # The script creates a second MachineConfigPool `power` where preinstall-worker-kargs is moved.
 
+# Function to wait for MCP to stabilize
+wait_for_mcp_stable() {
+    local MCP_NAME=$1
+    local MAX_RETRIES=${2:-50}
+    local RETRY_DELAY=${3:-30}
+    
+    echo "========================================"
+    echo "Waiting for ${MCP_NAME} MCP to stabilize..."
+    echo "========================================"
+    sleep 60
+    
+    local RETRY_COUNT=0
+    
+    while [ ${RETRY_COUNT} -lt ${MAX_RETRIES} ]; do
+        local MACHINE_COUNT=$(oc get mcp ${MCP_NAME} -o json | jq -r '.status.machineCount // 0')
+        local READY_COUNT=$(oc get mcp ${MCP_NAME} -o json | jq -r '.status.readyMachineCount // 0')
+        local UPDATED=$(oc get mcp ${MCP_NAME} -o json | jq -r '.status.conditions[] | select(.type=="Updated") | .status // "Unknown"')
+        local UPDATING=$(oc get mcp ${MCP_NAME} -o json | jq -r '.status.conditions[] | select(.type=="Updating") | .status // "Unknown"')
+        local DEGRADED=$(oc get mcp ${MCP_NAME} -o json | jq -r '.status.conditions[] | select(.type=="Degraded") | .status // "Unknown"')
+        
+        echo "[Attempt ${RETRY_COUNT}/${MAX_RETRIES}] ${MCP_NAME} MCP Status:"
+        echo "  Machines: ${READY_COUNT}/${MACHINE_COUNT}"
+        echo "  Updated: ${UPDATED}, Updating: ${UPDATING}, Degraded: ${DEGRADED}"
+        
+        if [ "${DEGRADED}" == "True" ]; then
+            echo "ERROR: ${MCP_NAME} MCP is degraded!"
+            oc get mcp ${MCP_NAME} -o yaml
+            exit 1
+        fi
+        
+        if [ "${READY_COUNT}" -eq "${MACHINE_COUNT}" ] && [ "${UPDATED}" == "True" ] && [ "${UPDATING}" == "False" ]; then
+            echo "SUCCESS: ${MCP_NAME} MCP is stable and ready"
+            echo "========================================"
+            return 0
+        fi
+        
+        RETRY_COUNT=$((RETRY_COUNT + 1))
+        sleep ${RETRY_DELAY}
+    done
+    
+    echo "ERROR: Timeout waiting for ${MCP_NAME} MCP to stabilize"
+    oc get mcp ${MCP_NAME} -o yaml
+    exit 1
+}
+
 VAL=$(oc get mc -o yaml | grep -c preinstall-worker-kargs)
 if [ ${VAL} -eq 1 ]
 then 
     echo "Migrating the preinstall-worker-kargs"
+
+    # Assign a role label in addition to worker called power [To existing running PowerVs worker nodes ]
+    echo "list of worker nodes: "
+    oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-headers=true
+
+    for POWER_NODE in $(oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-headers=true | awk '{print $1}')
+    do
+        echo "Adding label to Power Node: ${POWER_NODE}"
+        oc label node ${POWER_NODE} node-role.kubernetes.io/power=
+    done
+    echo "Done Labeling the nodes"
+
+    # Check the Nodes and you should see two roles listed
+    echo "The following nodes have the power node-role label"
+    oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power --no-headers=true
 
     # Create a mcp for power
     cat <<EOF | oc apply -f -
@@ -28,7 +88,11 @@ spec:
         matchLabels:
             node-role.kubernetes.io/power: ""
 EOF
-echo "Done creating the 'MachineConfigPool/power'"
+    echo "Done creating the 'power' MCP"
+
+    # Check to see the MachineConfigPools
+    echo "Verify the MCPs are listed:"
+    oc get mcp
 
     # Create the 'preinstall-power-kargs' mc and check it is part of the power mcp
     echo "Create the preinstall power kargs mc"
@@ -44,69 +108,43 @@ spec:
   - rd.multipath=default
   - root=/dev/disk/by-label/dm-mpath-root
 EOF
-    echo "Done creating MachineConfig/preinstall-power-kargs"
-
-    # Assign a role label in addition to worker called power [To existing running PowerVs worker nodes ]
-    echo "list of worker nodes: "
-    oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-headers=true
-
-    for POWER_NODE in $(oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/worker --no-headers=true | awk '{print $1}')
-    do
-        echo "Adding power label to Power Node: ${POWER_NODE}"
-        oc label node ${POWER_NODE} node-role.kubernetes.io/power=
-
-        echo "Removing worker label to Power Node: ${POWER_NODE}"
-        oc label node ${POWER_NODE} node-role.kubernetes.io/worker-
-    done
-    echo "Done Labeling the nodes"
-
-    # Check the Nodes and you should see two roles listed
-    echo "The following nodes have the power node-role label"
-    oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power --no-headers=true
-
-    # Check to see the MachineConfigPools
-    echo "Verify the MCPs are listed:"
-    oc get mcp
+    echo "Done creating mc"
 
     # Wait on the power mcp to update
-    echo "waiting small period of time for reconciliation in mcps - first update"
-    sleep 60
+    wait_for_mcp_stable "power" 50 30
 
     # Delete the mc 'preinstall-worker-kargs'
     echo "Deleting the worker kargs"
     oc delete mc preinstall-worker-kargs
 
-    MCP_IDX=0
-    MCP_COUNT=120
-    MACHINE_COUNT=$(oc get mcp power -o json | jq -r '.status.machineCount')
-    while [ $(oc get mcp power -o json | jq -r '.status.readyMachineCount') -ne ${MACHINE_COUNT} ]
-    do
-        echo "WAITING: ... $(oc get mcp power -o json | jq -r '.status.readyMachineCount') of ${MACHINE_COUNT} machines are ready"
+    # Wait on the worker mcp to update (FIXED: was incorrectly checking power MCP)
+    wait_for_mcp_stable "worker" 50 30
 
-        MCP_IDX=$(($MCP_IDX + 1))
-        if [ "${MCP_IDX}" -gt "${MCP_COUNT}" ]
-        then
-            echo "[MachineConfigPool/power]"
-            oc get mcp power -o json | jq -r '.'
-            oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power --no-headers=true
-
-            echo "[MachineConfigPool/worker+power]"
-            oc get nodes -l kubernetes.io/arch=ppc64le --no-headers=true
-
-            echo "failed to wait on the machine count"
-            echo "Now checking the openshift-machine-config operator status"
-            oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-server -owide
-        fi
-        sleep 1m
-    done
+    # Additional stabilization wait to ensure API endpoints are ready
+    echo "========================================"
+    echo "Additional stabilization wait for API endpoints..."
+    echo "========================================"
+    sleep 60
+    echo "Worker MCP should now be stable and API endpoints ready"
 
     # You can check the power nodes.
-    echo "Now checking the openshift-machine-config-operator operator status"
+    echo "========================================"
+    echo "Checking the openshift-machine-config operator status"
+    echo "========================================"
+    oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-daemon -l kubernetes.io/arch=ppc64le
+
+    # Display final MCP status
+    echo "========================================"
+    echo "Final MCP Status:"
+    echo "========================================"
     oc get mcp
-    oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-server -owide
 
     # Now you can manually download the worker ignition file and use it to create the intel worker nodes. They should be listed under worker MCP.
+    echo "========================================"
     echo "Completed setup of the power mcp"
+    echo "Worker MCP is ready for Intel/AMD64 worker nodes"
+    echo "========================================"
+
 else 
     echo "Skipping mcp creation as the preinstall-worker-kargs does not exist"
     oc get mc | grep -v rendered- | grep worker
