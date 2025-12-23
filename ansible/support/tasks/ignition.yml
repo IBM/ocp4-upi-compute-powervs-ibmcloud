@@ -17,7 +17,7 @@
     delay: 30
     until: mcp_wait_result.rc == 0
 
-  - name: Additional stabilization wait for MCS endpoints
+  - name: Additional stabilization wait for Machine Config Server endpoints
     pause:
       seconds: 120
 

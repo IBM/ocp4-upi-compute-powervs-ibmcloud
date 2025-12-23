@@ -139,7 +139,7 @@ EOF
     MCS_RETRY=0
     while [ ${MCS_RETRY} -lt ${MAX_MCS_RETRIES} ]; do
         if oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-server --no-headers | grep -q Running; then
-            echo "MCS pods are running"
+            echo "Machine Config Server pods are running"
             break
         fi
         echo "Waiting for MCS pods... (${MCS_RETRY}/${MAX_MCS_RETRIES})"
