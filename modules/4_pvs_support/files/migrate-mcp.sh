@@ -124,7 +124,7 @@ EOF
     echo "========================================"
     echo "Additional stabilization wait for API endpoints..."
     echo "========================================"
-    sleep 60
+    sleep 180
     echo "Worker MCP should now be stable and API endpoints ready"
 
     # You can check the power nodes.
@@ -132,6 +132,20 @@ EOF
     echo "Checking the openshift-machine-config operator status"
     echo "========================================"
     oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-daemon -l kubernetes.io/arch=ppc64le
+
+    # Verify MCS is responding
+    echo "Verifying Machine Config Server availability..."
+    MAX_MCS_RETRIES=10
+    MCS_RETRY=0
+    while [ ${MCS_RETRY} -lt ${MAX_MCS_RETRIES} ]; do
+        if oc get pods -n openshift-machine-config-operator -l k8s-app=machine-config-server --no-headers | grep -q Running; then
+            echo "MCS pods are running"
+            break
+        fi
+        echo "Waiting for MCS pods... (${MCS_RETRY}/${MAX_MCS_RETRIES})"
+        MCS_RETRY=$((MCS_RETRY + 1))
+        sleep 10
+    done
 
     # Display final MCP status
     echo "========================================"
