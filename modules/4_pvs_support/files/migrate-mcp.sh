@@ -94,24 +94,69 @@ EOF
     echo "Verify the MCPs are listed:"
     oc get mcp
 
-    # Create the 'preinstall-power-kargs' mc and check it is part of the power mcp
-    echo "Create the preinstall power kargs mc"
-    cat <<EOF | oc apply -f -
-apiVersion: machineconfiguration.openshift.io/v1
-kind: MachineConfig
-metadata:
-  labels:
-    machineconfiguration.openshift.io/role: power
-  name: preinstall-power-kargs
-spec:
-  kernelArguments:
-  - rd.multipath=default
-  - root=/dev/disk/by-label/dm-mpath-root
-EOF
-    echo "Done creating mc"
+    # Check if PowerVS nodes already have multipath kernel arguments
+    # PowerVS nodes typically don't need multipath, but if they were deployed with it
+    # in a previous run, we should not try to apply it again
+    echo "========================================"
+    echo "Checking PowerVS node configuration..."
+    echo "========================================"
 
-    # Wait on the power mcp to update
-    wait_for_mcp_stable "power" 50 30
+    NEEDS_KARGS=false
+    HAS_ANY_MULTIPATH=false
+
+    for POWER_NODE in $(oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power --no-headers=true | awk '{print $1}')
+    do
+        echo "Checking kernel args on node: ${POWER_NODE}"
+        # Check if node already has rd.multipath=default in kernel args
+        HAS_MULTIPATH=$(oc debug node/${POWER_NODE} -- chroot /host cat /proc/cmdline 2>/dev/null | grep -c "rd.multipath=default" || echo "0")
+
+        if [ "${HAS_MULTIPATH}" -eq 0 ]; then
+            echo "  Node ${POWER_NODE} does NOT have multipath kernel args"
+            NEEDS_KARGS=true
+        else
+            echo "  Node ${POWER_NODE} already has multipath kernel args"
+            HAS_ANY_MULTIPATH=true
+        fi
+    done
+
+    # Decision logic:
+    # 1. If ANY node has multipath, skip MC creation (nodes already configured)
+    # 2. If NO nodes have multipath, also skip (PowerVS doesn't need it)
+    # 3. Only create MC if explicitly needed for mixed scenarios
+
+    if [ "${HAS_ANY_MULTIPATH}" = true ]; then
+        echo "========================================"
+        echo "SKIPPING preinstall-power-kargs creation"
+        echo "PowerVS nodes already have multipath kernel arguments from previous deployment"
+        echo "No MachineConfig changes needed"
+        echo "========================================"
+    elif [ "${NEEDS_KARGS}" = true ]; then
+        echo "========================================"
+        echo "SKIPPING preinstall-power-kargs creation"
+        echo "PowerVS nodes use native PowerVS storage and don't require multipath"
+        echo "Multipath is only needed for VPC Intel workers"
+        echo "========================================"
+    fi
+
+    # Wait briefly for power MCP to stabilize
+    # Since we're not creating any new MachineConfigs, this should be quick
+    echo "========================================"
+    echo "Waiting for power MCP to stabilize..."
+    echo "========================================"
+    sleep 30
+
+    # Quick check that power MCP is healthy
+    POWER_MCP_STATUS=$(oc get mcp power -o json | jq -r '.status.conditions[] | select(.type=="Updated") | .status // "Unknown"')
+    POWER_MCP_UPDATING=$(oc get mcp power -o json | jq -r '.status.conditions[] | select(.type=="Updating") | .status // "Unknown"')
+
+    echo "Power MCP Status: Updated=${POWER_MCP_STATUS}, Updating=${POWER_MCP_UPDATING}"
+
+    if [ "${POWER_MCP_STATUS}" != "True" ] || [ "${POWER_MCP_UPDATING}" != "False" ]; then
+        echo "Power MCP needs time to stabilize, waiting..."
+        wait_for_mcp_stable "power" 20 30
+    else
+        echo "Power MCP is stable and ready"
+    fi
 
     # Delete the mc 'preinstall-worker-kargs'
     echo "Deleting the worker kargs"
