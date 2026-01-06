@@ -72,13 +72,14 @@ then
     echo "The following nodes have the power node-role label"
     oc get nodes -l kubernetes.io/arch=ppc64le,node-role.kubernetes.io/power --no-headers=true
 
-    # Create a mcp for power
+    # Create a mcp for power with maxUnavailable set to allow both nodes to update simultaneously
     cat <<EOF | oc apply -f -
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfigPool
 metadata:
     name: power
 spec:
+    maxUnavailable: 2
     machineConfigSelector:
         matchExpressions:
         - key: machineconfiguration.openshift.io/role
