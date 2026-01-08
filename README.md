@@ -9,7 +9,8 @@ The [`ocp4-upi-compute-powervs-ibmcloud` project](https://github.com/ibm/ocp4-up
 - The cluster must be installed with Transit Gateway enabled with a Power Edge Router Connection
 - The cluster must have the NFS Storage Provider installed.
 3. An Existing IBM Cloud Virtual Private Computing (VPC) setup with at least one subnet with a Public Gateway
-4. IAM Authorization configured:
+4. If your setup requires two MachineConfigPools, you must preconfigure it.
+5. IAM Authorization configured:
 
 - Navigate to https://cloud.ibm.com/iam/authorizations/grant
 - Source: `VPC Infrastructure Services service` - `resourceType string equals image`
