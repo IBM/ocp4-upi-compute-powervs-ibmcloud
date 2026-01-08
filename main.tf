@@ -123,7 +123,7 @@ module "support" {
   vpc_region           = var.vpc_region
   resource_group       = module.vpc.vpc_resource_group
   ignition_ip          = var.powervs_bastion_private_ip
-  only_use_worker_mcp = var.only_use_worker_mcp
+  only_use_worker_mcp  = var.only_use_worker_mcp
 }
 
 module "image" {

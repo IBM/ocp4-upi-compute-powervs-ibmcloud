@@ -94,7 +94,7 @@ EOF
 }
 
 resource "null_resource" "migrate_mcp" {
-   count = var.only_use_worker_mcp ? 0 : 1
+  count      = var.only_use_worker_mcp ? 0 : 1
   depends_on = [null_resource.limit_csi_arch]
   connection {
     type        = "ssh"
@@ -151,7 +151,7 @@ EOF
 # ovnkube between vpc/powervs requires routingViaHost for the LBs to work properly
 # ref: https://community.ibm.com/community/user/powerdeveloper/blogs/mick-tarsel/2023/01/26/routingviahost-with-ovnkuberenetes
 resource "null_resource" "set_routing_via_host" {
-  depends_on = [null_resource.migrate_mcp, null_resource.remove_chrony_changes]
+  depends_on = [null_resource.migrate_mcp, null_resource.limit_csi_arch]
   connection {
     type        = "ssh"
     user        = var.rhel_username
