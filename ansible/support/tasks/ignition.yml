@@ -17,10 +17,6 @@
     delay: 30
     until: mcp_wait_result.rc == 0
 
-  - name: Additional stabilization wait for Machine Config Server endpoints
-    pause:
-      seconds: 120
-
   - name: Assemble the MachineConfig url
     shell: |
       oc whoami --show-server=true | sed 's|/api\.|/api-int.|' | sed 's|:6443||'

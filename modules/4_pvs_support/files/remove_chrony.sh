@@ -9,7 +9,7 @@
 
 if [ -f /etc/chrony.conf.backup ]
 then
-    echo "restoring chronyd"
+    echo "backing up chronyd"
     mv -f /etc/chrony.conf.backup /etc/chrony.conf || true
 fi
 

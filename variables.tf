@@ -370,3 +370,8 @@ variable "image_id_for_skip_image" {
   default     = "r014-05bd1566-b321-45d6-8078-c3bcd0dfe1d2"
 }
 
+variable "use_worker_mcp" {
+  type        = bool
+  description = "skips the split of the worker mcp"
+  default     = true
+}
