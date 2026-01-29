@@ -77,10 +77,9 @@ resource "ibm_is_security_group_rule" "lbs_to_workers_http" {
   group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = local.lbs_sg[0].id
-  tcp {
-    port_min = 80
-    port_max = 80
-  }
+  protocol  = "tcp"
+  port_min  = 80
+  port_max  = 80
 }
 
 # TCP Inbound 443 - Security group *ocp-sec-group
@@ -89,8 +88,7 @@ resource "ibm_is_security_group_rule" "lbs_to_workers_https" {
   group     = ibm_is_security_group.worker_vm_sg[0].id
   direction = "inbound"
   remote    = local.lbs_sg[0].id
-  tcp {
-    port_min = 443
-    port_max = 443
-  }
+  protocol  = "tcp"
+  port_min  = 443
+  port_max  = 443
 }
