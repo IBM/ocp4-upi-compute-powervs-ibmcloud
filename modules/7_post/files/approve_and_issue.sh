@@ -5,6 +5,12 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
+cat < EOF > /etc/resolv.conf
+nameserver 161.26.0.10
+nameserver 161.26.0.11
+nameserver 127.0.0.1
+EOF
+
 # Approve and Issue CSRs for our generated amd64 workers only
 # The hostname is of the style - ${name_prefix}-worker-${ZONE}-${index}
 
@@ -30,7 +36,7 @@ fi
 # List VPC compute instances in the resource group
 list_vpc_instances() {
   echo "::::: Listing VPC compute instances"
-  ibmcloud is instances --resource-group-name "${RESOURCE_GROUP_NAME}"
+  ibmcloud is instances --resource-group-name "${RESOURCE_GROUP_NAME}" | grep -v ci-op
   echo "::::: End Listing VPC compute instances"
   return 0
 }
