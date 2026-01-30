@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: Apache-2.0
 ################################################################
 
-cat < EOF > /etc/resolv.conf
+cat << EOF > /etc/resolv.conf
 nameserver 161.26.0.10
 nameserver 161.26.0.11
 nameserver 127.0.0.1
