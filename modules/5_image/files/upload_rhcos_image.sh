@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 ################################################################
 # Copyright 2023 - IBM Corporation. All rights reserved
 # SPDX-License-Identifier: Apache-2.0
@@ -11,6 +13,7 @@ API_KEY="${1}"
 REGION="${2}"
 RESOURCE_GROUP="${3}"
 NAME_PREFIX="${4}"
+CRN="${5}"
 
 if [ -z "$(command -v ibmcloud)" ]
 then
@@ -55,6 +58,7 @@ fi
 done
 
 RHCOS_VERSION="4.15-9.2"
+DOWNLOAD_URL=""
 OCP_VERSION="$(cat ocpversion.json | jq -r . | grep v4.15. |  tr -d 'v",' | awk -F '=' '{print $2}')"
 if [[ "${OCP_VERSION}" == *"4.15."* ]]
 then
@@ -71,11 +75,16 @@ then
   RHCOS_VERSION="4.18-9.4"
 else
   echo "unrecognized version for RHCOS"
-  exit 1
+  # rhel-rhcos, it's now pegged to a base version
+  # even if this is for 4.19, it'll pivot to the cluster determined image
+  DOWNLOAD_URL="https://rhcos.mirror.openshift.com/art/storage/prod/streams/rhel-9.6/builds/9.6.20260112-0/x86_64/rhcos-9.6.20260112-0-ibmcloud.x86_64.qcow2.gz"
 fi
 
 RHCOS_BUILD=$(cat ocpversion.json | jq -r '.displayVersions."machine-os".Version')
-DOWNLOAD_URL="https://rhcos.mirror.openshift.com/art/storage/prod/streams/${RHCOS_VERSION}/builds/${RHCOS_BUILD}/x86_64/rhcos-${RHCOS_BUILD}-ibmcloud.x86_64.qcow2.gz"
+if [ -z "${DOWNLOAD_URL}" ]
+then
+    DOWNLOAD_URL="https://rhcos.mirror.openshift.com/art/storage/prod/streams/${RHCOS_VERSION}/builds/${RHCOS_BUILD}/x86_64/rhcos-${RHCOS_BUILD}-ibmcloud.x86_64.qcow2.gz"
+fi
 TARGET_GZ_FILE=$(echo "${DOWNLOAD_URL}" | sed 's|/| |g' | awk '{print $NF}')
 TARGET_FILE=$(echo "${TARGET_GZ_FILE}" | sed 's|.gz||g')
 
@@ -90,4 +99,7 @@ then
 fi
 
 # Upload the file to bucket
-ibmcloud cos object-put --bucket "${NAME_PREFIX}-mac-intel" --key "${NAME_PREFIX}-rhcos.qcow2" --body "${TARGET_DIR}/${TARGET_FILE}"
+ibmcloud cos config crn --crn "${CRN}"
+ibmcloud cos object-put --bucket "${NAME_PREFIX}-multi-arch-intel" \
+    --key "${NAME_PREFIX}-rhcos.qcow2" --body "${TARGET_DIR}/${TARGET_FILE}" \
+    --region "${REGION}"

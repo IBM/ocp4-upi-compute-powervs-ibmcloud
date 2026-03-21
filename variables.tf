@@ -272,7 +272,7 @@ variable "public_key" {
 ###
 variable "name_prefix" {
   type    = string
-  default = ""
+  default = "rhcos"
   validation {
     condition     = length(var.name_prefix) <= 32
     error_message = "Length cannot exceed 32 characters for name_prefix."

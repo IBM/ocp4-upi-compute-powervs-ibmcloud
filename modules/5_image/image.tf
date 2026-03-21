@@ -62,8 +62,9 @@ resource "null_resource" "upload_rhcos_image" {
     inline = [<<EOF
 echo 'Uploading rhcos image to ibmcloud'
 cd "${local.intel_image_upload_script_path}"
+echo "Vars: ${var.vpc_region}"
 chmod +x upload_rhcos_image.sh
-./upload_rhcos_image.sh "${var.ibmcloud_api_key}" "${var.vpc_region}" "${var.resource_group_name}" "${var.name_prefix}"
+./upload_rhcos_image.sh "${var.ibmcloud_api_key}" "${var.vpc_region}" "${var.resource_group_name}" "${var.name_prefix}" "${ibm_resource_instance.cos_instance.crn}"
 echo 'Done with rhcos image uploading to ibmcloud'
 EOF
     ]
@@ -78,7 +79,7 @@ resource "ibm_iam_authorization_policy" "policy" {
   source_service_name         = "is"
   source_resource_type        = "image"
   target_service_name         = "cloud-object-storage"
-  target_resource_instance_id = element(split(":", ibm_resource_instance.cos_instance.id), 7)
+  target_resource_instance_id = element(split(":", ibm_resource_instance.cos_instance.crn), 7)
   roles                       = ["Reader"]
 }
 
@@ -94,7 +95,7 @@ locals {
 resource "ibm_is_image" "worker_image_id" {
   depends_on       = [null_resource.upload_rhcos_image, ibm_cos_bucket.cos_bucket, ibm_iam_authorization_policy.policy]
   name             = "${var.name_prefix}-rhcos-img"
-  href             = "cos://${local.cos_region}/${var.name_prefix}-mac-intel/${var.name_prefix}-rhcos.qcow2"
+  href             = "cos://${local.cos_region}/${var.name_prefix}-multi-arch-intel/${var.name_prefix}-rhcos.qcow2"
   operating_system = "red-coreos-amd64-byol"
   resource_group   = data.ibm_resource_group.resource_group.id
 
