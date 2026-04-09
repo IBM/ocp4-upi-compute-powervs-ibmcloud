@@ -106,10 +106,10 @@ ibmcloud pi image import rhcos-415-92-202312071243-t1
 To import the Centos stock image:
 
 ```
-ibmcloud pi image create CentOS-Stream-9
+ibmcloud pi image create CentOS-Stream-10
 ```
 
-We no longer test with `CentOS-Stream-8` and recommend `CentOS-Stream-9.`
+We no longer test with `CentOS-Stream-9` and recommend `CentOS-Stream-10.`
 
 ## Contributing
 
