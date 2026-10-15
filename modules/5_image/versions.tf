@@ -15,7 +15,7 @@ terraform {
     }
     ibm = {
       source                = "IBM-Cloud/ibm"
-      version               = "~> 2.7.0"
+      version               = "~> 2.8.0"
       configuration_aliases = [ibm]
     }
   }
